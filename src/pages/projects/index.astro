@@ -18,29 +18,53 @@ const projectsWithImages = await Promise.all(
 ---
 
 <MainLayout title="Projects">
-  <h1>Projects</h1>
-  <div class="projects-grid">
-    {projectsWithImages.map(({ project, acf, image }) => (
-        <ProjectCard
-          title={project.title.rendered}
-          excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
-          link={`/projects/${project.slug}`}
-          imageUrl={image?.url}
-          imageAlt={image?.alt}
-          techStack={acf.tech_stack}
-        />
-    ))}
-  </div>
+  <section class="projects-page">
+    <div class="page-header">
+      <h1>Projects</h1>
+      <p class="subtitle">A collection of things I've built</p>
+    </div>
+    <div class="projects-grid">
+      {projectsWithImages.map(({ project, acf, image }) => (
+          <ProjectCard
+            title={project.title.rendered}
+            excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+            link={`/projects/${project.slug}`}
+            imageUrl={image?.url}
+            imageAlt={image?.alt}
+            techStack={acf.tech_stack}
+            githubUrl={acf.github_url || undefined}
+            downloadUrl={acf.download_url || undefined}
+          />
+      ))}
+    </div>
+  </section>
 </MainLayout>
 
 <style>
-  h1 {
-    margin-bottom: 2rem;
+  .projects-page {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.25rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 1.05rem;
+    margin: 0;
   }
 
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.75rem;
   }
 </style>

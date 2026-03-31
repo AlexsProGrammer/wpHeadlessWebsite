@@ -6,18 +6,24 @@ interface Props {
   imageUrl?: string;
   imageAlt?: string;
   techStack?: string;
+  githubUrl?: string;
+  downloadUrl?: string;
 }
 
-const { title, excerpt = '', link, imageUrl, imageAlt = '', techStack } = Astro.props;
+const { title, excerpt = '', link, imageUrl, imageAlt = '', techStack, githubUrl, downloadUrl } = Astro.props;
 const technologies = techStack ? techStack.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
 ---
 
-<a href={link} class="project-card">
+<div class="project-card">
   {imageUrl && (
-    <img src={imageUrl} alt={imageAlt || title} class="card-image" loading="lazy" />
+    <a href={link} class="card-image-link">
+      <img src={imageUrl} alt={imageAlt || title} class="card-image" loading="lazy" />
+    </a>
   )}
   <div class="card-body">
-    <h2>{title}</h2>
+    <a href={link} class="card-title-link">
+      <h2>{title}</h2>
+    </a>
     <div class="excerpt" set:html={excerpt} />
     {technologies.length > 0 && (
       <ul class="tech-list">
@@ -26,22 +32,46 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
         ))}
       </ul>
     )}
+    <div class="card-actions">
+      {githubUrl && (
+        <a href={githubUrl} target="_blank" rel="noopener noreferrer" class="btn btn-github">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      )}
+      {downloadUrl && (
+        <a href={downloadUrl} target="_blank" rel="noopener noreferrer" class="btn btn-download">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download
+        </a>
+      )}
+      <a href={link} class="btn btn-details">
+        Details &rarr;
+      </a>
+    </div>
   </div>
-</a>
+</div>
 
 <style>
   .project-card {
-    display: block;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #e2e2e2;
+    border-radius: 12px;
     text-decoration: none;
     color: inherit;
     overflow: hidden;
-    transition: box-shadow 0.2s ease;
+    background: #fff;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
 
   .project-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .card-image-link {
+    display: block;
   }
 
   .card-image {
@@ -49,21 +79,44 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
     height: 200px;
     object-fit: cover;
     display: block;
+    transition: transform 0.3s ease;
+  }
+
+  .project-card:hover .card-image {
+    transform: scale(1.03);
   }
 
   .card-body {
     padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  .card-title-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .card-title-link:hover h2 {
+    color: #0066cc;
   }
 
   .card-body h2 {
-    margin: 0 0 0.75rem;
-    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+    transition: color 0.2s ease;
   }
 
   .excerpt {
-    font-size: 0.95rem;
-    color: #555;
+    font-size: 0.9rem;
+    color: #666;
     line-height: 1.5;
+    flex: 1;
+  }
+
+  .excerpt :global(p) {
+    margin: 0;
   }
 
   .tech-list {
@@ -76,10 +129,64 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
   }
 
   .tech-list li {
-    background: #f0f0f0;
-    color: #333;
-    padding: 0.2rem 0.6rem;
-    border-radius: 4px;
+    background: #f0f4ff;
+    color: #3366aa;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .card-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
     font-size: 0.8rem;
+    transition: background 0.2s ease, transform 0.1s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  .btn-github {
+    background: #24292e;
+    color: #fff;
+  }
+
+  .btn-github:hover {
+    background: #444d56;
+  }
+
+  .btn-download {
+    background: #0066cc;
+    color: #fff;
+  }
+
+  .btn-download:hover {
+    background: #0052a3;
+  }
+
+  .btn-details {
+    background: #f5f5f5;
+    color: #333;
+    margin-left: auto;
+  }
+
+  .btn-details:hover {
+    background: #e8e8e8;
   }
 </style>
