@@ -1,11 +1,87 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
 import { getAllProjects } from '../lib/api';
 
-const projects = await getAllProjects();
-console.log(projects);
+let projects: any[] = [];
+try {
+  projects = await getAllProjects();
+} catch {
+  // API may be unreachable during dev; show empty state
+}
 ---
 
 <MainLayout title="Home">
-	<h1>Astro</h1>
+  <section class="hero">
+    <h1>Developer Portfolio</h1>
+    <p>Projects built with passion, powered by WordPress & Astro.</p>
+  </section>
+
+  <section class="projects">
+    <h2>Latest Projects</h2>
+    {projects.length > 0 ? (
+      <div class="projects-grid">
+        {projects.map((project: any) => (
+          <ProjectCard
+            title={project.title.rendered}
+            excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+            link={`/projects/${project.slug}`}
+          />
+        ))}
+      </div>
+    ) : (
+      <p class="empty">No projects found. Check your WordPress API connection.</p>
+    )}
+    <a href="/projects" class="view-all">View all projects &rarr;</a>
+  </section>
 </MainLayout>
+
+<style>
+  .hero {
+    text-align: center;
+    padding: 4rem 1rem 2rem;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: #555;
+  }
+
+  .projects {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .projects h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .empty {
+    color: #888;
+    font-style: italic;
+  }
+
+  .view-all {
+    display: inline-block;
+    margin-top: 2rem;
+    color: #333;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .view-all:hover {
+    text-decoration: underline;
+  }
+</style>

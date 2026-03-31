@@ -1,0 +1,32 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { getAllProjects } from '../../lib/api';
+
+const projects = await getAllProjects();
+---
+
+<MainLayout title="Projects">
+  <h1>Projects</h1>
+  <div class="projects-grid">
+    {projects.map((project: any) => (
+      <ProjectCard
+        title={project.title.rendered}
+        excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+        link={`/projects/${project.slug}`}
+      />
+    ))}
+  </div>
+</MainLayout>
+
+<style>
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+</style>

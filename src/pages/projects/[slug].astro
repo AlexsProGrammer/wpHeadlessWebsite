@@ -1,0 +1,55 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getAllProjects } from '../../lib/api';
+
+export async function getStaticPaths() {
+  const projects = await getAllProjects();
+  return projects.map((project: any) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+---
+
+<MainLayout title={project.title.rendered}>
+  <article class="project-detail">
+    <h1>{project.title.rendered}</h1>
+    <div class="content" set:html={project.content.rendered} />
+    {project.acf?.github_url && (
+      <a href={project.acf.github_url} target="_blank" rel="noopener noreferrer" class="github-link">
+        View on GitHub
+      </a>
+    )}
+  </article>
+</MainLayout>
+
+<style>
+  .project-detail {
+    max-width: 48rem;
+    margin: 0 auto;
+  }
+
+  .project-detail h1 {
+    margin-bottom: 1.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .github-link {
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 0.5rem 1rem;
+    background: #333;
+    color: #fff;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+
+  .github-link:hover {
+    background: #555;
+  }
+</style>

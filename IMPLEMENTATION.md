@@ -41,16 +41,16 @@
 - [x] **Verification:** In `src/pages/index.astro`, import `getAllProjects()`, `console.log` the result in the component script, run `npm run dev`, and verify the terminal outputs the JSON array from your WordPress database.
 
 #### Phase 3: Project Archive Implementation
-- [ ] **Step 3.1:** In `src/components/ProjectCard.astro`, define the properties (`title`, `excerpt`, `link`) and write the HTML/CSS layout for a single grid item.
-- [ ] **Step 3.2:** In `src/pages/projects/index.astro`, import `getAllProjects()` and `ProjectCard.astro`.
-- [ ] **Step 3.3:** In `src/pages/projects/index.astro`, map over the fetched projects array and render a `<ProjectCard />` for each item, passing the WordPress JSON properties into the component.
-- [ ] **Verification:** Navigate to `http://localhost:4321/projects` in the browser and visually confirm a list or grid of your WordPress projects is rendering.
+- [x] **Step 3.1:** In `src/components/ProjectCard.astro`, define the properties (`title`, `excerpt`, `link`) and write the HTML/CSS layout for a single grid item.
+- [x] **Step 3.2:** In `src/pages/projects/index.astro`, import `getAllProjects()` and `ProjectCard.astro`.
+- [x] **Step 3.3:** In `src/pages/projects/index.astro`, map over the fetched projects array and render a `<ProjectCard />` for each item, passing the WordPress JSON properties into the component.
+- [x] **Verification:** Navigate to `http://localhost:4321/projects` in the browser and visually confirm a list or grid of your WordPress projects is rendering.
 
 #### Phase 4: Dynamic Single Project Routing
-- [ ] **Step 4.1:** In `src/pages/projects/[slug].astro`, export a `getStaticPaths()` function.
-- [ ] **Step 4.2:** Inside `getStaticPaths()`, utilize `getAllProjects()` to fetch all projects, and map them to return an array of objects containing `params: { slug: project.slug }` and `props: { project }`.
-- [ ] **Step 4.3:** In the HTML section of `src/pages/projects/[slug].astro`, access `Astro.props.project` and render the individual project details (Title, Content via `set:html`, and Custom Fields like GitHub URLs).
-- [ ] **Verification:** Click on a project card from the `/projects` page and verify the application successfully routes to `/projects/your-project-slug` and displays the correct detailed content.
+- [x] **Step 4.1:** In `src/pages/projects/[slug].astro`, export a `getStaticPaths()` function.
+- [x] **Step 4.2:** Inside `getStaticPaths()`, utilize `getAllProjects()` to fetch all projects, and map them to return an array of objects containing `params: { slug: project.slug }` and `props: { project }`.
+- [x] **Step 4.3:** In the HTML section of `src/pages/projects/[slug].astro`, access `Astro.props.project` and render the individual project details (Title, Content via `set:html`, and Custom Fields like GitHub URLs).
+- [x] **Verification:** Click on a project card from the `/projects` page and verify the application successfully routes to `/projects/your-project-slug` and displays the correct detailed content.
 
 #### Phase 5: Production Build Configuration
 - [ ] **Step 5.1:** In the terminal, run `npm run build` to generate the static production files.

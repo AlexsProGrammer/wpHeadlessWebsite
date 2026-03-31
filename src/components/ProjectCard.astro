@@ -1,0 +1,41 @@
+---
+interface Props {
+  title: string;
+  excerpt?: string;
+  link: string;
+}
+
+const { title, excerpt = '', link } = Astro.props;
+---
+
+<a href={link} class="project-card">
+  <h2>{title}</h2>
+  <div class="excerpt" set:html={excerpt} />
+</a>
+
+<style>
+  .project-card {
+    display: block;
+    padding: 1.5rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .project-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .project-card h2 {
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+  }
+
+  .excerpt {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.5;
+  }
+</style>
