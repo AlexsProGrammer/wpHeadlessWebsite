@@ -29,16 +29,16 @@
 ## 2. Execution Phases
 
 #### Phase 1: Environment & Scaffolding Setup
-- [ ] **Step 1.1:** In the terminal, run `npm create astro@latest` to scaffold the project directory.
-- [ ] **Step 1.2:** In the root directory, create a `.env` file and define `PUBLIC_WP_API_URL=https://wp.yourdomain.de/wp-json/wp/v2`.
-- [ ] **Step 1.3:** In `src/layouts/MainLayout.astro`, create the base HTML boilerplate containing a `<slot />` tag for rendering page content.
-- [ ] **Verification:** Run `npm run dev` and verify the default Astro page loads at `http://localhost:4321`.
+- [x] **Step 1.1:** In the terminal, run `npm create astro@latest` to scaffold the project directory.
+- [x] **Step 1.2:** In the root directory, create a `.env` file and define `PUBLIC_WP_API_URL=https://wp.yourdomain.de/wp-json/wp/v2`.
+- [x] **Step 1.3:** In `src/layouts/MainLayout.astro`, create the base HTML boilerplate containing a `<slot />` tag for rendering page content.
+- [x] **Verification:** Run `npm run dev` and verify the default Astro page loads at `http://localhost:4321`.
 
 #### Phase 2: API Utility Configuration
-- [ ] **Step 2.1:** In `src/lib/api.js`, create an asynchronous function `getAllProjects()` utilizing the native `fetch` API.
-- [ ] **Step 2.2:** Configure `getAllProjects()` to target `import.meta.env.PUBLIC_WP_API_URL + '/projects?_embed'`. The `?_embed` parameter is crucial for retrieving featured images alongside post data.
-- [ ] **Step 2.3:** Parse the JSON response and return the data array.
-- [ ] **Verification:** In `src/pages/index.astro`, import `getAllProjects()`, `console.log` the result in the component script, run `npm run dev`, and verify the terminal outputs the JSON array from your WordPress database.
+- [x] **Step 2.1:** In `src/lib/api.js`, create an asynchronous function `getAllProjects()` utilizing the native `fetch` API.
+- [x] **Step 2.2:** Configure `getAllProjects()` to target `import.meta.env.PUBLIC_WP_API_URL + '/projects?_embed'`. The `?_embed` parameter is crucial for retrieving featured images alongside post data.
+- [x] **Step 2.3:** Parse the JSON response and return the data array.
+- [x] **Verification:** In `src/pages/index.astro`, import `getAllProjects()`, `console.log` the result in the component script, run `npm run dev`, and verify the terminal outputs the JSON array from your WordPress database.
 
 #### Phase 3: Project Archive Implementation
 - [ ] **Step 3.1:** In `src/components/ProjectCard.astro`, define the properties (`title`, `excerpt`, `link`) and write the HTML/CSS layout for a single grid item.
