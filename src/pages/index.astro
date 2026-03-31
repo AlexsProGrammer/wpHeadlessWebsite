@@ -1,7 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
-import { getAllProjects } from '../lib/api';
+import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../lib/api';
 
 let projects: any[] = [];
 try {
@@ -9,6 +9,17 @@ try {
 } catch {
   // API may be unreachable during dev; show empty state
 }
+
+const projectsWithImages = await Promise.all(
+  projects.map(async (project: any) => {
+    const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
+    let image = getEmbeddedImage(project);
+    if (!image && project.featured_media) {
+      image = await getMediaUrl(project.featured_media);
+    }
+    return { project, acf, image };
+  })
+);
 ---
 
 <MainLayout title="Home">
@@ -19,14 +30,17 @@ try {
 
   <section class="projects">
     <h2>Latest Projects</h2>
-    {projects.length > 0 ? (
+    {projectsWithImages.length > 0 ? (
       <div class="projects-grid">
-        {projects.map((project: any) => (
-          <ProjectCard
-            title={project.title.rendered}
-            excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
-            link={`/projects/${project.slug}`}
-          />
+        {projectsWithImages.map(({ project, acf, image }) => (
+            <ProjectCard
+              title={project.title.rendered}
+              excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+              link={`/projects/${project.slug}`}
+              imageUrl={image?.url}
+              imageAlt={image?.alt}
+              techStack={acf.tech_stack}
+            />
         ))}
       </div>
     ) : (

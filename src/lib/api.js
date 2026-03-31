@@ -10,3 +10,23 @@ export async function getAllProjects() {
   const data = await response.json();
   return data;
 }
+
+export async function getMediaUrl(mediaId) {
+  if (!mediaId) return null;
+  try {
+    const response = await fetch(`${API_URL}/media/${mediaId}`);
+    if (!response.ok) return null;
+    const media = await response.json();
+    return { url: media.source_url, alt: media.alt_text || '' };
+  } catch {
+    return null;
+  }
+}
+
+export function getEmbeddedImage(project) {
+  const media = project._embedded?.['wp:featuredmedia']?.[0];
+  if (media?.source_url) {
+    return { url: media.source_url, alt: media.alt_text || '' };
+  }
+  return null;
+}

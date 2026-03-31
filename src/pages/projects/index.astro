@@ -1,20 +1,34 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
-import { getAllProjects } from '../../lib/api';
+import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../../lib/api';
 
 const projects = await getAllProjects();
+
+const projectsWithImages = await Promise.all(
+  projects.map(async (project: any) => {
+    const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
+    let image = getEmbeddedImage(project);
+    if (!image && project.featured_media) {
+      image = await getMediaUrl(project.featured_media);
+    }
+    return { project, acf, image };
+  })
+);
 ---
 
 <MainLayout title="Projects">
   <h1>Projects</h1>
   <div class="projects-grid">
-    {projects.map((project: any) => (
-      <ProjectCard
-        title={project.title.rendered}
-        excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
-        link={`/projects/${project.slug}`}
-      />
+    {projectsWithImages.map(({ project, acf, image }) => (
+        <ProjectCard
+          title={project.title.rendered}
+          excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+          link={`/projects/${project.slug}`}
+          imageUrl={image?.url}
+          imageAlt={image?.alt}
+          techStack={acf.tech_stack}
+        />
     ))}
   </div>
 </MainLayout>
