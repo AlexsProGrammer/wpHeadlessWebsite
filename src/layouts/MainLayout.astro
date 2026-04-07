@@ -4,6 +4,8 @@ interface Props {
 }
 
 const { title } = Astro.props;
+const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Pro-Grammer';
+const fullTitle = `${siteName} - ${title}`;
 ---
 
 <html lang="en">
@@ -13,7 +15,7 @@ const { title } = Astro.props;
     <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
-    <title>{title}</title>
+    <title>{fullTitle}</title>
   </head>
   <body>
     <slot />
