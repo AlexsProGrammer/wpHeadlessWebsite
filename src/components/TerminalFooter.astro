@@ -1,0 +1,329 @@
+---
+const email = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-grammer.dev';
+const github = import.meta.env.PUBLIC_GITHUB_URL || '';
+const linkedin = import.meta.env.PUBLIC_LINKEDIN_URL || '';
+const twitter = import.meta.env.PUBLIC_TWITTER_URL || '';
+const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
+---
+
+<section class="terminal-section">
+  <h2 class="section-title">Terminal</h2>
+  <p class="section-sub">Type <code>help</code> to explore — or just scroll down.</p>
+
+  <div class="terminal-window">
+    <div class="terminal-header">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="terminal-title">user@portfolio — bash</span>
+    </div>
+
+    <div class="terminal-body" id="terminal-body">
+      <div class="terminal-history" id="terminal-history"></div>
+
+      <div class="terminal-input-line">
+        <span class="prompt">user@portfolio:~$</span>
+        <input
+          type="text"
+          id="terminal-input"
+          autocomplete="off"
+          spellcheck="false"
+          aria-label="Terminal input"
+        />
+      </div>
+    </div>
+  </div>
+
+  <!-- Pass env data to client-side script -->
+  <script
+    id="terminal-data"
+    type="application/json"
+    set:html={JSON.stringify({ email, github, linkedin, twitter, discord })}
+  />
+</section>
+
+<style>
+  .terminal-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 1.5rem;
+  }
+
+  .section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0 0 2rem;
+  }
+
+  .section-sub code {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.15em 0.45em;
+    border-radius: 4px;
+    font-size: 0.85em;
+    color: var(--neon-blue);
+  }
+
+  /* ── Terminal chrome ── */
+
+  .terminal-window {
+    background: rgba(10, 10, 15, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.65;
+  }
+
+  .terminal-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+  .dot.red    { background: #ff5f57; }
+  .dot.yellow { background: #febc2e; }
+  .dot.green  { background: #28c840; }
+
+  .terminal-title {
+    margin-left: 8px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Terminal body ── */
+
+  .terminal-body {
+    padding: 16px;
+    max-height: 380px;
+    overflow-y: auto;
+  }
+
+  .terminal-history {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* ── Output formatting ── */
+
+  .terminal-history :global(.cmd-line) {
+    color: var(--text-muted);
+    margin-bottom: 2px;
+  }
+
+  .terminal-history :global(.cmd-line .typed-cmd) {
+    color: var(--neon-blue);
+    font-weight: 600;
+  }
+
+  .terminal-history :global(.cmd-output) {
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+    padding-left: 4px;
+  }
+
+  .terminal-history :global(.cmd-output strong) {
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  .terminal-history :global(.cmd-output em) {
+    color: var(--neon-purple);
+    font-style: normal;
+  }
+
+  .terminal-history :global(.cmd-output .label) {
+    color: var(--text-muted);
+    display: inline-block;
+    min-width: 90px;
+  }
+
+  .terminal-history :global(.cmd-output a) {
+    color: var(--neon-pink);
+    text-decoration: none;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+  }
+
+  .terminal-history :global(.cmd-output a:hover) {
+    color: var(--neon-blue);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+  }
+
+  /* ── Input line ── */
+
+  .terminal-input-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .prompt {
+    color: var(--neon-purple);
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  #terminal-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--neon-blue);
+    font-family: inherit;
+    font-size: inherit;
+    caret-color: var(--neon-blue);
+  }
+</style>
+
+<script>
+  const dataEl = document.getElementById("terminal-data");
+  const data = dataEl ? JSON.parse(dataEl.textContent || "{}") : {};
+
+  const input = document.getElementById("terminal-input") as HTMLInputElement | null;
+  const history = document.getElementById("terminal-history");
+  const body = document.getElementById("terminal-body");
+
+  function escapeHtml(text: string): string {
+    const d = document.createElement("div");
+    d.appendChild(document.createTextNode(text));
+    return d.innerHTML;
+  }
+
+  function scrollToBottom(): void {
+    if (body) body.scrollTop = body.scrollHeight;
+  }
+
+  function appendCmd(cmd: string): void {
+    if (!history) return;
+    const line = document.createElement("div");
+    line.className = "cmd-line";
+    line.innerHTML = `<span class="prompt">user@portfolio:~$</span> <span class="typed-cmd">${escapeHtml(cmd)}</span>`;
+    history.appendChild(line);
+  }
+
+  function appendOutput(html: string): void {
+    if (!history) return;
+    const out = document.createElement("div");
+    out.className = "cmd-output";
+    out.innerHTML = html;
+    history.appendChild(out);
+    scrollToBottom();
+  }
+
+  function socialLink(url: string, label: string): string {
+    if (!url) return "";
+    return `<span class="label">${label}</span> <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(url)}</a>`;
+  }
+
+  function runCommand(cmd: string): void {
+    const trimmed = cmd.trim().toLowerCase();
+    if (!trimmed) return;
+
+    appendCmd(trimmed);
+
+    switch (trimmed) {
+      case "help":
+        appendOutput(
+          `<strong>Available commands:</strong>\n\n` +
+          `  <em>help</em>      — Show this help message\n` +
+          `  <em>about</em>     — About Pro-Grammer\n` +
+          `  <em>projects</em>  — Browse featured projects\n` +
+          `  <em>contact</em>   — Social links &amp; email\n` +
+          `  <em>skills</em>    — Tech stack overview\n` +
+          `  <em>clear</em>     — Clear terminal`
+        );
+        break;
+
+      case "about":
+        appendOutput(
+          `<strong>Pro-Grammer</strong>  —  Software-Entwicklung &amp; Consulting\n\n` +
+          `Maßgeschneiderte Lösungen für Agenturen und Startups.\n` +
+          `<em>Fullstack · TypeScript · Cloud · Open Source</em>`
+        );
+        break;
+
+      case "projects":
+        appendOutput(
+          `<strong>Projects</strong>\n\n` +
+          `Browse all projects → <a href="/projects" target="_blank" rel="noopener noreferrer">/projects</a>`
+        );
+        break;
+
+      case "contact": {
+        const lines: string[] = [
+          `<strong>Get in touch</strong>\n`
+        ];
+
+        if (data.email) {
+          lines.push(
+            `<span class="label">Email</span> <a href="mailto:${escapeHtml(data.email)}" target="_blank" rel="noopener noreferrer">${escapeHtml(data.email)}</a>`
+          );
+        }
+        if (data.github) lines.push(socialLink(data.github, "GitHub"));
+        if (data.linkedin) lines.push(socialLink(data.linkedin, "LinkedIn"));
+        if (data.twitter) lines.push(socialLink(data.twitter, "Twitter/X"));
+        if (data.discord) lines.push(socialLink(data.discord, "Discord"));
+
+        appendOutput(lines.filter(Boolean).join("\n"));
+        break;
+      }
+
+      case "skills":
+        appendOutput(
+          `<strong>Tech Stack</strong>\n\n` +
+          `<em>Languages</em>    TypeScript · JavaScript · Python\n` +
+          `<em>Frontend</em>     React · Next.js · Astro\n` +
+          `<em>Backend</em>      Node.js · Express · REST · GraphQL\n` +
+          `<em>Data</em>         PostgreSQL · MySQL · Redis\n` +
+          `<em>DevOps</em>       Docker · AWS · CI/CD\n` +
+          `<em>CMS</em>          WordPress · Headless`
+        );
+        break;
+
+      case "clear":
+        if (history) history.innerHTML = "";
+        return;
+
+      default:
+        appendOutput(
+          `command not found: <strong>${escapeHtml(trimmed)}</strong>\n` +
+          `Type <em>help</em> for available commands.`
+        );
+        break;
+    }
+  }
+
+  // ── Event listeners ──
+
+  if (input && history) {
+    body?.addEventListener("click", () => input.focus());
+
+    input.addEventListener("keydown", (e: KeyboardEvent) => {
+      if (e.key !== "Enter") return;
+      const cmd = input.value;
+      input.value = "";
+      runCommand(cmd);
+    });
+
+    // Auto-run "contact" on load
+    runCommand("contact");
+  }
+</script>

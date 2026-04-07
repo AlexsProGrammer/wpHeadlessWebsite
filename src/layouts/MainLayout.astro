@@ -21,6 +21,11 @@ const fullTitle = `${siteName} - ${title}`;
     <title>{fullTitle}</title>
   </head>
   <body>
+    <div class="bg-blobs-container">
+      <div class="blob" style="width: 600px; height: 600px; top: -10%; left: -5%; background: var(--neon-pink);"></div>
+      <div class="blob" style="width: 500px; height: 500px; bottom: -10%; right: -5%; background: var(--neon-blue); animation-delay: -3s;"></div>
+      <div class="blob" style="width: 400px; height: 400px; top: 40%; left: 50%; background: var(--neon-purple); animation-delay: -5s;"></div>
+    </div>
     <slot />
     <Footer />
   </body>
@@ -32,6 +37,9 @@ const fullTitle = `${siteName} - ${title}`;
     --text-main: #ffffff;
     --text-muted: #a1a1aa;
     --accent-blue: #2563eb;
+    --neon-blue: #00f0ff;
+    --neon-purple: #8a2be2;
+    --neon-pink: #ff007f;
   }
 
   body {
@@ -40,5 +48,33 @@ const fullTitle = `${siteName} - ${title}`;
     color: var(--text-main);
     margin: 0;
     padding: 0;
+  }
+
+  .bg-blobs-container {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(150px);
+    opacity: 0.6;
+    animation: float 8s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0% {
+      transform: translateY(0) translateX(0);
+    }
+    50% {
+      transform: translateY(-30px) translateX(20px);
+    }
+    100% {
+      transform: translateY(0) translateX(0);
+    }
   }
 </style>

@@ -2,66 +2,55 @@
 # IMPLEMENTATION.md
 
 ## 1. Project Context & Architecture
-- **Goal:** Refactor the existing Astro-based developer portfolio into a B2B-focused akquise funnel featuring a "Spatial Developer / Apple Minimalistic" premium dark mode design with glassmorphism effects.
-- **Tech Stack & Dependencies:** Astro, Native CSS. New dependency for local fonts: `npm install @fontsource/inter`.
+- **Goal:** Upgrade the existing UI to a highly vibrant, "Apple glass modern" aesthetic with animated glowing background orbs, a typewriter hero effect, and a fully functional interactive terminal easter egg. Introduce missing global navigation (Back to Home).
+- **Tech Stack & Dependencies:** Astro, Native CSS (Keyframe animations, CSS variables, `backdrop-filter` for glassmorphism), Vanilla JavaScript (for typewriter and terminal logic). No new external dependencies required.
 - **File Structure:**
   ```text
-  ├── package.json
   ├── src/
   │   ├── layouts/
   │   │   └── MainLayout.astro
   │   ├── pages/
   │   │   ├── index.astro
-  │   │   ├── impressum.astro (new)
-  │   │   ├── datenschutz.astro (new)
   │   │   └── projects/
   │   │       ├── index.astro
   │   │       └── [slug].astro
   │   └── components/
   │       ├── ProjectCard.astro
-  │       └── Footer.astro (new)
+  │       └── TerminalFooter.astro (new)
   ```
-- **Attention Points:** - All custom styling must utilize CSS variables for the deep space dark theme (`#09090b`) and glassmorphism properties (`backdrop-filter: blur(20px)`).
-- **DSGVO:** Strict compliance required. No external CDNs for fonts. Must use `@fontsource` to bundle fonts locally. No Google Analytics scripts or external trackers. Explicit routes for `impressum` and `datenschutz` are mandatory.
+- **Attention Points:** The colorful aesthetic is achieved not by coloring the cards, but by adding large, heavily blurred (`filter: blur(150px)`) absolute-positioned background "blobs" behind ultra-transparent frosted glass cards (`rgba(255, 255, 255, 0.02)`). 
 
 ## 2. Execution Phases
 
-#### Phase 1: Dependencies & Global DSGVO Setup
-- [x] **Step 1.1:** Run `npm install @fontsource/inter` to add the local font dependency.
-- [x] **Step 1.2:** In `src/layouts/MainLayout.astro`, import the font at the top of the component script using `import '@fontsource/inter';`.
-- [x] **Step 1.3:** In `src/layouts/MainLayout.astro`, modify the global `<style>` to set `font-family: 'Inter', sans-serif;` on the `body`.
-- [x] **Step 1.4:** In `src/layouts/MainLayout.astro`, define global CSS variables for the new theme on the `:root` pseudo-class: `--bg-dark: #09090b;`, `--text-main: #ffffff;`, `--text-muted: #a1a1aa;`, `--accent-blue: #2563eb;`. Set body `background-color` to `var(--bg-dark)` and `color` to `var(--text-main)`.
-- [x] **Verification:** Run `npm run dev`, open the browser network tab, and verify that `inter` font files are loaded from `localhost` and no requests are made to `fonts.googleapis.com`.
+#### Phase 1: Vibrant Backgrounds & Global CSS
+- [x] **Step 1.1:** In `src/layouts/MainLayout.astro`, define new CSS variables in `:root` for neon colors: `--neon-blue: #00f0ff;`, `--neon-purple: #8a2be2;`, `--neon-pink: #ff007f;`.
+- [x] **Step 1.2:** In `src/layouts/MainLayout.astro`, add global CSS classes for background glows (e.g., `.bg-blobs-container` using `position: fixed; z-index: -1; inset: 0; overflow: hidden;` and `.blob` using `position: absolute; border-radius: 50%; filter: blur(150px); opacity: 0.6;`). 
+- [x] **Step 1.3:** In `src/layouts/MainLayout.astro`, define keyframe animations for the blobs (e.g., `@keyframes float { 0% { transform: translateY(0); } 50% { transform: translateY(-30px) translateX(20px); } 100% { transform: translateY(0); } }`) and apply them to `.blob`.
+- [x] **Step 1.4:** In `src/layouts/MainLayout.astro`, inject the `.bg-blobs-container` HTML containing 2-3 `.blob` `div`s with inline styles positioning them (e.g., top-left pink, bottom-right blue) right after the opening `<body>` tag.
+- [x] **Verification:** Run `npm run dev` and confirm the dark background now features soft, vibrant, floating neon gradients while the main content scrolls over it.
 
-#### Phase 2: Component Overhaul (Glassmorphism UI)
-- [x] **Step 2.1:** In `src/components/ProjectCard.astro`, replace the solid background and gray border (`border: 1px solid #e2e2e2;`) with a frosted glass effect: `background: rgba(255, 255, 255, 0.03);`, `backdrop-filter: blur(20px);`, `-webkit-backdrop-filter: blur(20px);`, and a thin translucent border `border: 1px solid rgba(255, 255, 255, 0.08);`.
-- [x] **Step 2.2:** In `src/components/ProjectCard.astro`, update hover states to replace the drop shadow with a subtle glow: `box-shadow: 0 0 25px rgba(37, 99, 235, 0.15);`.
-- [x] **Step 2.3:** In `src/components/ProjectCard.astro`, modify text colors within the card to use the new CSS variables (`--text-main` for titles, `--text-muted` for excerpts). Update the tag pills to have a dark semi-transparent background instead of `#f0f4ff`.
-- [x] **Step 2.4:** Create `src/components/Footer.astro` containing links to `/impressum` and `/datenschutz`, and add it to `src/layouts/MainLayout.astro` just before the closing `</body>` tag.
-- [x] **Verification:** Navigate to `http://localhost:4321/projects` and verify the cards now display the dark glassmorphism styling over the dark background.
+#### Phase 2: Hero Section Typewriter Effect
+- [x] **Step 2.1:** In `src/pages/index.astro`, wrap the main hero headline inside a span with a specific ID (e.g., `<h1 id="typewriter-text"></h1>`) and add a static span next to it for the blinking cursor (e.g., `<span class="cursor">_</span>`).
+- [x] **Step 2.2:** In `src/pages/index.astro`, add CSS for `.cursor` utilizing an `@keyframes blink { 50% { opacity: 0; } }` animation.
+- [x] **Step 2.3:** In `src/pages/index.astro`, add a `<script>` tag at the bottom. Implement Vanilla JS logic that takes a target string (e.g., "Maßgeschneiderte Software..."), clears the `innerHTML` of `#typewriter-text`, and sets an interval to append one character every `50ms`.
+- [x] **Verification:** Reload `http://localhost:4321/` and verify the hero text dynamically types itself out character-by-character, followed by a continuously blinking cursor.
 
-#### Phase 3: Landing Page Rewrite (B2B Funnel)
-- [x] **Step 3.1:** In `src/pages/index.astro`, completely replace the existing `hero` section with a `100vh` full-height section. Add the B2B headline ("Maßgeschneiderte Software..."), sub-headline, and a primary CTA button styled with the `--accent-blue` color and a hover glow effect.
-- [x] **Step 3.2:** In `src/pages/index.astro`, implement a "Trust Bar" section immediately below the hero containing a flex row or CSS-marquee of text/svg logos representing the tech stack (TypeScript, React, Python, etc.).
-- [x] **Step 3.3:** In `src/pages/index.astro`, add a "Value Proposition" section containing two glassmorphism cards detailing the targeted solutions for "Agenturen" and "Startups".
-- [x] **Step 3.4:** In `src/pages/index.astro`, add a "Services" section explicitly detailing "Projektgeschäft" and "Consulting & White-Label" without mentioning pricing.
-- [x] **Step 3.5:** In `src/pages/index.astro`, modify the existing projects fetching logic to `slice(0, 2)` to only display the top 2 featured case studies instead of the full grid.
-- [x] **Verification:** Run `npm run dev` and visually verify the `index.astro` page matches the 5-part funnel structure (Hero -> Trust Bar -> Value Props -> Services -> Featured Projects).
+#### Phase 3: Interactive Terminal Easter Egg
+- [x] **Step 3.1:** Create a new file `src/components/TerminalFooter.astro`.
+- [x] **Step 3.2:** In `src/components/TerminalFooter.astro`, write the HTML for a macOS-like window (header with traffic-light buttons, body with a `.history` container, and an `<input type="text" autofocus>` line starting with `user@portfolio:~$`).
+- [x] **Step 3.3:** In `src/components/TerminalFooter.astro`, add CSS to style it with a dark transparent background, monospaced font, no border/outline on the input, and glowing neon text.
+- [x] **Step 3.4:** In `src/components/TerminalFooter.astro`, add a `<script>` block. Add an event listener to the input for the `Enter` key. When triggered, read the value, push the command to the `.history` div, and use a simple `switch` statement to output responses for commands like `help`, `clear`, `projects`, and `contact`. Clear the input field after execution.
+- [x] **Step 3.5:** In `src/layouts/MainLayout.astro`, import and render `<TerminalFooter />` just above the closing `</body>` tag (or replacing the existing standard footer).
+- [x] **Verification:** Scroll to the bottom of the homepage, click into the terminal input, type `help`, press Enter, and verify the terminal appends the predefined help text. Type `clear` to ensure the history empties.
 
-#### Phase 4: Project Detail & Archive Pages Styling
-- [x] **Step 4.1:** In `src/pages/projects/index.astro`, update the header section to use `--text-main` for the `<h1>` and `--text-muted` for the subtitle.
-- [x] **Step 4.2:** In `src/pages/projects/[slug].astro`, update the layout to ensure content rendered via `set:html` (WordPress content) receives appropriate CSS scoping for dark mode (e.g., targeting `.content :global(p)` to use `--text-muted` and `.content :global(h2)` to use `--text-main`).
-- [x] **Step 4.3:** In `src/pages/projects/[slug].astro`, style the GitHub/Download buttons utilizing the new glow/magnetic hover styling from the global CSS.
-- [x] **Verification:** Click on a project and verify the `[slug].astro` view renders readable text on the dark background and buttons reflect the new theme.
-
-#### Phase 5: Legal Pages (DSGVO Compliance)
-- [x] **Step 5.1:** Create `src/pages/impressum.astro` using `MainLayout.astro` and scaffold standard German Impressum headers (Angaben gemäß § 5 TMG, Kontakt, Umsatzsteuer-ID if applicable).
-- [x] **Step 5.2:** Create `src/pages/datenschutz.astro` using `MainLayout.astro` and scaffold standard GDPR/DSGVO privacy policy headers.
-- [x] **Verification:** Navigate to `http://localhost:4321/impressum` and `http://localhost:4321/datenschutz` and verify the pages load successfully within the main dark theme layout.
+#### Phase 4: Missing Navigation & UI Polish
+- [x] **Step 4.1:** In `src/pages/projects/index.astro`, add an anchor tag right below the `.page-header` pointing back home (`<a href="/" class="btn-glass">← Zurück zur Startseite</a>`).
+- [x] **Step 4.2:** In `src/pages/projects/[slug].astro`, add an identical "Zurück zur Übersicht" link at the top of the project detail content pointing to `/projects`.
+- [x] **Step 4.3:** In `src/components/ProjectCard.astro`, verify that the background color is highly transparent (e.g., `background: rgba(20, 20, 25, 0.2);`) to allow the new global glowing blobs to shine through the glass filter.
+- [x] **Verification:** Navigate to `/projects`, verify the "Back" button exists and routes correctly. Click a single project and verify its respective back button returns to the projects list.
 
 ## 3. Global Testing Strategy
-- **DSGVO Verification:** Build the application (`npm run build`) and analyze the `/dist` folder to guarantee all font files (`.woff2`) are located locally within the build artifacts and no external `<link rel="stylesheet" href="...google...">` exist.
-- **Cross-Browser Glassmorphism:** Test the rendering of `backdrop-filter` on Safari, Firefox, and Chromium-based browsers, ensuring fallback background colors (e.g., `rgba(20, 20, 25, 0.9)`) apply cleanly if the blur filter is unsupported.
-- **Mobile Responsive Funnel:** Emulate a mobile device to verify the 100vh Hero section does not break with mobile browser address bars and that the horizontal Trust Bar marquee scrolls correctly without causing horizontal viewport overflow.
-- **Contrast Accessibility:** Run a Lighthouse accessibility audit to ensure the contrast ratio between `--text-muted` and `--bg-dark` meets WCAG AA standards.
+- **Z-Index Integrity:** Verify that the `.bg-blobs-container` does not block pointer events for buttons, inputs, or links (ensure `pointer-events: none;` is on the background container).
+- **Terminal Focus:** Ensure that typing in the terminal does not trigger unexpected browser shortcuts, and that scrolling the history div inside the terminal works if many commands are entered.
+- **Glassmorphism Contrast:** Check the readability of white text (`--text-main`) when it overlaps exactly with a bright neon blob. Adjust the card's `backdrop-filter: blur()` or opacity if contrast is too low.
 ```

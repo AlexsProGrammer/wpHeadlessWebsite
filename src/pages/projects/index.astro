@@ -23,6 +23,7 @@ const projectsWithImages = await Promise.all(
       <h1>Projects</h1>
       <p class="subtitle">A collection of things I've built</p>
     </div>
+    <a href="/" class="btn-glass">&larr; Zurück zur Startseite</a>
     <div class="projects-grid">
       {projectsWithImages.map(({ project, acf, image }) => (
           <ProjectCard
@@ -61,6 +62,27 @@ const projectsWithImages = await Promise.all(
     color: var(--text-muted);
     font-size: 1.05rem;
     margin: 0;
+  }
+
+  .btn-glass {
+    display: inline-block;
+    margin-bottom: 2rem;
+    padding: 0.55rem 1.25rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .btn-glass:hover {
+    color: var(--text-main);
+    border-color: rgba(255, 255, 255, 0.2);
   }
 
   .projects-grid {

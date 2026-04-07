@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import TerminalSection from '../components/TerminalFooter.astro';
 import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../lib/api';
 
 let projects: any[] = [];
@@ -17,9 +18,14 @@ const projectsWithImages = await Promise.all(
     if (!image && project.featured_media) {
       image = await getMediaUrl(project.featured_media);
     }
+
+    console.log("Gefundenes Bild für:", project.title.rendered, image);
+    
     return { project, acf, image };
   })
 );
+
+const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-grammer.dev';
 ---
 
 <MainLayout title="Home">
@@ -27,9 +33,9 @@ const projectsWithImages = await Promise.all(
   <section class="hero">
     <div class="hero-inner">
       <p class="hero-tag">Software-Entwicklung &amp; Consulting</p>
-      <h1>Maßgeschneiderte Software<br />für Ihr Unternehmen.</h1>
+      <h1><span id="typewriter-text"></span><span class="cursor">_</span></h1>
       <p class="hero-sub">Von der Idee bis zum fertigen Produkt — wir entwickeln performante, sichere und skalierbare Lösungen für Agenturen und Startups.</p>
-      <a href="mailto:kontakt@pro-grammer.dev" class="cta-btn">Projekt anfragen</a>
+      <a href={`mailto:${contactEmail}`} class="cta-btn">Projekt anfragen</a>
     </div>
   </section>
 
@@ -131,6 +137,9 @@ const projectsWithImages = await Promise.all(
     )}
     <a href="/projects" class="view-all">Alle Projekte ansehen &rarr;</a>
   </section>
+
+  <!-- Terminal Easter Egg -->
+  <TerminalSection />
 </MainLayout>
 
 <style>
@@ -164,6 +173,17 @@ const projectsWithImages = await Promise.all(
     margin: 0 0 1.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
+    min-height: 1.15em;
+  }
+
+  .cursor {
+    display: inline-block;
+    color: var(--neon-blue);
+    animation: blink 0.8s step-end infinite;
+  }
+
+  @keyframes blink {
+    50% { opacity: 0; }
   }
 
   .hero-sub {
@@ -319,3 +339,24 @@ const projectsWithImages = await Promise.all(
     color: var(--text-main);
   }
 </style>
+
+<script>
+  const target = "Maßgeschneiderte Software\nfür Ihr Unternehmen.";
+  const el = document.getElementById("typewriter-text");
+  if (el) {
+    let i = 0;
+    const interval = setInterval(() => {
+      if (i < target.length) {
+        const char = target[i];
+        if (char === "\n") {
+          el.appendChild(document.createElement("br"));
+        } else {
+          el.appendChild(document.createTextNode(char));
+        }
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 50);
+  }
+</script>
