@@ -11,7 +11,7 @@ try {
 }
 
 const projectsWithImages = await Promise.all(
-  projects.map(async (project: any) => {
+  projects.slice(0, 2).map(async (project: any) => {
     const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
     let image = getEmbeddedImage(project);
     if (!image && project.featured_media) {
@@ -23,59 +23,278 @@ const projectsWithImages = await Promise.all(
 ---
 
 <MainLayout title="Home">
+  <!-- Hero -->
   <section class="hero">
-    <h1>Developer Portfolio</h1>
-    <p>Projects built with passion, powered by WordPress & Astro.</p>
+    <div class="hero-inner">
+      <p class="hero-tag">Software-Entwicklung &amp; Consulting</p>
+      <h1>Maßgeschneiderte Software<br />für Ihr Unternehmen.</h1>
+      <p class="hero-sub">Von der Idee bis zum fertigen Produkt — wir entwickeln performante, sichere und skalierbare Lösungen für Agenturen und Startups.</p>
+      <a href="mailto:kontakt@pro-grammer.dev" class="cta-btn">Projekt anfragen</a>
+    </div>
   </section>
 
-  <section class="projects">
-    <h2>Latest Projects</h2>
+  <!-- Trust Bar -->
+  <section class="trust-bar">
+    <div class="trust-track">
+      <span>TypeScript</span>
+      <span>React</span>
+      <span>Next.js</span>
+      <span>Astro</span>
+      <span>Node.js</span>
+      <span>Python</span>
+      <span>PostgreSQL</span>
+      <span>Docker</span>
+      <span>AWS</span>
+      <span>WordPress</span>
+      <!-- duplicate for seamless loop -->
+      <span>TypeScript</span>
+      <span>React</span>
+      <span>Next.js</span>
+      <span>Astro</span>
+      <span>Node.js</span>
+      <span>Python</span>
+      <span>PostgreSQL</span>
+      <span>Docker</span>
+      <span>AWS</span>
+      <span>WordPress</span>
+    </div>
+  </section>
+
+  <!-- Value Proposition -->
+  <section class="value-props">
+    <h2 class="section-title">Für wen wir arbeiten</h2>
+    <div class="props-grid">
+      <div class="glass-card">
+        <h3>Agenturen</h3>
+        <p>Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt — ohne Ihr internes Team zu belasten.</p>
+        <ul>
+          <li>White-Label Entwicklung</li>
+          <li>Nahtlose Integration in Ihre Workflows</li>
+          <li>Skalierbare Kapazitäten on-demand</li>
+        </ul>
+      </div>
+      <div class="glass-card">
+        <h3>Startups</h3>
+        <p>Von MVP bis Production-Ready — wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
+        <ul>
+          <li>Rapid Prototyping &amp; MVP Development</li>
+          <li>Technische Architekturberatung</li>
+          <li>Langfristige Wartung &amp; Weiterentwicklung</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Services -->
+  <section class="services">
+    <h2 class="section-title">Leistungen</h2>
+    <div class="services-grid">
+      <div class="glass-card">
+        <h3>Projektgeschäft</h3>
+        <p>Ganzheitliche Umsetzung Ihres Software-Projekts — von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
+        <ul>
+          <li>Fullstack Web-Applikationen</li>
+          <li>Headless CMS &amp; API-Entwicklung</li>
+          <li>Performance-Optimierung &amp; Security Audits</li>
+        </ul>
+      </div>
+      <div class="glass-card">
+        <h3>Consulting &amp; White-Label</h3>
+        <p>Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams — flexibel, diskret und ergebnisorientiert.</p>
+        <ul>
+          <li>Code Reviews &amp; Architektur-Audits</li>
+          <li>Team Augmentation</li>
+          <li>Tech Stack Migration &amp; Modernisierung</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects -->
+  <section class="featured-projects">
+    <h2 class="section-title">Ausgewählte Projekte</h2>
     {projectsWithImages.length > 0 ? (
       <div class="projects-grid">
         {projectsWithImages.map(({ project, acf, image }) => (
-            <ProjectCard
-              title={project.title.rendered}
-              excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
-              link={`/projects/${project.slug}`}
-              imageUrl={image?.url}
-              imageAlt={image?.alt}
-              techStack={acf.tech_stack}
-            />
+          <ProjectCard
+            title={project.title.rendered}
+            excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
+            link={`/projects/${project.slug}`}
+            imageUrl={image?.url}
+            imageAlt={image?.alt}
+            techStack={acf.tech_stack}
+          />
         ))}
       </div>
     ) : (
-      <p class="empty">No projects found. Check your WordPress API connection.</p>
+      <p class="empty">Keine Projekte gefunden.</p>
     )}
-    <a href="/projects" class="view-all">View all projects &rarr;</a>
+    <a href="/projects" class="view-all">Alle Projekte ansehen &rarr;</a>
   </section>
 </MainLayout>
 
 <style>
+  /* Hero */
   .hero {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 2rem 1.5rem;
     text-align: center;
-    padding: 4rem 1rem 2rem;
+  }
+
+  .hero-inner {
+    max-width: 720px;
+  }
+
+  .hero-tag {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--accent-blue);
+    margin: 0 0 1.25rem;
+    font-weight: 600;
   }
 
   .hero h1 {
-    font-size: 2.5rem;
-    margin: 0 0 0.5rem;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1.15;
+    margin: 0 0 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
-  .hero p {
-    font-size: 1.15rem;
-    color: #555;
+  .hero-sub {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: var(--text-muted);
+    margin: 0 0 2.5rem;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .projects {
-    max-width: 960px;
+  .cta-btn {
+    display: inline-block;
+    padding: 0.85rem 2.25rem;
+    background: var(--accent-blue);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: box-shadow 0.25s ease, transform 0.15s ease;
+  }
+
+  .cta-btn:hover {
+    box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Trust Bar */
+  .trust-bar {
+    overflow: hidden;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1.25rem 0;
+  }
+
+  .trust-track {
+    display: flex;
+    gap: 3rem;
+    width: max-content;
+    animation: marquee 25s linear infinite;
+  }
+
+  .trust-track span {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  /* Shared section styles */
+  .section-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 2rem;
+    letter-spacing: -0.01em;
+  }
+
+  .value-props,
+  .services,
+  .featured-projects {
+    max-width: 1100px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 5rem 1.5rem;
   }
 
-  .projects h2 {
-    margin-bottom: 1.5rem;
+  /* Glass cards */
+  .props-grid,
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
   }
 
+  .glass-card {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 2rem;
+    transition: box-shadow 0.25s ease, transform 0.2s ease;
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.15);
+    transform: translateY(-2px);
+  }
+
+  .glass-card h3 {
+    font-size: 1.25rem;
+    margin: 0 0 0.75rem;
+    color: var(--text-main);
+  }
+
+  .glass-card p {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    line-height: 1.65;
+    margin: 0 0 1rem;
+  }
+
+  .glass-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .glass-card li {
+    position: relative;
+    padding-left: 1.25rem;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .glass-card li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--accent-blue);
+  }
+
+  /* Featured Projects */
   .projects-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -83,19 +302,20 @@ const projectsWithImages = await Promise.all(
   }
 
   .empty {
-    color: #888;
+    color: var(--text-muted);
     font-style: italic;
   }
 
   .view-all {
     display: inline-block;
     margin-top: 2rem;
-    color: #333;
+    color: var(--text-muted);
     font-weight: 600;
     text-decoration: none;
+    transition: color 0.2s ease;
   }
 
   .view-all:hover {
-    text-decoration: underline;
+    color: var(--text-main);
   }
 </style>

@@ -1,0 +1,53 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-copy">&copy; {currentYear} Pro-Grammer. Alle Rechte vorbehalten.</p>
+    <nav class="footer-nav">
+      <a href="/impressum">Impressum</a>
+      <a href="/datenschutz">Datenschutz</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2rem 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .footer-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .footer-copy {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  .footer-nav {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .footer-nav a {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-nav a:hover {
+    color: var(--text-main);
+  }
+</style>

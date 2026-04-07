@@ -56,17 +56,19 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
   .project-card {
     display: flex;
     flex-direction: column;
-    border: 1px solid #e2e2e2;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 12px;
     text-decoration: none;
     color: inherit;
     overflow: hidden;
-    background: #fff;
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     transition: box-shadow 0.2s ease, transform 0.2s ease;
   }
 
   .project-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 25px rgba(37, 99, 235, 0.15);
     transform: translateY(-2px);
   }
 
@@ -95,22 +97,23 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
 
   .card-title-link {
     text-decoration: none;
-    color: inherit;
+    color: var(--text-main);
   }
 
   .card-title-link:hover h2 {
-    color: #0066cc;
+    color: var(--accent-blue);
   }
 
   .card-body h2 {
     margin: 0 0 0.5rem;
     font-size: 1.3rem;
+    color: var(--text-main);
     transition: color 0.2s ease;
   }
 
   .excerpt {
     font-size: 0.9rem;
-    color: #666;
+    color: var(--text-muted);
     line-height: 1.5;
     flex: 1;
   }
@@ -129,8 +132,8 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
   }
 
   .tech-list li {
-    background: #f0f4ff;
-    color: #3366aa;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--accent-blue);
     padding: 0.2rem 0.65rem;
     border-radius: 999px;
     font-size: 0.75rem;
@@ -143,7 +146,7 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
     gap: 0.5rem;
     margin-top: 1rem;
     padding-top: 1rem;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .btn {
@@ -181,12 +184,12 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
   }
 
   .btn-details {
-    background: #f5f5f5;
-    color: #333;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
     margin-left: auto;
   }
 
   .btn-details:hover {
-    background: #e8e8e8;
+    background: rgba(255, 255, 255, 0.12);
   }
 </style>
