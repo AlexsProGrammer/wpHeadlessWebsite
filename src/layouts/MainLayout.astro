@@ -1,12 +1,14 @@
 ---
 import '@fontsource/inter';
 import Footer from '../components/Footer.astro';
+import PillNav from '../components/PillNav.astro';
 
 interface Props {
   title: string;
+  activeNav?: 'identity' | 'work' | 'terminal';
 }
 
-const { title } = Astro.props;
+const { title, activeNav = 'identity' } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Pro-Grammer';
 const fullTitle = `${siteName} - ${title}`;
 ---
@@ -26,6 +28,7 @@ const fullTitle = `${siteName} - ${title}`;
       <div class="blob" style="width: 500px; height: 500px; bottom: -10%; right: -5%; background: var(--neon-blue); animation-delay: -3s;"></div>
       <div class="blob" style="width: 400px; height: 400px; top: 40%; left: 50%; background: var(--neon-purple); animation-delay: -5s;"></div>
     </div>
+    <PillNav active={activeNav} />
     <slot />
     <Footer />
   </body>

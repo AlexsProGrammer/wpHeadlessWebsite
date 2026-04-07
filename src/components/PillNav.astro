@@ -1,0 +1,84 @@
+---
+interface Props {
+  active?: 'identity' | 'work' | 'terminal';
+}
+
+const { active = 'identity' } = Astro.props;
+---
+
+<nav class="pill-nav" aria-label="Main navigation" id="pill-nav">
+  <div class="pill-track">
+    <a href="/#hero" class:list={['pill', { active: active === 'identity' }]} data-section="identity" aria-label="Identity" title="Identity">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
+      </svg>
+    </a>
+    <a href="/#leistungen" class:list={['pill', { active: active === 'work' }]} data-section="work" aria-label="Leistungen" title="Leistungen">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 5h16v3H4zm0 5h16v3H4zm0 5h16v3H4z" />
+      </svg>
+    </a>
+    <a href="/#terminal" class:list={['pill', { active: active === 'terminal' }]} data-section="terminal" aria-label="Terminal" title="Terminal">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm1 3 4 3-4 3v2l6-5-6-5zm8 8h6v-2h-6z" />
+      </svg>
+    </a>
+  </div>
+</nav>
+
+<style>
+  .pill-nav {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .pill-nav {
+      display: block;
+    }
+  }
+
+  .pill-track {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 0.25rem;
+  }
+
+  .pill {
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 999px;
+    color: var(--text-muted);
+    text-decoration: none;
+    display: grid;
+    place-items: center;
+    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .pill svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    fill: currentColor;
+  }
+
+  .pill:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  .pill.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.14);
+  }
+</style>

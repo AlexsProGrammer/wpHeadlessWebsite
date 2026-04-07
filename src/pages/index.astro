@@ -19,8 +19,6 @@ const projectsWithImages = await Promise.all(
       image = await getMediaUrl(project.featured_media);
     }
 
-    console.log("Gefundenes Bild für:", project.title.rendered, image);
-    
     return { project, acf, image };
   })
 );
@@ -28,14 +26,14 @@ const projectsWithImages = await Promise.all(
 const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-grammer.dev';
 ---
 
-<MainLayout title="Home">
+<MainLayout title="Home" activeNav="identity">
   <!-- Hero -->
-  <section class="hero">
+  <section class="hero" id="hero">
     <div class="hero-inner">
-      <p class="hero-tag">Software-Entwicklung &amp; Consulting</p>
+      <p class="hero-tag">&gt;_ Architecting the modern web.</p>
       <h1><span id="typewriter-text"></span><span class="cursor">_</span></h1>
-      <p class="hero-sub">Von der Idee bis zum fertigen Produkt — wir entwickeln performante, sichere und skalierbare Lösungen für Agenturen und Startups.</p>
-      <a href={`mailto:${contactEmail}`} class="cta-btn">Projekt anfragen</a>
+      <p class="hero-sub">Astro &times; Headless WordPress.</p>
+      <a href="#projects" class="cta-btn">View Projects</a>
     </div>
   </section>
 
@@ -92,7 +90,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   </section>
 
   <!-- Services -->
-  <section class="services">
+  <section class="services" id="leistungen">
     <h2 class="section-title">Leistungen</h2>
     <div class="services-grid">
       <div class="glass-card">
@@ -117,8 +115,9 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   </section>
 
   <!-- Featured Projects -->
-  <section class="featured-projects">
-    <h2 class="section-title">Ausgewählte Projekte</h2>
+  <section class="featured-projects" id="projects">
+    <h2 class="section-title">Selected Artifacts</h2>
+    <p class="section-sub">A curated collection of speed and aesthetics.</p>
     {projectsWithImages.length > 0 ? (
       <div class="projects-grid">
         {projectsWithImages.map(({ project, acf, image }) => (
@@ -143,42 +142,53 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 </MainLayout>
 
 <style>
-  /* Hero */
+  /* ── Hero ── */
   .hero {
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
     min-height: 100dvh;
-    padding: 2rem 1.5rem;
+    padding: 5rem 1.5rem 2rem;
     text-align: center;
   }
 
   .hero-inner {
-    max-width: 720px;
+    max-width: 900px;
   }
 
   .hero-tag {
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.15em;
-    color: var(--accent-blue);
-    margin: 0 0 1.25rem;
-    font-weight: 600;
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 0.9rem;
+    color: var(--neon-blue);
+    margin: 0 0 1.5rem;
+    letter-spacing: 0.04em;
   }
 
   .hero h1 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    line-height: 1.15;
+    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    line-height: 1.1;
     margin: 0 0 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    min-height: 1.15em;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    min-height: 1.1em;
+  }
+
+  #typewriter-text {
+    background: linear-gradient(
+      180deg,
+      var(--text-main) 40%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .cursor {
     display: inline-block;
     color: var(--neon-blue);
+    -webkit-text-fill-color: var(--neon-blue);
     animation: blink 0.8s step-end infinite;
   }
 
@@ -187,33 +197,31 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .hero-sub {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     line-height: 1.7;
     color: var(--text-muted);
     margin: 0 0 2.5rem;
-    max-width: 560px;
-    margin-left: auto;
-    margin-right: auto;
+    letter-spacing: 0.02em;
   }
 
   .cta-btn {
     display: inline-block;
-    padding: 0.85rem 2.25rem;
-    background: var(--accent-blue);
-    color: #fff;
+    padding: 0.9rem 2.5rem;
+    background: var(--text-main);
+    color: var(--bg-dark);
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border-radius: 999px;
+    font-weight: 700;
     font-size: 1rem;
     transition: box-shadow 0.25s ease, transform 0.15s ease;
   }
 
   .cta-btn:hover {
-    box-shadow: 0 0 30px rgba(37, 99, 235, 0.4);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
     transform: translateY(-1px);
   }
 
-  /* Trust Bar */
+  /* ── Trust Bar ── */
   .trust-bar {
     overflow: hidden;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
@@ -241,23 +249,29 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     100% { transform: translateX(-50%); }
   }
 
-  /* Shared section styles */
+  /* ── Shared section styles ── */
   .section-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    margin: 0 0 2rem;
-    letter-spacing: -0.01em;
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .section-sub {
+    color: var(--text-muted);
+    font-size: 1rem;
+    margin: 0.5rem 0 2.5rem;
   }
 
   .value-props,
   .services,
   .featured-projects {
-    max-width: 1100px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 5rem 1.5rem;
   }
 
-  /* Glass cards */
+  /* ── Glass cards ── */
   .props-grid,
   .services-grid {
     display: grid;
@@ -266,24 +280,26 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(20, 20, 25, 0.4);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 16px;
     padding: 2rem;
-    transition: box-shadow 0.25s ease, transform 0.2s ease;
+    transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
   }
 
   .glass-card:hover {
-    box-shadow: 0 0 25px rgba(37, 99, 235, 0.15);
-    transform: translateY(-2px);
+    box-shadow: 0 0 30px rgba(138, 43, 226, 0.12);
+    border-color: rgba(255, 255, 255, 0.12);
+    transform: translateY(-3px);
   }
 
   .glass-card h3 {
     font-size: 1.25rem;
     margin: 0 0 0.75rem;
     color: var(--text-main);
+    font-weight: 700;
   }
 
   .glass-card p {
@@ -311,14 +327,14 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     content: '—';
     position: absolute;
     left: 0;
-    color: var(--accent-blue);
+    color: var(--neon-blue);
   }
 
-  /* Featured Projects */
+  /* ── Featured Projects ── */
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.75rem;
   }
 
   .empty {
@@ -341,7 +357,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 </style>
 
 <script>
-  const target = "Maßgeschneiderte Software\nfür Ihr Unternehmen.";
+  const target = "I build digital experiences\nthat stick.";
   const el = document.getElementById("typewriter-text");
   if (el) {
     let i = 0;
@@ -359,4 +375,35 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
       }
     }, 50);
   }
+</script>
+
+<script>
+  // Scroll-spy for pill nav
+  const sections = [
+    { id: 'hero', nav: 'identity' },
+    { id: 'leistungen', nav: 'work' },
+    { id: 'terminal', nav: 'terminal' },
+  ];
+
+  function updateActivePill(): void {
+    const pills = document.querySelectorAll<HTMLAnchorElement>('#pill-nav .pill');
+    if (!pills.length) return;
+
+    const scrollY = window.scrollY + window.innerHeight / 3;
+    let current = sections[0].nav;
+
+    for (const section of sections) {
+      const el = document.getElementById(section.id);
+      if (el && el.offsetTop <= scrollY) {
+        current = section.nav;
+      }
+    }
+
+    pills.forEach((pill) => {
+      pill.classList.toggle('active', pill.dataset.section === current);
+    });
+  }
+
+  window.addEventListener('scroll', updateActivePill, { passive: true });
+  updateActivePill();
 </script>

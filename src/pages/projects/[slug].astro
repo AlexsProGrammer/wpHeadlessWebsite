@@ -22,7 +22,7 @@ const technologies = acf.tech_stack
   : [];
 ---
 
-<MainLayout title={project.title.rendered}>
+<MainLayout title={project.title.rendered} activeNav="work">
   <article class="project-detail">
     <a href="/projects" class="back-link">&larr; Zurück zur Übersicht</a>
 
@@ -69,7 +69,7 @@ const technologies = acf.tech_stack
   .project-detail {
     max-width: 60rem;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 6rem 1.5rem 3rem;
   }
 
   .back-link {
@@ -77,8 +77,8 @@ const technologies = acf.tech_stack
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
-    margin-bottom: 2rem;
-    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
     transition: color 0.2s ease;
   }
 
@@ -90,9 +90,9 @@ const technologies = acf.tech_stack
     display: flex;
     gap: 2.5rem;
     align-items: flex-start;
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
     padding-bottom: 2.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .hero-info {
@@ -102,10 +102,11 @@ const technologies = acf.tech_stack
 
   .hero-image {
     flex-shrink: 0;
-    width: 320px;
-    border-radius: 12px;
+    width: 340px;
+    border-radius: 16px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   }
 
   .hero-image img {
@@ -116,10 +117,12 @@ const technologies = acf.tech_stack
   }
 
   .project-detail h1 {
-    font-size: 2.5rem;
-    margin: 0 0 1rem;
-    line-height: 1.2;
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin: 0 0 1.25rem;
+    line-height: 1.15;
     color: var(--text-main);
+    letter-spacing: -0.02em;
   }
 
   .tech-list {
@@ -132,12 +135,15 @@ const technologies = acf.tech_stack
   }
 
   .tech-list li {
-    background: rgba(255, 255, 255, 0.06);
-    color: var(--accent-blue);
-    padding: 0.3rem 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+    padding: 0.3rem 0.85rem;
     border-radius: 999px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
   }
 
   .project-actions {
@@ -154,8 +160,8 @@ const technologies = acf.tech_stack
     border-radius: 8px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.95rem;
-    transition: background 0.2s ease, transform 0.1s ease;
+    font-size: 0.9rem;
+    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
   }
 
   .btn:active {
@@ -169,21 +175,21 @@ const technologies = acf.tech_stack
   }
 
   .btn-github:hover {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.2);
-    border-color: rgba(37, 99, 235, 0.3);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.15);
+    border-color: rgba(255, 255, 255, 0.15);
   }
 
   .btn-download {
-    background: var(--accent-blue);
-    color: #fff;
+    background: var(--text-main);
+    color: var(--bg-dark);
   }
 
   .btn-download:hover {
-    box-shadow: 0 0 20px rgba(37, 99, 235, 0.35);
+    box-shadow: 0 0 24px rgba(255, 255, 255, 0.15);
   }
 
   .content {
-    line-height: 1.8;
+    line-height: 1.85;
     font-size: 1.05rem;
     color: var(--text-muted);
   }
@@ -192,6 +198,7 @@ const technologies = acf.tech_stack
   .content :global(h3),
   .content :global(h4) {
     color: var(--text-main);
+    font-weight: 700;
   }
 
   .content :global(p) {
@@ -199,7 +206,7 @@ const technologies = acf.tech_stack
   }
 
   .content :global(a) {
-    color: var(--accent-blue);
+    color: var(--neon-blue);
   }
 
   .content :global(strong) {
@@ -214,15 +221,15 @@ const technologies = acf.tech_stack
   }
 
   .content :global(pre) {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 8px;
+    background: rgba(12, 12, 18, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
     padding: 1.25rem;
     overflow-x: auto;
   }
 
   .content :global(blockquote) {
-    border-left: 3px solid var(--accent-blue);
+    border-left: 3px solid var(--neon-purple);
     padding-left: 1rem;
     margin-left: 0;
     color: var(--text-muted);

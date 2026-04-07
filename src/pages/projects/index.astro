@@ -17,13 +17,12 @@ const projectsWithImages = await Promise.all(
 );
 ---
 
-<MainLayout title="Projects">
+<MainLayout title="Projects" activeNav="work">
   <section class="projects-page">
     <div class="page-header">
-      <h1>Projects</h1>
-      <p class="subtitle">A collection of things I've built</p>
+      <h1>Selected Artifacts</h1>
+      <p class="subtitle">A curated collection of speed and aesthetics.</p>
     </div>
-    <a href="/" class="btn-glass">&larr; Zurück zur Startseite</a>
     <div class="projects-grid">
       {projectsWithImages.map(({ project, acf, image }) => (
           <ProjectCard
@@ -43,19 +42,21 @@ const projectsWithImages = await Promise.all(
 
 <style>
   .projects-page {
-    max-width: 72rem;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1rem;
+    padding: 6rem 1.5rem 3rem;
   }
 
   .page-header {
-    margin-bottom: 2.5rem;
+    margin-bottom: 3rem;
   }
 
   .page-header h1 {
-    font-size: 2.25rem;
+    font-size: 2.75rem;
+    font-weight: 800;
     margin: 0 0 0.5rem;
     color: var(--text-main);
+    letter-spacing: -0.02em;
   }
 
   .subtitle {
@@ -64,30 +65,9 @@ const projectsWithImages = await Promise.all(
     margin: 0;
   }
 
-  .btn-glass {
-    display: inline-block;
-    margin-bottom: 2rem;
-    padding: 0.55rem 1.25rem;
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    transition: color 0.2s ease, border-color 0.2s ease;
-  }
-
-  .btn-glass:hover {
-    color: var(--text-main);
-    border-color: rgba(255, 255, 255, 0.2);
-  }
-
   .projects-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.75rem;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 2rem;
   }
 </style>

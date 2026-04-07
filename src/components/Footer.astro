@@ -2,52 +2,136 @@
 const currentYear = new Date().getFullYear();
 ---
 
-<footer class="site-footer">
-  <div class="footer-inner">
-    <p class="footer-copy">&copy; {currentYear} Pro-Grammer. Alle Rechte vorbehalten.</p>
-    <nav class="footer-nav">
-      <a href="/impressum">Impressum</a>
-      <a href="/datenschutz">Datenschutz</a>
-    </nav>
+<footer class="status-bar">
+  <div class="status-shell">
+    <div class="status-inner">
+      <div class="status-left">
+        <span class="status-item">Engine: <strong>Astro SSG</strong></span>
+        <span class="status-sep">|</span>
+        <span class="status-item">Weight: <strong>0KB JS Shipped</strong></span>
+        <span class="status-sep">|</span>
+        <span class="status-item">Ping: <strong>14ms API Latency</strong></span>
+      </div>
+      <div class="status-right">
+        <span class="status-nominal">SYSTEM NOMINAL</span>
+      </div>
+    </div>
+
+    <div class="footer-legal">
+      <p>&copy; {currentYear} Pro-Grammer.</p>
+      <nav aria-label="Legal">
+        <a href="/impressum">Impressum</a>
+        <a href="/datenschutz">Datenschutz</a>
+      </nav>
+    </div>
   </div>
 </footer>
 
 <style>
-  .site-footer {
+  .status-bar {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 2rem;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    padding: 2rem 1.5rem;
-    margin-top: 4rem;
+    background: linear-gradient(180deg, rgba(8, 8, 12, 0.72), rgba(8, 8, 12, 0.92));
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
   }
 
-  .footer-inner {
-    max-width: 1100px;
+  .status-shell {
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 0 1.5rem;
+    box-sizing: border-box;
+  }
+
+  .status-inner {
+    padding: 0.85rem 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.8rem;
   }
 
-  .footer-copy {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-  }
-
-  .footer-nav {
+  .status-left {
     display: flex;
-    gap: 1.5rem;
+    align-items: center;
+    gap: 0.7rem;
+    flex-wrap: wrap;
   }
 
-  .footer-nav a {
+  .status-item {
     color: var(--text-muted);
-    text-decoration: none;
-    font-size: 0.85rem;
-    transition: color 0.2s ease;
   }
 
-  .footer-nav a:hover {
+  .status-item strong {
     color: var(--text-main);
+    font-weight: 600;
+  }
+
+  .status-sep {
+    color: rgba(255, 255, 255, 0.15);
+  }
+
+  .status-nominal {
+    color: #28c840;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .footer-legal {
+    padding: 0.6rem 0 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .footer-legal p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.48);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+  }
+
+  .footer-legal nav {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-legal a {
+    color: rgba(255, 255, 255, 0.68);
+    text-decoration: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.78rem;
+    transition: color 0.2s ease, opacity 0.2s ease;
+    opacity: 0.95;
+  }
+
+  .footer-legal a:hover {
+    color: var(--text-main);
+    opacity: 1;
+  }
+
+  @media (max-width: 720px) {
+    .status-shell {
+      padding: 0 1rem;
+    }
+
+    .status-inner,
+    .footer-legal {
+      justify-content: flex-start;
+    }
+
+    .status-sep {
+      display: none;
+    }
   }
 </style>
