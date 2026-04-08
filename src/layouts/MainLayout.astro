@@ -2,18 +2,20 @@
 import '@fontsource/inter';
 import Footer from '../components/Footer.astro';
 import PillNav from '../components/PillNav.astro';
+import LangToggle from '../components/LangToggle.astro';
 
 interface Props {
   title: string;
   activeNav?: 'identity' | 'work' | 'terminal';
+  showPillNav?: boolean;
 }
 
-const { title, activeNav = 'identity' } = Astro.props;
+const { title, activeNav = 'identity', showPillNav = false } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Pro-Grammer';
 const fullTitle = `${siteName} - ${title}`;
 ---
 
-<html lang="en">
+<html lang="de">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -31,7 +33,10 @@ const fullTitle = `${siteName} - ${title}`;
     <div class="scroll-edge scroll-edge-top" aria-hidden="true"></div>
     <div class="scroll-edge scroll-edge-bottom" aria-hidden="true"></div>
     <div class="overscroll-wrapper" id="overscroll-wrapper">
-      <PillNav active={activeNav} />
+      <div class="side-rail" id="side-rail">
+        {showPillNav && <PillNav active={activeNav} />}
+        <LangToggle />
+      </div>
       <main class="page-content">
         <slot />
       </main>
@@ -103,6 +108,24 @@ const fullTitle = `${siteName} - ${title}`;
     flex: 1 0 auto;
   }
 
+  .side-rail {
+    position: fixed;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 100;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  @media (min-width: 1024px) {
+    .side-rail {
+      display: flex;
+    }
+  }
+
   .bg-blobs-container {
     position: fixed;
     z-index: -1;
@@ -153,6 +176,10 @@ const fullTitle = `${siteName} - ${title}`;
     }
   }
 </style>
+
+<script>
+  import '../i18n/client';
+</script>
 
 <script>
   const root = document.documentElement;

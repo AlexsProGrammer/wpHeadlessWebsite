@@ -1,0 +1,40 @@
+---
+---
+
+<div class="lang-toggle" id="lang-toggle" title="Toggle language">
+  <button type="button" class="lang-btn" id="lang-btn" aria-label="Switch language">
+    <span class="lang-label" id="lang-label">DE</span>
+  </button>
+</div>
+
+<style>
+  .lang-toggle {
+    display: block;
+  }
+
+  .lang-btn {
+    width: calc(2.1rem + 0.5rem + 2px);
+    height: calc(2.1rem + 0.5rem + 2px);
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    color: var(--text-muted);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    padding: 0;
+  }
+
+  .lang-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.14);
+  }
+</style>

@@ -19,11 +19,11 @@ const projectsWithImages = await Promise.all(
 
 <MainLayout title="Projects" activeNav="work">
   <section class="projects-page">
-    <a href="/#projects" class="back-link">&larr; Zurück zur Startseite</a>
+    <a href="/#projects" class="back-link" data-i18n="projects.page.back">&larr; Zurück zur Startseite</a>
 
     <div class="page-header">
-      <h1>Selected Artifacts</h1>
-      <p class="subtitle">A curated collection of speed and aesthetics.</p>
+      <h1 data-i18n="projects.page.title">Ausgewählte Projekte</h1>
+      <p class="subtitle" data-i18n="projects.page.subtitle">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
     </div>
     <div class="projects-grid">
       {projectsWithImages.map(({ project, acf, image }) => (

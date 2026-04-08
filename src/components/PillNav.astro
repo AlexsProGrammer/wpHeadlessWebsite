@@ -8,17 +8,17 @@ const { active = 'identity' } = Astro.props;
 
 <nav class="pill-nav" aria-label="Main navigation" id="pill-nav">
   <div class="pill-track">
-    <a href="/#hero" class:list={['pill', { active: active === 'identity' }]} data-section="identity" aria-label="Identity" title="Identity">
+    <a href="/#hero" class:list={['pill', { active: active === 'identity' }]} data-section="identity" aria-label="Identity" title="Identity" data-i18n-title="nav.identity" data-i18n-aria="nav.identity">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5zm0 2c-4.418 0-8 2.239-8 5v1h16v-1c0-2.761-3.582-5-8-5z" />
       </svg>
     </a>
-    <a href="/#leistungen" class:list={['pill', { active: active === 'work' }]} data-section="work" aria-label="Leistungen" title="Leistungen">
+    <a href="/#leistungen" class:list={['pill', { active: active === 'work' }]} data-section="work" aria-label="Leistungen" title="Leistungen" data-i18n-title="nav.work" data-i18n-aria="nav.work">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M4 5h16v3H4zm0 5h16v3H4zm0 5h16v3H4z" />
       </svg>
     </a>
-    <a href="/#terminal" class:list={['pill', { active: active === 'terminal' }]} data-section="terminal" aria-label="Terminal" title="Terminal">
+    <a href="/#terminal" class:list={['pill', { active: active === 'terminal' }]} data-section="terminal" aria-label="Terminal" title="Terminal" data-i18n-title="nav.terminal" data-i18n-aria="nav.terminal">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2zm1 3 4 3-4 3v2l6-5-6-5zm8 8h6v-2h-6z" />
       </svg>
@@ -28,18 +28,7 @@ const { active = 'identity' } = Astro.props;
 
 <style>
   .pill-nav {
-    position: fixed;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 100;
-    display: none;
-  }
-
-  @media (min-width: 1024px) {
-    .pill-nav {
-      display: block;
-    }
+    display: block;
   }
 
   .pill-track {

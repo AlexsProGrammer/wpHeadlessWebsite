@@ -26,14 +26,14 @@ const projectsWithImages = await Promise.all(
 const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-grammer.dev';
 ---
 
-<MainLayout title="Home" activeNav="identity">
+<MainLayout title="Home" activeNav="identity" showPillNav>
   <!-- Hero -->
   <section class="hero" id="hero">
     <div class="hero-inner">
-      <p class="hero-tag">&gt;_ Architecting the modern web.</p>
+      <p class="hero-tag" data-i18n="hero.tag">&gt;_ Architecting the modern web.</p>
       <h1><span id="typewriter-text"></span><span class="cursor">_</span></h1>
-      <p class="hero-sub">Astro &times; Headless WordPress.</p>
-      <a href="#projects" class="cta-btn">View Projects</a>
+      <p class="hero-sub" data-i18n="hero.sub">Astro &times; Headless WordPress.</p>
+      <a href="#projects" class="cta-btn" data-i18n="hero.cta">Projekte ansehen</a>
     </div>
   </section>
 
@@ -66,24 +66,24 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Value Proposition -->
   <section class="value-props">
-    <h2 class="section-title">Für wen wir arbeiten</h2>
+    <h2 class="section-title" data-i18n="value.title">Für wen wir arbeiten</h2>
     <div class="props-grid">
       <div class="glass-card">
-        <h3>Agenturen</h3>
-        <p>Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt — ohne Ihr internes Team zu belasten.</p>
+        <h3 data-i18n="value.agencies.title">Agenturen</h3>
+        <p data-i18n="value.agencies.desc">Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt — ohne Ihr internes Team zu belasten.</p>
         <ul>
-          <li>White-Label Entwicklung</li>
-          <li>Nahtlose Integration in Ihre Workflows</li>
-          <li>Skalierbare Kapazitäten on-demand</li>
+          <li data-i18n="value.agencies.li1">White-Label Entwicklung</li>
+          <li data-i18n="value.agencies.li2">Nahtlose Integration in Ihre Workflows</li>
+          <li data-i18n="value.agencies.li3">Skalierbare Kapazitäten on-demand</li>
         </ul>
       </div>
       <div class="glass-card">
-        <h3>Startups</h3>
-        <p>Von MVP bis Production-Ready — wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
+        <h3 data-i18n="value.startups.title">Startups</h3>
+        <p data-i18n="value.startups.desc">Von MVP bis Production-Ready — wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
         <ul>
-          <li>Rapid Prototyping &amp; MVP Development</li>
-          <li>Technische Architekturberatung</li>
-          <li>Langfristige Wartung &amp; Weiterentwicklung</li>
+          <li data-i18n="value.startups.li1">Rapid Prototyping &amp; MVP Development</li>
+          <li data-i18n="value.startups.li2">Technische Architekturberatung</li>
+          <li data-i18n="value.startups.li3">Langfristige Wartung &amp; Weiterentwicklung</li>
         </ul>
       </div>
     </div>
@@ -91,24 +91,24 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Services -->
   <section class="services" id="leistungen">
-    <h2 class="section-title">Leistungen</h2>
+    <h2 class="section-title" data-i18n="services.title">Leistungen</h2>
     <div class="services-grid">
       <div class="glass-card">
-        <h3>Projektgeschäft</h3>
-        <p>Ganzheitliche Umsetzung Ihres Software-Projekts — von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
+        <h3 data-i18n="services.project.title">Projektgeschäft</h3>
+        <p data-i18n="services.project.desc">Ganzheitliche Umsetzung Ihres Software-Projekts — von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
         <ul>
-          <li>Fullstack Web-Applikationen</li>
-          <li>Headless CMS &amp; API-Entwicklung</li>
-          <li>Performance-Optimierung &amp; Security Audits</li>
+          <li data-i18n="services.project.li1">Fullstack Web-Applikationen</li>
+          <li data-i18n="services.project.li2">Headless CMS &amp; API-Entwicklung</li>
+          <li data-i18n="services.project.li3">Performance-Optimierung &amp; Security Audits</li>
         </ul>
       </div>
       <div class="glass-card">
-        <h3>Consulting &amp; White-Label</h3>
-        <p>Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams — flexibel, diskret und ergebnisorientiert.</p>
+        <h3 data-i18n="services.consulting.title">Consulting &amp; White-Label</h3>
+        <p data-i18n="services.consulting.desc">Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams — flexibel, diskret und ergebnisorientiert.</p>
         <ul>
-          <li>Code Reviews &amp; Architektur-Audits</li>
-          <li>Team Augmentation</li>
-          <li>Tech Stack Migration &amp; Modernisierung</li>
+          <li data-i18n="services.consulting.li1">Code Reviews &amp; Architektur-Audits</li>
+          <li data-i18n="services.consulting.li2">Team Augmentation</li>
+          <li data-i18n="services.consulting.li3">Tech Stack Migration &amp; Modernisierung</li>
         </ul>
       </div>
     </div>
@@ -116,8 +116,8 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Featured Projects -->
   <section class="featured-projects" id="projects">
-    <h2 class="section-title">Selected Artifacts</h2>
-    <p class="section-sub">A curated collection of speed and aesthetics.</p>
+    <h2 class="section-title" data-i18n="projects.title">Ausgewählte Projekte</h2>
+    <p class="section-sub" data-i18n="projects.sub">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
     {projectsWithImages.length > 0 ? (
       <div class="projects-grid">
         {projectsWithImages.map(({ project, acf, image }) => (
@@ -132,9 +132,9 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
         ))}
       </div>
     ) : (
-      <p class="empty">Keine Projekte gefunden.</p>
+      <p class="empty" data-i18n="projects.empty">Keine Projekte gefunden.</p>
     )}
-    <a href="/projects" class="view-all">Alle Projekte ansehen &rarr;</a>
+    <a href="/projects" class="view-all" data-i18n="projects.viewAll">Alle Projekte ansehen →</a>
   </section>
 
   <!-- Terminal Easter Egg -->
@@ -357,13 +357,21 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 </style>
 
 <script>
-  const target = "I build digital experiences\nthat stick.";
-  const el = document.getElementById("typewriter-text");
-  if (el) {
+  import { translations } from '../i18n/translations';
+
+  function getTypewriterText(): string {
+    const lang = document.documentElement.lang || 'de';
+    return translations[lang]?.['hero.typewriter'] ?? translations.de['hero.typewriter'];
+  }
+
+  function typewrite(text: string): void {
+    const el = document.getElementById("typewriter-text");
+    if (!el) return;
+    el.innerHTML = '';
     let i = 0;
     const interval = setInterval(() => {
-      if (i < target.length) {
-        const char = target[i];
+      if (i < text.length) {
+        const char = text[i];
         if (char === "\n") {
           el.appendChild(document.createElement("br"));
         } else {
@@ -375,6 +383,12 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
       }
     }, 50);
   }
+
+  typewrite(getTypewriterText());
+
+  window.addEventListener('langchange', () => {
+    typewrite(getTypewriterText());
+  });
 </script>
 
 <script>
