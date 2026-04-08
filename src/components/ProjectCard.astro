@@ -15,9 +15,13 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
 ---
 
 <div class="project-card">
+  <div class="card-glow"></div>
   {imageUrl && (
     <a href={link} class="card-image-link">
-      <img src={imageUrl} alt={imageAlt || title} class="card-image" loading="lazy" />
+      <div class="card-image-wrapper">
+        <img src={imageUrl} alt={imageAlt || title} class="card-image" loading="lazy" />
+        <div class="image-shine"></div>
+      </div>
     </a>
   )}
   <div class="card-body">
@@ -53,45 +57,115 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
 </div>
 
 <style>
+  /* ── Apple Glass Card ── */
   .project-card {
+    position: relative;
     display: flex;
     flex-direction: column;
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    border-radius: 20px;
     text-decoration: none;
     color: inherit;
     overflow: hidden;
-    background: rgba(20, 20, 25, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(40px) saturate(1.6);
+    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition:
+      transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.4s ease;
   }
 
   .project-card:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(138, 43, 226, 0.1);
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-6px) scale(1.01);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.35),
+      0 0 40px rgba(0, 240, 255, 0.06),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
+  /* ── Ambient glow behind card on hover ── */
+  .card-glow {
+    position: absolute;
+    inset: -1px;
+    border-radius: 20px;
+    opacity: 0;
+    z-index: -1;
+    background: conic-gradient(
+      from 180deg,
+      rgba(0, 240, 255, 0.12),
+      rgba(138, 43, 226, 0.12),
+      rgba(255, 0, 127, 0.08),
+      rgba(0, 240, 255, 0.12)
+    );
+    filter: blur(20px);
+    transition: opacity 0.5s ease;
+  }
+
+  .project-card:hover .card-glow {
+    opacity: 1;
+  }
+
+  /* ── Image ── */
   .card-image-link {
     display: block;
+    margin: 10px 10px 0;
+    border-radius: 12px;
     overflow: hidden;
+    position: relative;
+  }
+
+  .card-image-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
   }
 
   .card-image {
     width: 100%;
-    height: 240px;
+    height: 220px;
     object-fit: cover;
     display: block;
-    transition: transform 0.4s ease;
+    border-radius: 12px;
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .project-card:hover .card-image {
-    transform: scale(1.05);
+    transform: scale(1.04);
   }
 
+  /* Subtle specular highlight across image */
+  .image-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+
+  .project-card:hover .image-shine {
+    opacity: 0.6;
+  }
+
+  /* ── Card Body ── */
   .card-body {
-    padding: 1.5rem;
+    padding: 1.35rem 1.5rem 1.5rem;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -103,22 +177,28 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
   }
 
   .card-title-link:hover h2 {
-    color: var(--neon-blue, #00f0ff);
+    background-position: 0% 100%;
   }
 
   .card-body h2 {
-    margin: 0 0 0.6rem;
-    font-size: 1.35rem;
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
     font-weight: 700;
     color: var(--text-main);
-    transition: color 0.2s ease;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, var(--text-main), var(--neon-blue, #00f0ff));
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    transition: background-position 0.4s ease;
+    -webkit-text-fill-color: transparent;
   }
 
   .excerpt {
-    font-size: 0.88rem;
+    font-size: 0.87rem;
     color: var(--text-muted);
-    line-height: 1.6;
+    line-height: 1.65;
     flex: 1;
   }
 
@@ -126,34 +206,46 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
     margin: 0;
   }
 
+  /* ── Tech Pills ── */
   .tech-list {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
+    gap: 0.35rem;
     list-style: none;
     padding: 0;
-    margin: 1rem 0 0;
+    margin: 1.1rem 0 0;
   }
 
   .tech-list li {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    color: var(--text-muted);
-    padding: 0.25rem 0.7rem;
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0.22rem 0.65rem;
     border-radius: 999px;
-    font-size: 0.72rem;
-    font-weight: 500;
+    font-size: 0.68rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
   }
 
+  .project-card:hover .tech-list li {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Actions ── */
   .card-actions {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.5rem;
     margin-top: 1.25rem;
     padding-top: 1rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
   }
 
   .btn {
@@ -161,48 +253,91 @@ const technologies = techStack ? techStack.split(',').map((t: string) => t.trim(
     align-items: center;
     gap: 0.35rem;
     padding: 0.45rem 0.9rem;
-    border-radius: 8px;
+    border-radius: 10px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.8rem;
-    transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+    font-size: 0.78rem;
+    transition:
+      background 0.25s ease,
+      transform 0.15s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
   }
 
   .btn:active {
-    transform: scale(0.97);
+    transform: scale(0.96);
   }
 
   .btn-github {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-main);
   }
 
   .btn-github:hover {
-    box-shadow: 0 0 16px rgba(138, 43, 226, 0.15);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 18px rgba(138, 43, 226, 0.15);
+    border-color: rgba(255, 255, 255, 0.16);
   }
 
   .btn-download {
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-main);
   }
 
   .btn-download:hover {
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.16);
   }
 
   .btn-details {
-    background: var(--text-main);
-    color: var(--bg-dark, #0a0a0f);
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--bg-dark, #09090b);
     margin-left: auto;
     border-radius: 999px;
-    padding: 0.45rem 1rem;
+    padding: 0.45rem 1.1rem;
+    font-weight: 700;
+    border: none;
+    transition:
+      background 0.25s ease,
+      box-shadow 0.3s ease,
+      transform 0.15s ease;
   }
 
   .btn-details:hover {
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+    background: #ffffff;
+    box-shadow:
+      0 0 20px rgba(255, 255, 255, 0.2),
+      0 0 40px rgba(0, 240, 255, 0.08);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .card-image-link {
+      margin: 8px 8px 0;
+    }
+
+    .card-image {
+      height: 180px;
+    }
+
+    .card-body {
+      padding: 1.1rem 1.2rem 1.3rem;
+    }
+
+    .card-body h2 {
+      font-size: 1.15rem;
+    }
+
+    .card-actions {
+      gap: 0.4rem;
+    }
+
+    .btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.74rem;
+    }
   }
 </style>
