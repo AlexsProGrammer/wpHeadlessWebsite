@@ -49,27 +49,20 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   <!-- Trust Bar -->
   <section class="trust-bar">
     <div class="trust-track">
-      <span>TypeScript</span>
-      <span>React</span>
-      <span>Next.js</span>
-      <span>Astro</span>
-      <span>Node.js</span>
-      <span>Python</span>
-      <span>PostgreSQL</span>
-      <span>Docker</span>
-      <span>AWS</span>
-      <span>WordPress</span>
-      <!-- duplicate for seamless loop -->
-      <span>TypeScript</span>
-      <span>React</span>
-      <span>Next.js</span>
-      <span>Astro</span>
-      <span>Node.js</span>
-      <span>Python</span>
-      <span>PostgreSQL</span>
-      <span>Docker</span>
-      <span>AWS</span>
-      <span>WordPress</span>
+      {Array.from({ length: 5 }).map(() => (
+        <>
+          <span>TypeScript</span>
+          <span>React</span>
+          <span>Next.js</span>
+          <span>Astro</span>
+          <span>Node.js</span>
+          <span>Python</span>
+          <span>PostgreSQL</span>
+          <span>Docker</span>
+          <span>AWS</span>
+          <span>WordPress</span>
+        </>
+      ))}
     </div>
   </section>
 
