@@ -1,21 +1,15 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../../lib/api';
+import { getProjectBySlug, getProjectImage } from '../../lib/api';
 
-export async function getStaticPaths() {
-  const projects = await getAllProjects();
-  return projects.map((project: any) => ({
-    params: { slug: project.slug },
-    props: { project },
-  }));
+const { slug } = Astro.params;
+const project = slug ? await getProjectBySlug(slug) : null;
+
+if (!project) {
+  return Astro.redirect('/404');
 }
 
-const { project } = Astro.props;
-
-let image = getEmbeddedImage(project);
-if (!image && project.featured_media) {
-  image = await getMediaUrl(project.featured_media);
-}
+const image = await getProjectImage(project);
 const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
 const technologies = acf.tech_stack
   ? acf.tech_stack.split(',').map((t: string) => t.trim()).filter(Boolean)

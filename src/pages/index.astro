@@ -2,7 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TerminalSection from '../components/TerminalFooter.astro';
-import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../lib/api';
+import { getAllProjects, getProjectImage } from '../lib/api';
 
 let projects: any[] = [];
 try {
@@ -23,10 +23,7 @@ const highlightedProjects = projects.filter((project: any) => {
 const projectsWithImages = await Promise.all(
   highlightedProjects.map(async (project: any) => {
     const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
-    let image = getEmbeddedImage(project);
-    if (!image && project.featured_media) {
-      image = await getMediaUrl(project.featured_media);
-    }
+    const image = await getProjectImage(project);
 
     return { project, acf, image };
   })

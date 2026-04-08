@@ -1,17 +1,14 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
-import { getAllProjects, getEmbeddedImage, getMediaUrl } from '../../lib/api';
+import { getAllProjects, getProjectImage } from '../../lib/api';
 
 const projects = await getAllProjects();
 
 const projectsWithImages = await Promise.all(
   projects.map(async (project: any) => {
     const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
-    let image = getEmbeddedImage(project);
-    if (!image && project.featured_media) {
-      image = await getMediaUrl(project.featured_media);
-    }
+    const image = await getProjectImage(project);
     return { project, acf, image };
   })
 );
