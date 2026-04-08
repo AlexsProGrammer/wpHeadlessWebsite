@@ -28,11 +28,15 @@ const fullTitle = `${siteName} - ${title}`;
       <div class="blob" style="width: 500px; height: 500px; bottom: -10%; right: -5%; background: var(--neon-blue); animation-delay: -3s;"></div>
       <div class="blob" style="width: 400px; height: 400px; top: 40%; left: 50%; background: var(--neon-purple); animation-delay: -5s;"></div>
     </div>
-    <PillNav active={activeNav} />
-    <main class="page-content">
-      <slot />
-    </main>
-    <Footer />
+    <div class="scroll-edge scroll-edge-top" aria-hidden="true"></div>
+    <div class="scroll-edge scroll-edge-bottom" aria-hidden="true"></div>
+    <div class="overscroll-wrapper" id="overscroll-wrapper">
+      <PillNav active={activeNav} />
+      <main class="page-content">
+        <slot />
+      </main>
+      <Footer />
+    </div>
   </body>
 </html>
 
@@ -45,6 +49,27 @@ const fullTitle = `${siteName} - ${title}`;
     --neon-blue: #00f0ff;
     --neon-purple: #8a2be2;
     --neon-pink: #ff007f;
+  }
+
+  html {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    overscroll-behavior: none;
+  }
+
+  html::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+
+  *::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
   }
 
   html,
@@ -62,8 +87,16 @@ const fullTitle = `${siteName} - ${title}`;
     min-height: 100vh;
     min-height: 100svh;
     min-height: 100dvh;
+    --edge-top-opacity: 0;
+    --edge-bottom-opacity: 0;
+  }
+
+  .overscroll-wrapper {
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .page-content {
@@ -76,6 +109,28 @@ const fullTitle = `${siteName} - ${title}`;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
+  }
+
+  .scroll-edge {
+    position: fixed;
+    left: 0;
+    right: 0;
+    height: 28px;
+    z-index: 95;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  .scroll-edge-top {
+    top: 0;
+    opacity: var(--edge-top-opacity);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+  }
+
+  .scroll-edge-bottom {
+    bottom: 0;
+    opacity: var(--edge-bottom-opacity);
+    background: linear-gradient(0deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
   }
 
   .blob {
@@ -98,3 +153,67 @@ const fullTitle = `${siteName} - ${title}`;
     }
   }
 </style>
+
+<script>
+  const root = document.documentElement;
+  const body = document.body;
+  const wrapper = document.getElementById('overscroll-wrapper');
+  let scrollHintTimer: number | undefined;
+  let releaseTimer: number | undefined;
+
+  function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function updateScrollEdges(): void {
+    const scrollTop = root.scrollTop || body.scrollTop;
+    const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
+    const topOpacity = scrollTop <= 2 ? 0 : 0.9;
+    const bottomOpacity = scrollTop >= maxScroll - 2 ? 0 : 0.9;
+
+    body.style.setProperty('--edge-top-opacity', String(topOpacity));
+    body.style.setProperty('--edge-bottom-opacity', String(bottomOpacity));
+
+    if (scrollHintTimer) {
+      window.clearTimeout(scrollHintTimer);
+    }
+
+    scrollHintTimer = window.setTimeout(() => {
+      body.style.setProperty('--edge-top-opacity', String(topOpacity === 0 ? 0 : 0.55));
+      body.style.setProperty('--edge-bottom-opacity', String(bottomOpacity === 0 ? 0 : 0.55));
+    }, 120);
+  }
+
+  function releaseOverscroll(): void {
+    if (releaseTimer) {
+      window.clearTimeout(releaseTimer);
+    }
+
+    releaseTimer = window.setTimeout(() => {
+      if (wrapper) wrapper.style.transform = '';
+    }, 50);
+  }
+
+  window.addEventListener('scroll', updateScrollEdges, { passive: true });
+  window.addEventListener('resize', updateScrollEdges, { passive: true });
+
+  window.addEventListener(
+    'wheel',
+    (event: WheelEvent) => {
+      const scrollTop = root.scrollTop || body.scrollTop;
+      const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
+      const atTop = scrollTop <= 0;
+      const atBottom = scrollTop >= maxScroll - 1;
+
+      if ((atTop && event.deltaY < 0) || (atBottom && event.deltaY > 0)) {
+        event.preventDefault();
+        const pull = clamp(event.deltaY * 0.15, -18, 18);
+        if (wrapper) wrapper.style.transform = `translateY(${pull}px)`;
+        releaseOverscroll();
+      }
+    },
+    { passive: false }
+  );
+
+  updateScrollEdges();
+</script>
