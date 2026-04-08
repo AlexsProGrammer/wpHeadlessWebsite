@@ -63,12 +63,20 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     margin: 0 0 2rem;
   }
 
-  .section-sub code {
-    background: rgba(255, 255, 255, 0.06);
-    padding: 0.15em 0.45em;
-    border-radius: 4px;
-    font-size: 0.85em;
-    color: var(--neon-blue);
+  .section-sub :global(code) {
+    display: inline-block;
+    padding: 0.18em 0.5em;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 0.84em;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    color: #d4d4da;
+    white-space: nowrap;
   }
 
   /* ── Terminal chrome ── */
