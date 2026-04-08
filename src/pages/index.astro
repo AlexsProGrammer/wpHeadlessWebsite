@@ -11,8 +11,17 @@ try {
   // API may be unreachable during dev; show empty state
 }
 
+const isHighlightBEnabled = (value: unknown): boolean => (
+  value === true || value === 1 || value === '1' || value === 'true'
+);
+
+const highlightedProjects = projects.filter((project: any) => {
+  const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
+  return isHighlightBEnabled(acf.highlighted_b);
+});
+
 const projectsWithImages = await Promise.all(
-  projects.slice(0, 2).map(async (project: any) => {
+  highlightedProjects.map(async (project: any) => {
     const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
     let image = getEmbeddedImage(project);
     if (!image && project.featured_media) {
@@ -159,7 +168,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   .hero-tag {
     font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 1.05rem;
     color: var(--neon-blue);
     margin: 0 0 1.5rem;
     letter-spacing: 0.04em;
