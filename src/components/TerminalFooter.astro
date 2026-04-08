@@ -8,14 +8,14 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
 
 <section class="terminal-section" id="terminal">
   <h2 class="section-title" data-i18n="terminal.title">Terminal</h2>
-  <p class="section-sub" data-i18n="terminal.sub" data-i18n-html>Type <code>help</code> to explore — or just scroll down.</p>
+  <p class="section-sub" data-i18n="terminal.sub" data-i18n-html>Type <code>help</code> to explore - or just scroll down.</p>
 
   <div class="terminal-window">
     <div class="terminal-header">
       <span class="dot red"></span>
       <span class="dot yellow"></span>
       <span class="dot green"></span>
-      <span class="terminal-title">user@portfolio — bash</span>
+      <span class="terminal-title">user@portfolio - bash</span>
     </div>
 
     <div class="terminal-body" id="terminal-body">
@@ -244,18 +244,18 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
       case "help":
         appendOutput(
           `<strong>Available commands:</strong>\n\n` +
-          `  <em>help</em>      — Show this help message\n` +
-          `  <em>about</em>     — About Pro-Grammer\n` +
-          `  <em>projects</em>  — Browse featured projects\n` +
-          `  <em>contact</em>   — Social links &amp; email\n` +
-          `  <em>skills</em>    — Tech stack overview\n` +
-          `  <em>clear</em>     — Clear terminal`
+          `  <em>help</em>      - Show this help message\n` +
+          `  <em>about</em>     - About Pro-Grammer\n` +
+          `  <em>projects</em>  - Browse featured projects\n` +
+          `  <em>contact</em>   - Social links &amp; email\n` +
+          `  <em>skills</em>    - Tech stack overview\n` +
+          `  <em>clear</em>     - Clear terminal`
         );
         break;
 
       case "about":
         appendOutput(
-          `<strong>Pro-Grammer</strong>  —  Software-Entwicklung &amp; Consulting\n\n` +
+          `<strong>Pro-Grammer</strong>  -  Software-Entwicklung &amp; Consulting\n\n` +
           `Maßgeschneiderte Lösungen für Agenturen und Startups.\n` +
           `<em>Fullstack · TypeScript · Cloud · Open Source</em>`
         );

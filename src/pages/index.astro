@@ -44,25 +44,24 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
       <p class="hero-sub" data-i18n="hero.sub">Astro &times; Headless WordPress.</p>
       <a href="#projects" class="cta-btn" data-i18n="hero.cta">Projekte ansehen</a>
     </div>
-  </section>
-
-  <!-- Trust Bar -->
-  <section class="trust-bar">
-    <div class="trust-track">
-      {Array.from({ length: 5 }).map(() => (
-        <>
-          <span>TypeScript</span>
-          <span>React</span>
-          <span>Next.js</span>
-          <span>Astro</span>
-          <span>Node.js</span>
-          <span>Python</span>
-          <span>PostgreSQL</span>
-          <span>Docker</span>
-          <span>AWS</span>
-          <span>WordPress</span>
-        </>
-      ))}
+    <!-- Trust Bar pinned to bottom of hero viewport -->
+    <div class="trust-bar">
+      <div class="trust-track">
+        {Array.from({ length: 5 }).map(() => (
+          <>
+            <span>TypeScript</span>
+            <span>React</span>
+            <span>Next.js</span>
+            <span>Astro</span>
+            <span>Node.js</span>
+            <span>Python</span>
+            <span>PostgreSQL</span>
+            <span>Docker</span>
+            <span>AWS</span>
+            <span>WordPress</span>
+          </>
+        ))}
+      </div>
     </div>
   </section>
 
@@ -72,7 +71,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     <div class="props-grid">
       <div class="glass-card">
         <h3 data-i18n="value.agencies.title">Agenturen</h3>
-        <p data-i18n="value.agencies.desc">Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt — ohne Ihr internes Team zu belasten.</p>
+        <p data-i18n="value.agencies.desc">Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt - ohne Ihr internes Team zu belasten.</p>
         <ul>
           <li data-i18n="value.agencies.li1">White-Label Entwicklung</li>
           <li data-i18n="value.agencies.li2">Nahtlose Integration in Ihre Workflows</li>
@@ -81,7 +80,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
       </div>
       <div class="glass-card">
         <h3 data-i18n="value.startups.title">Startups</h3>
-        <p data-i18n="value.startups.desc">Von MVP bis Production-Ready — wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
+        <p data-i18n="value.startups.desc">Von MVP bis Production-Ready - wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
         <ul>
           <li data-i18n="value.startups.li1">Rapid Prototyping &amp; MVP Development</li>
           <li data-i18n="value.startups.li2">Technische Architekturberatung</li>
@@ -97,7 +96,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     <div class="services-grid">
       <div class="glass-card">
         <h3 data-i18n="services.project.title">Projektgeschäft</h3>
-        <p data-i18n="services.project.desc">Ganzheitliche Umsetzung Ihres Software-Projekts — von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
+        <p data-i18n="services.project.desc">Ganzheitliche Umsetzung Ihres Software-Projekts - von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
         <ul>
           <li data-i18n="services.project.li1">Fullstack Web-Applikationen</li>
           <li data-i18n="services.project.li2">Headless CMS &amp; API-Entwicklung</li>
@@ -106,7 +105,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
       </div>
       <div class="glass-card">
         <h3 data-i18n="services.consulting.title">Consulting &amp; White-Label</h3>
-        <p data-i18n="services.consulting.desc">Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams — flexibel, diskret und ergebnisorientiert.</p>
+        <p data-i18n="services.consulting.desc">Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams - flexibel, diskret und ergebnisorientiert.</p>
         <ul>
           <li data-i18n="services.consulting.li1">Code Reviews &amp; Architektur-Audits</li>
           <li data-i18n="services.consulting.li2">Team Augmentation</li>
@@ -146,17 +145,23 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 <style>
   /* ── Hero ── */
   .hero {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    min-height: 100dvh;
-    padding: 5rem 1.5rem 2rem;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    height: 100vh;
+    height: 100svh;
+    box-sizing: border-box;
+    padding: 5rem 1.5rem 0;
     text-align: center;
   }
 
   .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
   }
 
   .hero-tag {
@@ -223,12 +228,29 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     transform: translateY(-1px);
   }
 
-  /* ── Trust Bar ── */
+  /* ── Trust Bar (anchored to bottom of hero) ── */
   .trust-bar {
+    width: 100%;
     overflow: hidden;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     padding: 1.25rem 0;
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 8rem,
+      black calc(100% - 8rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent 0%,
+      black 8rem,
+      black calc(100% - 8rem),
+      transparent 100%
+    );
+    mask-repeat: no-repeat;
+    -webkit-mask-repeat: no-repeat;
   }
 
   .trust-track {
@@ -326,7 +348,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .glass-card li::before {
-    content: '—';
+    content: '-';
     position: absolute;
     left: 0;
     color: var(--neon-blue);
