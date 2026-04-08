@@ -6,7 +6,7 @@ const twitter = import.meta.env.PUBLIC_TWITTER_URL || '';
 const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
 ---
 
-<section class="terminal-section" id="terminal">
+<section class="terminal-section reveal" id="terminal">
   <h2 class="section-title" data-i18n="terminal.title">Terminal</h2>
   <p class="section-sub" data-i18n="terminal.sub" data-i18n-html>Type <code>help</code> to explore - or just scroll down.</p>
 
@@ -55,6 +55,10 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     font-weight: 800;
     margin: 0 0 1.75rem;
     letter-spacing: -0.02em;
+    background: linear-gradient(135deg, var(--text-main) 40%, var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .section-sub {
@@ -82,15 +86,22 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
   /* ── Terminal chrome ── */
 
   .terminal-window {
-    background: rgba(10, 10, 15, 0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
     overflow: hidden;
     font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
     font-size: 0.85rem;
     line-height: 1.65;
+    box-shadow: var(--glass-shadow);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .terminal-window:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover);
   }
 
   .terminal-header {
@@ -106,10 +117,18 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     width: 12px;
     height: 12px;
     border-radius: 50%;
+    transition: box-shadow 0.3s ease, transform 0.3s var(--transition-spring);
+    cursor: default;
+  }
+  .dot:hover {
+    transform: scale(1.2);
   }
   .dot.red    { background: #ff5f57; }
+  .dot.red:hover { box-shadow: 0 0 8px rgba(255, 95, 87, 0.6); }
   .dot.yellow { background: #febc2e; }
+  .dot.yellow:hover { box-shadow: 0 0 8px rgba(254, 188, 46, 0.6); }
   .dot.green  { background: #28c840; }
+  .dot.green:hover { box-shadow: 0 0 8px rgba(40, 200, 64, 0.6); }
 
   .terminal-title {
     margin-left: 8px;
@@ -199,6 +218,14 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     font-family: inherit;
     font-size: inherit;
     caret-color: var(--neon-blue);
+  }
+
+  #terminal-input:focus {
+    text-shadow: 0 0 6px rgba(0, 240, 255, 0.3);
+  }
+
+  .prompt {
+    text-shadow: 0 0 6px rgba(138, 43, 226, 0.3);
   }
 </style>
 

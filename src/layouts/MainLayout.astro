@@ -54,6 +54,22 @@ const fullTitle = `${siteName} - ${title}`;
     --neon-blue: #00f0ff;
     --neon-purple: #8a2be2;
     --neon-pink: #ff007f;
+
+    /* ── Glass design tokens ── */
+    --glass-bg: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-border-hover: rgba(255, 255, 255, 0.14);
+    --glass-blur: blur(40px) saturate(1.6);
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    --glass-shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.35), 0 0 40px rgba(0, 240, 255, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    --glass-radius: 20px;
+    --glass-radius-sm: 12px;
+    --transition-spring: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   html {
@@ -159,22 +175,87 @@ const fullTitle = `${siteName} - ${title}`;
   .blob {
     position: absolute;
     border-radius: 50%;
-    filter: blur(150px);
-    opacity: 0.6;
-    animation: float 8s ease-in-out infinite;
+    filter: blur(160px);
+    opacity: 0.4;
+    animation: float 12s ease-in-out infinite;
   }
 
   @keyframes float {
     0% {
-      transform: translateY(0) translateX(0);
+      transform: translateY(0) translateX(0) scale(1);
     }
-    50% {
-      transform: translateY(-30px) translateX(20px);
+    33% {
+      transform: translateY(-25px) translateX(15px) scale(1.03);
+    }
+    66% {
+      transform: translateY(10px) translateX(-10px) scale(0.97);
     }
     100% {
-      transform: translateY(0) translateX(0);
+      transform: translateY(0) translateX(0) scale(1);
     }
   }
+
+  /* ── Global animation keyframes ── */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(28px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      opacity: 0;
+      transform: translateX(-24px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.6; }
+  }
+
+  /* ── Scroll-reveal utility ── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Stagger children when parent has .reveal-stagger */
+  .reveal-stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+  .reveal-stagger > .reveal:nth-child(2) { transition-delay: 80ms; }
+  .reveal-stagger > .reveal:nth-child(3) { transition-delay: 160ms; }
+  .reveal-stagger > .reveal:nth-child(4) { transition-delay: 240ms; }
+  .reveal-stagger > .reveal:nth-child(5) { transition-delay: 320ms; }
+  .reveal-stagger > .reveal:nth-child(6) { transition-delay: 400ms; }
+  .reveal-stagger > .reveal:nth-child(n+7) { transition-delay: 480ms; }
 </style>
 
 <script>
@@ -243,4 +324,30 @@ const fullTitle = `${siteName} - ${title}`;
   );
 
   updateScrollEdges();
+</script>
+
+<script>
+  // ── Global scroll-reveal observer ──
+  const revealObserver = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          revealObserver.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
+  );
+
+  function observeReveals(): void {
+    document.querySelectorAll('.reveal:not(.revealed)').forEach((el) => {
+      revealObserver.observe(el);
+    });
+  }
+
+  observeReveals();
+
+  // Re-observe after Astro page transitions (View Transitions)
+  document.addEventListener('astro:page-load', observeReveals);
 </script>

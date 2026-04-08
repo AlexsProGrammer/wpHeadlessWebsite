@@ -16,10 +16,10 @@
     width: calc(2.1rem + 0.5rem + 2px);
     height: calc(2.1rem + 0.5rem + 2px);
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     color: var(--text-muted);
     font-family: 'Inter', sans-serif;
     font-size: 0.65rem;
@@ -28,13 +28,24 @@
     cursor: pointer;
     display: grid;
     place-items: center;
-    transition: color 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+    transition: color 0.3s var(--transition-spring),
+                background 0.3s var(--transition-spring),
+                box-shadow 0.3s ease,
+                transform 0.3s var(--transition-spring),
+                border-color 0.3s ease;
     padding: 0;
   }
 
   .lang-btn:hover {
     color: var(--text-main);
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 8px rgba(138, 43, 226, 0.14);
+    border-color: var(--glass-border-hover);
+    box-shadow: 0 0 14px rgba(138, 43, 226, 0.25),
+                0 0 4px rgba(0, 240, 255, 0.1);
+    transform: scale(1.08);
+  }
+
+  .lang-btn:active {
+    transform: scale(0.95);
   }
 </style>

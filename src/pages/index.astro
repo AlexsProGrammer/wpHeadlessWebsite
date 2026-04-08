@@ -36,13 +36,13 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   <!-- Hero -->
   <section class="hero" id="hero">
     <div class="hero-inner">
-      <p class="hero-tag" data-i18n="hero.tag">&gt;_ Architecting the modern web.</p>
-      <h1><span id="typewriter-text"></span><span class="cursor">_</span></h1>
-      <p class="hero-sub" data-i18n="hero.sub">Astro &times; Headless WordPress.</p>
-      <a href="#projects" class="cta-btn" data-i18n="hero.cta">Projekte ansehen</a>
+      <p class="hero-tag reveal" data-i18n="hero.tag">&gt;_ Architecting the modern web.</p>
+      <h1 class="reveal" style="transition-delay: 120ms"><span id="typewriter-text"></span><span class="cursor">_</span></h1>
+      <p class="hero-sub reveal" style="transition-delay: 240ms" data-i18n="hero.sub">Astro &times; Headless WordPress.</p>
+      <a href="#projects" class="cta-btn reveal" style="transition-delay: 360ms" data-i18n="hero.cta">Projekte ansehen</a>
     </div>
     <!-- Trust Bar pinned to bottom of hero viewport -->
-    <div class="trust-bar">
+    <div class="trust-bar reveal" style="transition-delay: 480ms">
       <div class="trust-track">
         {Array.from({ length: 5 }).map(() => (
           <>
@@ -64,9 +64,9 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Value Proposition -->
   <section class="value-props">
-    <h2 class="section-title" data-i18n="value.title">Für wen wir arbeiten</h2>
-    <div class="props-grid">
-      <div class="glass-card">
+    <h2 class="section-title reveal" data-i18n="value.title">Für wen wir arbeiten</h2>
+    <div class="props-grid reveal-stagger">
+      <div class="glass-card reveal">
         <h3 data-i18n="value.agencies.title">Agenturen</h3>
         <p data-i18n="value.agencies.desc">Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt - ohne Ihr internes Team zu belasten.</p>
         <ul>
@@ -75,7 +75,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
           <li data-i18n="value.agencies.li3">Skalierbare Kapazitäten on-demand</li>
         </ul>
       </div>
-      <div class="glass-card">
+      <div class="glass-card reveal">
         <h3 data-i18n="value.startups.title">Startups</h3>
         <p data-i18n="value.startups.desc">Von MVP bis Production-Ready - wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
         <ul>
@@ -89,9 +89,9 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Services -->
   <section class="services" id="leistungen">
-    <h2 class="section-title" data-i18n="services.title">Leistungen</h2>
-    <div class="services-grid">
-      <div class="glass-card">
+    <h2 class="section-title reveal" data-i18n="services.title">Leistungen</h2>
+    <div class="services-grid reveal-stagger">
+      <div class="glass-card reveal">
         <h3 data-i18n="services.project.title">Projektgeschäft</h3>
         <p data-i18n="services.project.desc">Ganzheitliche Umsetzung Ihres Software-Projekts - von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
         <ul>
@@ -100,7 +100,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
           <li data-i18n="services.project.li3">Performance-Optimierung &amp; Security Audits</li>
         </ul>
       </div>
-      <div class="glass-card">
+      <div class="glass-card reveal">
         <h3 data-i18n="services.consulting.title">Consulting &amp; White-Label</h3>
         <p data-i18n="services.consulting.desc">Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams - flexibel, diskret und ergebnisorientiert.</p>
         <ul>
@@ -114,11 +114,12 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   <!-- Featured Projects -->
   <section class="featured-projects" id="projects">
-    <h2 class="section-title" data-i18n="projects.title">Ausgewählte Projekte</h2>
-    <p class="section-sub" data-i18n="projects.sub">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
+    <h2 class="section-title reveal" data-i18n="projects.title">Ausgewählte Projekte</h2>
+    <p class="section-sub reveal" style="transition-delay: 80ms" data-i18n="projects.sub">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
     {projectsWithImages.length > 0 ? (
-      <div class="projects-grid">
+      <div class="projects-grid reveal-stagger">
         {projectsWithImages.map(({ project, acf, image }) => (
+          <div class="reveal">
           <ProjectCard
             title={project.title.rendered}
             excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
@@ -129,12 +130,13 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
             githubUrl={acf.github_url || undefined}
             downloadUrl={acf.download_url || undefined}
           />
+          </div>
         ))}
       </div>
     ) : (
       <p class="empty" data-i18n="projects.empty">Keine Projekte gefunden.</p>
     )}
-    <a href="/projects" class="view-all" data-i18n="projects.viewAll">Alle Projekte ansehen →</a>
+    <a href="/projects" class="view-all reveal" data-i18n="projects.viewAll">Alle Projekte ansehen →</a>
   </section>
 
   <!-- Terminal Easter Egg -->
@@ -165,10 +167,17 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   .hero-tag {
     font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
-    font-size: 1.05rem;
+    font-size: 1rem;
     color: var(--neon-blue);
     margin: 0 0 1.5rem;
     letter-spacing: 0.04em;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(0, 240, 255, 0.12);
+    border-radius: 999px;
+    padding: 0.45rem 1.2rem;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    text-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
   }
 
   .hero h1 {
@@ -195,6 +204,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     display: inline-block;
     color: var(--neon-blue);
     -webkit-text-fill-color: var(--neon-blue);
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
     animation: blink 0.8s step-end infinite;
   }
 
@@ -213,26 +223,37 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   .cta-btn {
     display: inline-block;
     padding: 0.9rem 2.5rem;
-    background: var(--text-main);
+    background: rgba(255, 255, 255, 0.92);
     color: var(--bg-dark);
     text-decoration: none;
     border-radius: 999px;
     font-weight: 700;
     font-size: 1rem;
-    transition: box-shadow 0.25s ease, transform 0.15s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition:
+      box-shadow 0.35s var(--transition-spring),
+      transform 0.25s var(--transition-spring),
+      background 0.25s ease;
   }
 
   .cta-btn:hover {
-    box-shadow: 0 0 40px rgba(255, 255, 255, 0.15);
-    transform: translateY(-1px);
+    background: #ffffff;
+    box-shadow:
+      0 0 40px rgba(255, 255, 255, 0.18),
+      0 0 80px rgba(0, 240, 255, 0.08);
+    transform: translateY(-2px);
   }
 
-  /* ── Trust Bar (anchored to bottom of hero) ── */
+  .cta-btn:active {
+    transform: translateY(0) scale(0.98);
+  }
+
+  /* ── Trust Bar ── */
   .trust-bar {
     width: 100%;
     overflow: hidden;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--glass-border);
     padding: 1.25rem 0;
     -webkit-mask-image: linear-gradient(
       to right,
@@ -260,11 +281,17 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .trust-track span {
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-weight: 500;
-    color: var(--text-muted);
+    color: rgba(255, 255, 255, 0.35);
     white-space: nowrap;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.05em;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+  }
+
+  .trust-track span:hover {
+    color: var(--text-main);
+    text-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
   }
 
   @keyframes marquee {
@@ -278,6 +305,10 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     font-weight: 800;
     margin: 0 0 1.75rem;
     letter-spacing: -0.02em;
+    background: linear-gradient(90deg, var(--text-main), rgba(255, 255, 255, 0.7));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .section-sub {
@@ -303,26 +334,64 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .glass-card {
-    background: rgba(20, 20, 25, 0.4);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 16px;
+    position: relative;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
     padding: 2rem;
-    transition: box-shadow 0.3s ease, transform 0.2s ease, border-color 0.3s ease;
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
+    transition:
+      box-shadow 0.4s var(--transition-spring),
+      transform 0.4s var(--transition-spring),
+      border-color 0.4s ease;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--glass-radius);
+    opacity: 0;
+    z-index: -1;
+    background: conic-gradient(
+      from 180deg,
+      rgba(0, 240, 255, 0.1),
+      rgba(138, 43, 226, 0.1),
+      rgba(255, 0, 127, 0.06),
+      rgba(0, 240, 255, 0.1)
+    );
+    filter: blur(20px);
+    transition: opacity 0.5s ease;
+  }
+
+  .glass-card:hover::before {
+    opacity: 1;
   }
 
   .glass-card:hover {
-    box-shadow: 0 0 30px rgba(138, 43, 226, 0.12);
-    border-color: rgba(255, 255, 255, 0.12);
-    transform: translateY(-3px);
+    box-shadow: var(--glass-shadow-hover);
+    border-color: var(--glass-border-hover);
+    transform: translateY(-5px) scale(1.005);
   }
 
   .glass-card h3 {
     font-size: 1.25rem;
     margin: 0 0 0.75rem;
-    color: var(--text-main);
     font-weight: 700;
+    background: linear-gradient(90deg, var(--text-main), var(--neon-blue));
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: background-position 0.4s ease;
+  }
+
+  .glass-card:hover h3 {
+    background-position: 0% 100%;
   }
 
   .glass-card p {
@@ -340,17 +409,27 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
   .glass-card li {
     position: relative;
-    padding-left: 1.25rem;
+    padding-left: 1.4rem;
     font-size: 0.9rem;
     color: var(--text-muted);
-    line-height: 1.8;
+    line-height: 1.85;
+    transition: color 0.2s ease;
+  }
+
+  .glass-card:hover li {
+    color: rgba(255, 255, 255, 0.7);
   }
 
   .glass-card li::before {
-    content: '-';
+    content: '';
     position: absolute;
     left: 0;
-    color: var(--neon-blue);
+    top: 0.65em;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--neon-blue);
+    box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
   }
 
   /* ── Featured Projects ── */
@@ -366,16 +445,53 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   }
 
   .view-all {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 2rem;
     color: var(--text-muted);
     font-weight: 600;
+    font-size: 0.95rem;
     text-decoration: none;
-    transition: color 0.2s ease;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition:
+      color 0.3s ease,
+      border-color 0.3s ease,
+      background 0.3s ease,
+      box-shadow 0.3s ease,
+      transform 0.2s ease,
+      gap 0.3s ease;
   }
 
   .view-all:hover {
     color: var(--text-main);
+    border-color: var(--glass-border-hover);
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.08);
+    transform: translateX(4px);
+    gap: 0.75rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 480px) {
+    .hero-tag {
+      font-size: 0.85rem;
+      padding: 0.35rem 1rem;
+    }
+
+    .cta-btn {
+      padding: 0.8rem 2rem;
+      font-size: 0.92rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+    }
   }
 </style>
 

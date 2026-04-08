@@ -16,14 +16,15 @@ const projectsWithImages = await Promise.all(
 
 <MainLayout title="Projects" activeNav="work">
   <section class="projects-page">
-    <a href="/#projects" class="back-link" data-i18n="projects.page.back">&larr; Zurück zur Startseite</a>
+    <a href="/#projects" class="back-link reveal" data-i18n="projects.page.back">&larr; Zurück zur Startseite</a>
 
-    <div class="page-header">
+    <div class="page-header reveal" style="transition-delay: 80ms">
       <h1 data-i18n="projects.page.title">Ausgewählte Projekte</h1>
       <p class="subtitle" data-i18n="projects.page.subtitle">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
     </div>
-    <div class="projects-grid">
+    <div class="projects-grid reveal-stagger">
       {projectsWithImages.map(({ project, acf, image }) => (
+          <div class="reveal">
           <ProjectCard
             title={project.title.rendered}
             excerpt={project.excerpt?.rendered ?? project.content?.rendered ?? ''}
@@ -34,6 +35,7 @@ const projectsWithImages = await Promise.all(
             githubUrl={acf.github_url || undefined}
             downloadUrl={acf.download_url || undefined}
           />
+          </div>
       ))}
     </div>
   </section>
@@ -51,25 +53,38 @@ const projectsWithImages = await Promise.all(
   }
 
   .back-link {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
     margin-bottom: 2.5rem;
     font-size: 0.9rem;
-    transition: color 0.2s ease;
+    transition: color 0.25s ease, gap 0.3s var(--transition-spring);
   }
 
   .back-link:hover {
     color: var(--text-main);
+    gap: 0.6rem;
   }
 
   .page-header h1 {
     font-size: 2.75rem;
     font-weight: 800;
     margin: 0 0 0.5rem;
-    color: var(--text-main);
     letter-spacing: -0.02em;
+    background: linear-gradient(90deg, var(--text-main), var(--neon-blue));
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: background-position 0.6s ease;
+  }
+
+  .page-header:hover h1 {
+    background-position: 0% 100%;
   }
 
   .subtitle {

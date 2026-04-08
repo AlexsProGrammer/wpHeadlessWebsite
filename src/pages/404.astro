@@ -5,13 +5,15 @@ Astro.response.status = 404;
 ---
 
 <MainLayout title="404" activeNav="work">
-  <section class="not-found">
-    <p class="eyebrow">404</p>
-    <h1>Projekt nicht gefunden.</h1>
-    <p class="copy">Der angeforderte Eintrag existiert nicht oder ist nicht mehr verfugbar.</p>
-    <div class="actions">
-      <a href="/projects" class="btn btn-primary">Alle Projekte</a>
-      <a href="/" class="btn btn-secondary">Zur Startseite</a>
+  <section class="not-found reveal">
+    <div class="glass-card">
+      <p class="eyebrow">ERROR</p>
+      <h1>404</h1>
+      <p class="copy">Der angeforderte Eintrag existiert nicht oder ist nicht mehr verfügbar.</p>
+      <div class="actions">
+        <a href="/projects" class="btn btn-primary">Alle Projekte</a>
+        <a href="/" class="btn btn-secondary">Zur Startseite</a>
+      </div>
     </div>
   </section>
 </MainLayout>
@@ -28,20 +30,57 @@ Astro.response.status = 404;
     margin: 0 auto;
   }
 
+  .glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
+    box-shadow: var(--glass-shadow);
+    padding: 3.5rem 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.03), transparent 40%, rgba(138, 43, 226, 0.03));
+    pointer-events: none;
+  }
+
+  .glass-card:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover);
+  }
+
   .eyebrow {
     margin: 0;
     color: var(--neon-blue);
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 700;
     letter-spacing: 0.28em;
     text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
   }
 
   h1 {
     margin: 0;
-    font-size: clamp(2.5rem, 7vw, 4.5rem);
+    font-size: clamp(4rem, 12vw, 8rem);
     line-height: 1;
     letter-spacing: -0.04em;
+    background: linear-gradient(135deg, var(--text-main) 20%, var(--neon-blue) 50%, var(--neon-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 0 30px rgba(0, 240, 255, 0.2));
+    animation: pulseGlow 4s ease-in-out infinite;
   }
 
   .copy {
@@ -49,6 +88,7 @@ Astro.response.status = 404;
     color: var(--text-muted);
     font-size: 1.05rem;
     line-height: 1.7;
+    max-width: 420px;
   }
 
   .actions {
@@ -68,28 +108,47 @@ Astro.response.status = 404;
     border-radius: 999px;
     text-decoration: none;
     font-weight: 700;
-    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.3s var(--transition-spring),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease;
   }
 
   .btn:hover {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
   .btn-primary {
     background: var(--text-main);
     color: var(--bg-dark);
-    box-shadow: 0 0 24px rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 24px rgba(255, 255, 255, 0.12),
+                0 0 48px rgba(0, 240, 255, 0.08);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 32px rgba(255, 255, 255, 0.2),
+                0 0 64px rgba(0, 240, 255, 0.15);
   }
 
   .btn-secondary {
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid var(--glass-border);
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.15);
   }
 
   @media (max-width: 640px) {
     .not-found {
       min-height: 60vh;
+    }
+
+    .glass-card {
+      padding: 2.5rem 1.5rem;
     }
 
     .actions {
@@ -98,6 +157,9 @@ Astro.response.status = 404;
 
     .btn {
       width: 100%;
+    }
+  }
+</style>
     }
   }
 </style>

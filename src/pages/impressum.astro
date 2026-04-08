@@ -3,7 +3,7 @@ import MainLayout from '../layouts/MainLayout.astro';
 ---
 
 <MainLayout title="Impressum">
-  <section class="legal-page">
+  <section class="legal-page reveal">
     <h1 data-i18n="impressum.title">Impressum</h1>
 
     <h2 data-i18n="impressum.1.title">Angaben gemäß § 5 TMG</h2>
@@ -62,18 +62,24 @@ import MainLayout from '../layouts/MainLayout.astro';
     font-size: 2.25rem;
     margin: 0 0 2.5rem;
     color: var(--text-main);
+    background: linear-gradient(135deg, var(--text-main) 40%, var(--neon-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .legal-page h2 {
     font-size: 1.25rem;
     margin: 2rem 0 0.75rem;
     color: var(--text-main);
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
 
   .legal-page h3 {
     font-size: 1.05rem;
     margin: 1.5rem 0 0.5rem;
-    color: var(--text-main);
+    color: var(--neon-blue);
   }
 
   .legal-page p {
@@ -81,5 +87,20 @@ import MainLayout from '../layouts/MainLayout.astro';
     line-height: 1.75;
     margin: 0 0 1rem;
     font-size: 0.95rem;
+  }
+
+  .legal-page :global(strong) {
+    color: var(--text-main);
+    font-weight: 600;
+  }
+
+  .legal-page :global(a) {
+    color: var(--neon-blue);
+    text-decoration: none;
+    transition: text-shadow 0.3s ease;
+  }
+
+  .legal-page :global(a:hover) {
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
   }
 </style>
