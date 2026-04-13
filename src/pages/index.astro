@@ -1,6 +1,8 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import SolarLoader from '../components/SolarLoader.astro';
+import SupernovaHero from '../components/SupernovaHero.astro';
+import SlidingBento from '../components/SlidingBento.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TerminalSection from '../components/TerminalFooter.astro';
 import { getAllProjects, getProjectImage } from '../lib/api';
@@ -35,84 +37,10 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 
 <MainLayout title="Home">
   <SolarLoader />
-  <!-- Hero -->
-  <section class="hero" id="hero">
-    <div class="hero-inner">
-      <p class="hero-tag reveal" data-i18n="hero.tag">&gt;_ Architecting the modern web.</p>
-      <h1 class="reveal" style="transition-delay: 120ms"><span id="typewriter-text"></span><span class="cursor">_</span></h1>
-      <p class="hero-sub reveal" style="transition-delay: 240ms" data-i18n="hero.sub">Astro &times; Headless WordPress.</p>
-      <a href="#projects" class="cta-btn reveal" style="transition-delay: 360ms" data-i18n="hero.cta">Projekte ansehen</a>
-    </div>
-    <!-- Trust Bar pinned to bottom of hero viewport -->
-    <div class="trust-bar reveal" style="transition-delay: 480ms">
-      <div class="trust-track">
-        {Array.from({ length: 5 }).map(() => (
-          <>
-            <span>TypeScript</span>
-            <span>React</span>
-            <span>Next.js</span>
-            <span>Astro</span>
-            <span>Node.js</span>
-            <span>Python</span>
-            <span>PostgreSQL</span>
-            <span>Docker</span>
-            <span>AWS</span>
-            <span>WordPress</span>
-          </>
-        ))}
-      </div>
-    </div>
-  </section>
+  <SupernovaHero />
 
-  <!-- Value Proposition -->
-  <section class="value-props">
-    <h2 class="section-title reveal" data-i18n="value.title">Für wen wir arbeiten</h2>
-    <div class="props-grid reveal-stagger">
-      <div class="glass-card reveal">
-        <h3 data-i18n="value.agencies.title">Agenturen</h3>
-        <p data-i18n="value.agencies.desc">Sie brauchen einen verlässlichen Entwicklungspartner, der komplexe Kundenprojekte termingerecht umsetzt - ohne Ihr internes Team zu belasten.</p>
-        <ul>
-          <li data-i18n="value.agencies.li1">White-Label Entwicklung</li>
-          <li data-i18n="value.agencies.li2">Nahtlose Integration in Ihre Workflows</li>
-          <li data-i18n="value.agencies.li3">Skalierbare Kapazitäten on-demand</li>
-        </ul>
-      </div>
-      <div class="glass-card reveal">
-        <h3 data-i18n="value.startups.title">Startups</h3>
-        <p data-i18n="value.startups.desc">Von MVP bis Production-Ready - wir helfen Ihnen, schnell am Markt zu sein mit einem technischen Fundament, das mitwächst.</p>
-        <ul>
-          <li data-i18n="value.startups.li1">Rapid Prototyping &amp; MVP Development</li>
-          <li data-i18n="value.startups.li2">Technische Architekturberatung</li>
-          <li data-i18n="value.startups.li3">Langfristige Wartung &amp; Weiterentwicklung</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <!-- Services -->
-  <section class="services" id="leistungen">
-    <h2 class="section-title reveal" data-i18n="services.title">Leistungen</h2>
-    <div class="services-grid reveal-stagger">
-      <div class="glass-card reveal">
-        <h3 data-i18n="services.project.title">Projektgeschäft</h3>
-        <p data-i18n="services.project.desc">Ganzheitliche Umsetzung Ihres Software-Projekts - von der Anforderungsanalyse über die Entwicklung bis zum Go-Live und darüber hinaus.</p>
-        <ul>
-          <li data-i18n="services.project.li1">Fullstack Web-Applikationen</li>
-          <li data-i18n="services.project.li2">Headless CMS &amp; API-Entwicklung</li>
-          <li data-i18n="services.project.li3">Performance-Optimierung &amp; Security Audits</li>
-        </ul>
-      </div>
-      <div class="glass-card reveal">
-        <h3 data-i18n="services.consulting.title">Consulting &amp; White-Label</h3>
-        <p data-i18n="services.consulting.desc">Strategische Beratung und operative Unterstützung für Ihre bestehenden Teams - flexibel, diskret und ergebnisorientiert.</p>
-        <ul>
-          <li data-i18n="services.consulting.li1">Code Reviews &amp; Architektur-Audits</li>
-          <li data-i18n="services.consulting.li2">Team Augmentation</li>
-          <li data-i18n="services.consulting.li3">Tech Stack Migration &amp; Modernisierung</li>
-        </ul>
-      </div>
-    </div>
-  </section>
+  <!-- Sliding Bento (Identity · Tech Stack · Backend · Frontend) -->
+  <SlidingBento />
 
   <!-- Featured Projects -->
   <section class="featured-projects" id="projects">

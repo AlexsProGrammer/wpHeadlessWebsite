@@ -1,0 +1,914 @@
+---
+// SupernovaHero — 300vh sticky-scroll constellation canvas.
+// Canvas-only (no image frames). The supernova core star sits at the
+// centre of the "CODE" letter constellation layout (C · O · D · E).
+// Scroll drives an explosion that scatters all stars outward, then
+// the canvas fades out handing off to the content below.
+---
+
+<!-- ═══════════════════════════════════════════════════════════
+     HERO SCROLL SECTION — 300vh scroll container
+     ═══════════════════════════════════════════════════════════ -->
+<div id="hero-scroll-container">
+  <div id="hero-sticky-viewport">
+
+    <!-- Interactive constellation canvas (z-index 5) -->
+    <canvas id="constellation-canvas" aria-hidden="true"></canvas>
+
+    <!-- Scroll hint -->
+    <p class="scroll-hint" id="scroll-hint">
+      <span class="scroll-hint-arrow">&#8595;</span>
+      <span data-i18n="hero.scrollHint">scroll to ignite</span>
+    </p>
+  </div>
+</div>
+
+<style>
+  /* ── Scroll container ───────────────────────────────────────── */
+  #hero-scroll-container {
+    height: 200vh;
+  }
+
+  /* ── Sticky viewport ────────────────────────────────────────── */
+  #hero-sticky-viewport {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    background: #000000;
+  }
+
+  /* ── Canvas ─────────────────────────────────────────────────── */
+  #constellation-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    z-index: 5;
+  }
+
+  /* ── Scroll hint ────────────────────────────────────────────── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    animation: hintPulse 2.4s ease-in-out infinite;
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .scroll-hint-arrow {
+    font-size: 1.3rem;
+    animation: hintBounce 2s ease-in-out infinite;
+  }
+
+  @keyframes hintBounce {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(6px); }
+  }
+
+  @keyframes hintPulse {
+    0%, 100% { opacity: 0.3; }
+    50%       { opacity: 0.8; }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // ═══════════════════════════════════════════════════════════════
+  //  1. CANVAS SETUP
+  // ═══════════════════════════════════════════════════════════════
+
+  const canvas = document.getElementById("constellation-canvas") as HTMLCanvasElement;
+  const ctx = canvas.getContext("2d")!;
+
+  let cW = 0, cH = 0, cDpr = 1;
+
+  function resizeCanvas() {
+    cDpr = Math.min(window.devicePixelRatio || 1, 2);
+    cW = canvas.clientWidth;
+    cH = canvas.clientHeight;
+    canvas.width = cW * cDpr;
+    canvas.height = cH * cDpr;
+    ctx.setTransform(cDpr, 0, 0, cDpr, 0, 0);
+  }
+
+  const ro = new ResizeObserver(resizeCanvas);
+  ro.observe(canvas);
+  resizeCanvas();
+
+  // ═══════════════════════════════════════════════════════════════
+  //  2. MOUSE TRACKING
+  // ═══════════════════════════════════════════════════════════════
+
+  const mouse = { x: -9999, y: -9999, active: false };
+  const smoothMouse = { x: -9999, y: -9999 };
+
+  const heroViewport = document.getElementById("hero-sticky-viewport")!;
+  heroViewport.addEventListener("mousemove", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+    mouse.active = true;
+  });
+  heroViewport.addEventListener("mouseleave", () => { mouse.active = false; });
+  heroViewport.addEventListener("touchmove", (e) => {
+    const t = e.touches[0];
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = t.clientX - rect.left;
+    mouse.y = t.clientY - rect.top;
+    mouse.active = true;
+  }, { passive: true });
+  heroViewport.addEventListener("touchend", () => { mouse.active = false; });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  3. NOISE FUNCTIONS
+  // ═══════════════════════════════════════════════════════════════
+
+  function hash2d(ix: number, iy: number): number {
+    let h = ix * 374761393 + iy * 668265263;
+    h = (h ^ (h >> 13)) * 1274126177;
+    h = h ^ (h >> 16);
+    return (h & 0x7fffffff) / 0x7fffffff;
+  }
+
+  function noise2d(x: number, y: number): number {
+    const ix = Math.floor(x), iy = Math.floor(y);
+    const fx = x - ix, fy = y - iy;
+    const ux = fx * fx * (3 - 2 * fx);
+    const uy = fy * fy * (3 - 2 * fy);
+    const a = hash2d(ix, iy),     b = hash2d(ix + 1, iy);
+    const c = hash2d(ix, iy + 1), d = hash2d(ix + 1, iy + 1);
+    return a + (b - a) * ux + (c - a) * uy + (a - b - c + d) * ux * uy;
+  }
+
+  function fbm(x: number, y: number, octaves: number): number {
+    let val = 0, amp = 0.5, freq = 1;
+    for (let i = 0; i < octaves; i++) {
+      val += amp * noise2d(x * freq, y * freq);
+      amp *= 0.5;
+      freq *= 2.0;
+    }
+    return val;
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  4. CONSTANTS
+  // ═══════════════════════════════════════════════════════════════
+
+  const PULSE_SPEED   = 0.0008;
+  const DRIFT_SPEED   = 0.00008;
+  const MOUSE_RADIUS  = 250;
+  const MOUSE_PULL    = 25;
+  const REVEAL_RADIUS = 220;
+  const BRIGHT_BOOST  = 3.5;
+  const CORE_ID       = -2; // special id for the supernova core star
+
+  // ═══════════════════════════════════════════════════════════════
+  //  5. LETTER CONSTELLATION TEMPLATES (C, D, E)
+  //  Normalised 0-1 coordinates. "O" is a single core star, not a letter.
+  // ═══════════════════════════════════════════════════════════════
+
+  interface ConstellationTemplate {
+    name: string;
+    stars: [number, number, number][]; // [x, y, magnitude]
+    edges: [number, number][];
+  }
+
+  const LETTER_C: ConstellationTemplate = {
+    name: "C",
+    stars: [
+      [0.85, 0.10, 0.8],  // 0 top-right tip
+      [0.55, 0.00, 0.7],  // 1 top arc
+      [0.20, 0.08, 0.6],  // 2 upper left
+      [0.00, 0.30, 0.7],  // 3 left upper curve
+      [0.00, 0.70, 0.7],  // 4 left lower curve
+      [0.20, 0.92, 0.6],  // 5 lower left
+      [0.55, 1.00, 0.7],  // 6 bottom arc
+      [0.85, 0.90, 0.8],  // 7 bottom-right tip
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7],
+    ],
+  };
+
+  const LETTER_D: ConstellationTemplate = {
+    name: "D",
+    stars: [
+      [0.00, 0.00, 0.8],  // 0 top-left
+      [0.50, 0.00, 0.7],  // 1 top-right
+      [0.85, 0.20, 0.6],  // 2 upper curve
+      [1.00, 0.50, 0.7],  // 3 right apex
+      [0.85, 0.80, 0.6],  // 4 lower curve
+      [0.50, 1.00, 0.7],  // 5 bottom-right
+      [0.00, 1.00, 0.8],  // 6 bottom-left
+    ],
+    edges: [
+      [0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 0],
+    ],
+  };
+
+  const LETTER_E: ConstellationTemplate = {
+    name: "E",
+    stars: [
+      [0.00, 0.00, 0.8],  // 0 top-left
+      [1.00, 0.00, 0.7],  // 1 top-right
+      [0.00, 0.48, 0.7],  // 2 mid-left
+      [0.75, 0.48, 0.6],  // 3 mid-right
+      [0.00, 1.00, 0.8],  // 4 bottom-left
+      [1.00, 1.00, 0.7],  // 5 bottom-right
+    ],
+    edges: [
+      [0, 1], [0, 2], [2, 3], [2, 4], [4, 5],
+    ],
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  //  6. BACKGROUND CONSTELLATION TEMPLATES (real star patterns)
+  // ═══════════════════════════════════════════════════════════════
+
+  const BG_TEMPLATES: ConstellationTemplate[] = [
+    { name: "Orion",           stars: [[0.45,0.0,0.9],[0.85,0.05,0.8],[0.35,0.95,0.95],[0.78,0.9,0.7],[0.55,0.4,0.6],[0.65,0.42,0.6],[0.75,0.44,0.6],[0.60,0.65,0.4],[0.30,0.25,0.35],[0.20,0.45,0.3]], edges: [[0,4],[1,6],[4,5],[5,6],[4,2],[6,3],[5,7],[0,8],[8,9]] },
+    { name: "BigDipper",       stars: [[0.0,0.55,0.8],[0.18,0.40,0.7],[0.35,0.30,0.7],[0.55,0.28,0.7],[0.60,0.10,0.8],[0.80,0.15,0.75],[0.78,0.42,0.6]],  edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3]] },
+    { name: "Cassiopeia",      stars: [[0.0,0.35,0.75],[0.22,0.05,0.8],[0.45,0.30,0.85],[0.68,0.0,0.75],[0.90,0.25,0.8]], edges: [[0,1],[1,2],[2,3],[3,4]] },
+    { name: "Cygnus",          stars: [[0.50,0.0,0.9],[0.48,0.35,0.6],[0.50,0.65,0.5],[0.50,1.0,0.85],[0.15,0.50,0.7],[0.85,0.50,0.7],[0.32,0.42,0.45],[0.68,0.42,0.45]], edges: [[0,1],[1,2],[2,3],[4,6],[6,1],[1,7],[7,5]] },
+    { name: "Lyra",            stars: [[0.50,0.0,0.95],[0.35,0.40,0.5],[0.65,0.40,0.5],[0.30,0.75,0.45],[0.70,0.75,0.45],[0.50,1.0,0.4]], edges: [[0,1],[0,2],[1,3],[2,4],[3,5],[4,5]] },
+    { name: "Crux",            stars: [[0.50,0.0,0.85],[0.50,1.0,0.9],[0.10,0.50,0.75],[0.90,0.50,0.75],[0.60,0.65,0.35]], edges: [[0,1],[2,3]] },
+    { name: "CoronaBorealis",  stars: [[0.0,0.60,0.55],[0.15,0.25,0.6],[0.35,0.05,0.65],[0.55,0.00,0.8],[0.75,0.10,0.6],[0.90,0.30,0.55],[1.0,0.60,0.5]], edges: [[0,1],[1,2],[2,3],[3,4],[4,5],[5,6]] },
+    { name: "Triangulum",      stars: [[0.50,0.0,0.7],[0.05,1.0,0.65],[0.95,0.85,0.6]], edges: [[0,1],[1,2],[2,0]] },
+    { name: "Aquila",          stars: [[0.50,0.0,0.55],[0.45,0.25,0.6],[0.50,0.45,0.92],[0.30,0.50,0.55],[0.70,0.50,0.55],[0.48,0.70,0.45],[0.45,0.95,0.4]], edges: [[0,1],[1,2],[3,2],[2,4],[2,5],[5,6]] },
+  ];
+
+  // ═══════════════════════════════════════════════════════════════
+  //  7. DATA STRUCTURES
+  // ═══════════════════════════════════════════════════════════════
+
+  interface CNode {
+    x: number; y: number;
+    baseX: number; baseY: number;
+    noiseOffX: number; noiseOffY: number;
+    radius: number;
+    pulsePhase: number;
+    hue: number;
+    baseBrightness: number;
+    currentBrightness: number;
+    hidden: boolean;
+    displaceX: number; displaceY: number;
+    revealAlpha: number;
+    constellationId: number; // >=0 = letter/bg constellation, -1 = scatter/hidden, -2 = core
+  }
+
+  interface ConstellationEdge {
+    a: number; b: number;
+    constellationId: number;
+  }
+
+  interface Nebula {
+    x: number; y: number;
+    rx: number; ry: number;
+    rotation: number;
+    hue: number; hue2: number;
+    alpha: number;
+    phase: number;
+    speed: number;
+  }
+
+  const nodes: CNode[] = [];
+  const constellationEdges: ConstellationEdge[] = [];
+  const nebulae: Nebula[] = [];
+
+  let SCATTER_COUNT = 200;
+  let HIDDEN_COUNT  = 80;
+  let coreNodeIndex = -1;
+
+  function updateStarCounts() {
+    const w = window.innerWidth;
+    if (w >= 1024)     { SCATTER_COUNT = 280; HIDDEN_COUNT = 100; }
+    else if (w >= 768) { SCATTER_COUNT = 140; HIDDEN_COUNT = 60;  }
+    else               { SCATTER_COUNT = 80;  HIDDEN_COUNT = 35;  }
+  }
+  updateStarCounts();
+
+  // ═══════════════════════════════════════════════════════════════
+  //  8. INIT NODES — Place C, core, D, E + background + scatter
+  // ═══════════════════════════════════════════════════════════════
+
+  interface PlacedConstellation {
+    originX: number; originY: number;
+    scale: number; rotation: number;
+    starOffset: number;
+    hue: number;
+  }
+
+  const placedConstellations: PlacedConstellation[] = [];
+
+  function placeLetterOnCanvas(
+    tmpl: ConstellationTemplate,
+    xStart: number,
+    xEnd: number,
+    constellationId: number,
+    hue: number,
+  ) {
+    const letterW = (xEnd - xStart) * cW;
+    const letterH = letterW * 1.3;
+    const centerX = (xStart + xEnd) * 0.5 * cW;
+    const centerY = cH * 0.5;
+    const startIdx = nodes.length;
+
+    for (let si = 0; si < tmpl.stars.length; si++) {
+      const [sx, sy, mag] = tmpl.stars[si];
+      const wx = centerX + (sx - 0.5) * letterW;
+      const wy = centerY + (sy - 0.5) * letterH;
+
+      nodes.push({
+        x: wx, y: wy, baseX: wx, baseY: wy,
+        noiseOffX: Math.random() * 1000,
+        noiseOffY: Math.random() * 1000,
+        radius: 1.0 + mag * 2.0,
+        pulsePhase: Math.random() * Math.PI * 2,
+        hue: hue + (Math.random() - 0.5) * 60,
+        baseBrightness: 0.55 + mag * 0.40,
+        currentBrightness: 0,
+        hidden: false,
+        displaceX: 0, displaceY: 0,
+        revealAlpha: 1,
+        constellationId,
+      });
+    }
+
+    for (const [ea, eb] of tmpl.edges) {
+      constellationEdges.push({ a: startIdx + ea, b: startIdx + eb, constellationId });
+    }
+  }
+
+  function placeBgConstellations() {
+    placedConstellations.length = 0;
+
+    const area = cW * cH;
+    const targetCount = Math.max(4, Math.min(10, Math.floor(area / 120000)));
+
+    const templateOrder = BG_TEMPLATES.map((_, i) => i);
+    for (let i = templateOrder.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [templateOrder[i], templateOrder[j]] = [templateOrder[j], templateOrder[i]];
+    }
+
+    // Exclusion zone around the CODE text (central band)
+    const excludeLeft   = cW * 0.15;
+    const excludeRight  = cW * 0.85;
+    const excludeTop    = cH * 0.28;
+    const excludeBottom = cH * 0.72;
+
+    const placed: { cx: number; cy: number; r: number }[] = [];
+    const padding = 50;
+    let conId = 10;
+
+    for (
+      let attempt = 0;
+      attempt < targetCount * 5 && placedConstellations.length < targetCount;
+      attempt++
+    ) {
+      const ti   = templateOrder[placedConstellations.length % templateOrder.length];
+      const tmpl = BG_TEMPLATES[ti];
+      const starCount = tmpl.stars.length;
+
+      const baseScale = Math.min(cW, cH) * 0.10;
+      const scale     = baseScale * (0.6 + starCount * 0.05) + Math.random() * baseScale * 0.3;
+      const rotation  = Math.random() * Math.PI * 2;
+
+      const margin = scale * 0.5 + padding;
+      const ox = margin + Math.random() * (cW - margin * 2);
+      const oy = margin + Math.random() * (cH - margin * 2);
+
+      // Skip if in exclusion zone
+      if (ox > excludeLeft && ox < excludeRight && oy > excludeTop && oy < excludeBottom) continue;
+
+      let overlaps = false;
+      for (const p of placed) {
+        const ddx = ox - p.cx, ddy = oy - p.cy;
+        const minDist = scale * 0.5 + p.r + padding;
+        if (ddx * ddx + ddy * ddy < minDist * minDist) { overlaps = true; break; }
+      }
+      if (overlaps) continue;
+
+      placed.push({ cx: ox, cy: oy, r: scale * 0.5 });
+      const bgHue     = 210 + Math.random() * 70;
+      const starOffset = nodes.length;
+      const cosR      = Math.cos(rotation), sinR = Math.sin(rotation);
+
+      for (let si = 0; si < tmpl.stars.length; si++) {
+        const [sx, sy, mag] = tmpl.stars[si];
+        const lx = (sx - 0.5) * scale, ly = (sy - 0.5) * scale;
+        const wx = ox + lx * cosR - ly * sinR;
+        const wy = oy + lx * sinR + ly * cosR;
+
+        nodes.push({
+          x: wx, y: wy, baseX: wx, baseY: wy,
+          noiseOffX: Math.random() * 1000, noiseOffY: Math.random() * 1000,
+          radius: 1.0 + mag * 2.0,
+          pulsePhase: Math.random() * Math.PI * 2,
+          hue: bgHue + (Math.random() - 0.5) * 30,
+          baseBrightness: 0.35 + mag * 0.45,
+          currentBrightness: 0,
+          hidden: false,
+          displaceX: 0, displaceY: 0,
+          revealAlpha: 1,
+          constellationId: conId,
+        });
+      }
+
+      for (const [ea, eb] of tmpl.edges) {
+        constellationEdges.push({ a: starOffset + ea, b: starOffset + eb, constellationId: conId });
+      }
+
+      placedConstellations.push({
+        originX: ox, originY: oy,
+        scale, rotation, starOffset, hue: bgHue,
+      });
+      conId++;
+    }
+  }
+
+  let coreScreenX = 0, coreScreenY = 0;
+
+  function initNodes() {
+    nodes.length = 0;
+    constellationEdges.length = 0;
+
+    // Letter constellations: C at 17.5-29.5%, core (O) at ~40.5%, D at 51.5-63.5%, E at 70.5-82.5%
+    placeLetterOnCanvas(LETTER_C, 0.175, 0.295, 0, 230);
+
+    // Supernova Core Star (the "O")
+    coreScreenX = cW * 0.405;
+    coreScreenY = cH * 0.5;
+    coreNodeIndex = nodes.length;
+    nodes.push({
+      x: coreScreenX, y: coreScreenY,
+      baseX: coreScreenX, baseY: coreScreenY,
+      noiseOffX: Math.random() * 1000,
+      noiseOffY: Math.random() * 1000,
+      radius: 5,
+      pulsePhase: 0,
+      hue: 45,
+      baseBrightness: 1.0,
+      currentBrightness: 0,
+      hidden: false,
+      displaceX: 0, displaceY: 0,
+      revealAlpha: 1,
+      constellationId: CORE_ID,
+    });
+
+    placeLetterOnCanvas(LETTER_D, 0.515, 0.635, 1, 240);
+    placeLetterOnCanvas(LETTER_E, 0.705, 0.825, 2, 250);
+
+    // Background real-constellation patterns
+    placeBgConstellations();
+
+    // Scatter stars
+    for (let i = 0; i < SCATTER_COUNT; i++) {
+      const mag = Math.random();
+      const bx = Math.random() * cW, by = Math.random() * cH;
+      nodes.push({
+        x: bx, y: by, baseX: bx, baseY: by,
+        noiseOffX: Math.random() * 1000, noiseOffY: Math.random() * 1000,
+        radius: 0.4 + mag * 1.2,
+        pulsePhase: Math.random() * Math.PI * 2,
+        hue: 200 + Math.random() * 80,
+        baseBrightness: 0.12 + mag * 0.25,
+        currentBrightness: 0,
+        hidden: false,
+        displaceX: 0, displaceY: 0,
+        revealAlpha: 1,
+        constellationId: -1,
+      });
+    }
+
+    // Hidden stars (mouse-reveal only)
+    for (let i = 0; i < HIDDEN_COUNT; i++) {
+      const bx = Math.random() * cW, by = Math.random() * cH;
+      nodes.push({
+        x: bx, y: by, baseX: bx, baseY: by,
+        noiseOffX: Math.random() * 1000, noiseOffY: Math.random() * 1000,
+        radius: 0.6 + Math.random() * 0.8,
+        pulsePhase: Math.random() * Math.PI * 2,
+        hue: 210 + Math.random() * 60,
+        baseBrightness: 0.12 + Math.random() * 0.08,
+        currentBrightness: 0,
+        hidden: true,
+        displaceX: 0, displaceY: 0,
+        revealAlpha: 0,
+        constellationId: -1,
+      });
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  9. NEBULAE
+  // ═══════════════════════════════════════════════════════════════
+
+  function initNebulae() {
+    nebulae.length = 0;
+
+    // Central hero nebula (behind CODE text)
+    nebulae.push({
+      x: cW * 0.50, y: cH * 0.50,
+      rx: Math.max(cW * 0.50, 380),
+      ry: Math.max(cH * 0.38, 240),
+      rotation: 0.18,
+      hue: 248, hue2: 278,
+      alpha: 0.30,
+      phase: 0, speed: 0.00008,
+    });
+
+    // Surrounding nebulae
+    for (let i = 0; i < 7; i++) {
+      const hue = 200 + Math.random() * 140;
+      nebulae.push({
+        x: Math.random() * cW, y: Math.random() * cH,
+        rx: 200 + Math.random() * 350,
+        ry: 120 + Math.random() * 250,
+        rotation: Math.random() * Math.PI,
+        hue, hue2: hue + 30 + Math.random() * 55,
+        alpha: 0.10 + Math.random() * 0.12,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.00010 + Math.random() * 0.00016,
+      });
+    }
+  }
+
+  function drawNebulae(time: number) {
+    for (const neb of nebulae) {
+      const breathe = 0.88 + 0.12 * Math.sin(time * neb.speed + neb.phase);
+      const a = neb.alpha * breathe;
+
+      ctx.save();
+      ctx.translate(neb.x, neb.y);
+      ctx.rotate(neb.rotation);
+      ctx.scale(neb.rx, neb.ry);
+
+      const g1 = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+      g1.addColorStop(0,    `hsla(${neb.hue}, 78%, 70%, ${a})`);
+      g1.addColorStop(0.25, `hsla(${neb.hue}, 68%, 62%, ${a * 0.55})`);
+      g1.addColorStop(0.55, `hsla(${neb.hue2}, 60%, 55%, ${a * 0.22})`);
+      g1.addColorStop(1,    `hsla(${neb.hue2}, 48%, 45%, 0)`);
+      ctx.fillStyle = g1;
+      ctx.beginPath();
+      ctx.arc(0, 0, 1, 0, Math.PI * 2);
+      ctx.fill();
+
+      const g2 = ctx.createRadialGradient(0.28, 0.12, 0, 0.28, 0.12, 0.72);
+      g2.addColorStop(0,   `hsla(${neb.hue2}, 82%, 68%, ${a * 0.60})`);
+      g2.addColorStop(0.4, `hsla(${neb.hue2}, 68%, 58%, ${a * 0.22})`);
+      g2.addColorStop(1,   `hsla(${neb.hue2}, 52%, 48%, 0)`);
+      ctx.fillStyle = g2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 1, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  10. MAIN RENDER LOOP
+  // ═══════════════════════════════════════════════════════════════
+
+  initNodes();
+  initNebulae();
+
+  let heroScrollProgress = 0;
+
+  function drawFrame(time: number) {
+    ctx.clearRect(0, 0, cW, cH);
+
+    // Canvas stays fully visible through most of the 300vh scroll,
+    // then fades over the final 20% to hand off to the content below.
+    // (No images to fade in, so the canvas persists through the explosion.)
+    const canvasAlpha = heroScrollProgress < 0.80
+      ? 1
+      : Math.max(0, 1 - (heroScrollProgress - 0.80) / 0.20);
+
+    if (canvasAlpha < 0.001) return;
+    ctx.globalAlpha = canvasAlpha;
+
+    drawNebulae(time);
+
+    const t = time * DRIFT_SPEED;
+    const parallaxY = heroScrollProgress * cH * 0.15;
+
+    // Smooth mouse
+    if (mouse.active) {
+      smoothMouse.x += (mouse.x - smoothMouse.x) * 0.35;
+      smoothMouse.y += (mouse.y - smoothMouse.y) * 0.35;
+    } else {
+      smoothMouse.x += (-9999 - smoothMouse.x) * 0.06;
+      smoothMouse.y += (-9999 - smoothMouse.y) * 0.06;
+    }
+
+    // Scroll-driven explosion parameters
+    const scrollIntensity = Math.min(1, heroScrollProgress / 0.12);
+    const explosionPhase  = heroScrollProgress > 0.12
+      ? Math.min(1, (heroScrollProgress - 0.12) / 0.13)
+      : 0;
+
+    const core = coreNodeIndex >= 0 ? nodes[coreNodeIndex] : null;
+
+    // Update all nodes
+    for (let i = 0; i < nodes.length; i++) {
+      const n = nodes[i];
+      const isCore = n.constellationId === CORE_ID;
+
+      const nx = fbm(n.noiseOffX + t, n.noiseOffY, 3);
+      const ny = fbm(n.noiseOffY + t, n.noiseOffX, 3);
+      const driftAmount = isCore ? 5 : (n.constellationId >= 0 ? 20 : 60);
+      let driftX = n.baseX + (nx - 0.5) * driftAmount;
+      let driftY = n.baseY + (ny - 0.5) * driftAmount - parallaxY;
+
+      // Explosion scatter (non-core stars push outward from core)
+      if (explosionPhase > 0 && !isCore && core) {
+        const cex = driftX - core.x;
+        const cey = driftY - core.y;
+        const ceDist = Math.sqrt(cex * cex + cey * cey) || 1;
+        const scatterStrength = n.constellationId >= 0 && n.constellationId < 10
+          ? 400 * explosionPhase
+          : 100 * explosionPhase;
+        driftX += (cex / ceDist) * scatterStrength;
+        driftY += (cey / ceDist) * scatterStrength;
+      }
+
+      // Mouse interaction
+      const dx = smoothMouse.x - driftX;
+      const dy = smoothMouse.y - driftY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      let targetDispX = 0, targetDispY = 0;
+      let brightnessMult = 1;
+
+      if (dist < MOUSE_RADIUS && dist > 0.1) {
+        const influence     = 1 - dist / MOUSE_RADIUS;
+        const easedInfluence = influence * influence;
+
+        if (isCore) {
+          brightnessMult = 1 + easedInfluence * (BRIGHT_BOOST - 1) * 1.5;
+        } else {
+          let isNearCore = false;
+          if (core) {
+            const dcx = n.x - core.x, dcy = n.y - core.y;
+            const coreDist = Math.sqrt(dcx * dcx + dcy * dcy);
+            if (coreDist < MOUSE_RADIUS * 0.8 && dist < MOUSE_RADIUS * 0.6) {
+              const repelStr = easedInfluence * MOUSE_PULL * 0.6;
+              if (coreDist > 0.1) {
+                targetDispX = (dcx / coreDist) * repelStr;
+                targetDispY = (dcy / coreDist) * repelStr;
+              }
+              isNearCore = true;
+            }
+          }
+          if (!isNearCore) {
+            const pullStrength = easedInfluence * MOUSE_PULL;
+            targetDispX = (dx / dist) * pullStrength;
+            targetDispY = (dy / dist) * pullStrength;
+          }
+          brightnessMult = 1 + easedInfluence * (BRIGHT_BOOST - 1);
+        }
+      }
+
+      n.displaceX += (targetDispX - n.displaceX) * 0.08;
+      n.displaceY += (targetDispY - n.displaceY) * 0.08;
+      n.x = driftX + n.displaceX;
+      n.y = driftY + n.displaceY;
+
+      let targetBright = n.baseBrightness * brightnessMult;
+      if (isCore) targetBright *= (1 + scrollIntensity * 3);
+      n.currentBrightness += (targetBright - n.currentBrightness) * 0.1;
+
+      if (n.hidden) {
+        const targetReveal = dist < REVEAL_RADIUS
+          ? Math.min(1, (1 - dist / REVEAL_RADIUS) * 1.8) : 0;
+        n.revealAlpha += (targetReveal - n.revealAlpha) * 0.08;
+      }
+
+      // Vertical wrap
+      if (n.y < -20)     { n.y += cH + 40; n.baseY += cH + 40; }
+      if (n.y > cH + 20) { n.y -= cH + 40; n.baseY -= cH + 40; }
+    }
+
+    // Draw edges
+    for (const edge of constellationEdges) {
+      const a = nodes[edge.a], b = nodes[edge.b];
+      const aVis = a.hidden ? a.revealAlpha : 1;
+      const bVis = b.hidden ? b.revealAlpha : 1;
+      const pairVis = Math.min(aVis, bVis);
+      if (pairVis < 0.01) continue;
+
+      const edgeFade = 1 - explosionPhase;
+      if (edgeFade < 0.01) continue;
+
+      const midX  = (a.x + b.x) * 0.5, midY = (a.y + b.y) * 0.5;
+      const mDist = Math.sqrt((smoothMouse.x - midX) ** 2 + (smoothMouse.y - midY) ** 2);
+      const mouseEdgeBoost = mDist < MOUSE_RADIUS ? 1 + (1 - mDist / MOUSE_RADIUS) * 2.0 : 1;
+
+      const baseAlpha = 0.35 * pairVis * mouseEdgeBoost * edgeFade;
+      const capped    = Math.min(baseAlpha, 0.75);
+      if (capped < 0.005) continue;
+
+      const avgHue = (a.hue + b.hue) * 0.5;
+      const sat    = 45 + mouseEdgeBoost * 10;
+      const lum    = 55 + mouseEdgeBoost * 8;
+
+      ctx.lineWidth = 0.6 + (mouseEdgeBoost - 1) * 1.0;
+      const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+      grad.addColorStop(0,    `hsla(${a.hue}, ${sat}%, ${lum}%, 0)`);
+      grad.addColorStop(0.12, `hsla(${a.hue}, ${sat}%, ${lum}%, ${capped})`);
+      grad.addColorStop(0.5,  `hsla(${avgHue}, ${sat}%, ${lum}%, ${capped * 0.85})`);
+      grad.addColorStop(0.88, `hsla(${b.hue}, ${sat}%, ${lum}%, ${capped})`);
+      grad.addColorStop(1,    `hsla(${b.hue}, ${sat}%, ${lum}%, 0)`);
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(a.x, a.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.stroke();
+    }
+
+    // Draw nodes
+    for (let i = 0; i < nodes.length; i++) {
+      const n      = nodes[i];
+      const isCore = n.constellationId === CORE_ID;
+      const visibility = n.hidden ? n.revealAlpha : 1;
+      if (visibility < 0.01) continue;
+
+      const nodeFade = isCore
+        ? Math.max(0, 1 - explosionPhase * 1.5)
+        : Math.max(0, 1 - explosionPhase * 0.8);
+      if (nodeFade < 0.01) continue;
+
+      const pulseSpeed = isCore
+        ? PULSE_SPEED * 3
+        : (n.constellationId >= 0 && n.constellationId < 10 ? PULSE_SPEED * 0.4 : PULSE_SPEED);
+      const pulse          = 0.5 + 0.5 * Math.sin(time * pulseSpeed + n.pulsePhase);
+      const bright         = n.currentBrightness;
+      const brightnessRatio = bright / n.baseBrightness;
+      const alpha          = bright * (0.6 + pulse * 0.4) * visibility * nodeFade;
+
+      // Slow hue drift for CODE letter edge stars
+      if (n.constellationId >= 0 && n.constellationId < 10) {
+        n.hue += Math.sin(time * 0.00012 + n.pulsePhase) * 0.08;
+      }
+
+      if (isCore) {
+        // SUPERNOVA CORE STAR — slow color cycling like a real supernova
+        const coreHueCycle = (time * 0.008) % 360;
+        const coreHue      = coreHueCycle;
+        const coreGlowR    = n.radius * (8 + pulse * 10 + scrollIntensity * 40);
+
+        // Outer glow
+        const g1 = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, coreGlowR);
+        g1.addColorStop(0,    `hsla(${coreHue}, 90%, 80%, ${alpha * 0.6})`);
+        g1.addColorStop(0.15, `hsla(${coreHue}, 85%, 70%, ${alpha * 0.35})`);
+        g1.addColorStop(0.4,  `hsla(${coreHue + 20}, 70%, 60%, ${alpha * 0.12})`);
+        g1.addColorStop(0.7,  `hsla(${coreHue + 40}, 50%, 50%, ${alpha * 0.04})`);
+        g1.addColorStop(1,    `hsla(${coreHue + 60}, 40%, 40%, 0)`);
+        ctx.fillStyle = g1;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, coreGlowR, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Lens flare cross (4 rays)
+        const flareLen   = coreGlowR * (0.8 + scrollIntensity * 1.5);
+        const flareAlpha = alpha * 0.25 * (0.5 + pulse * 0.5);
+        ctx.strokeStyle  = `hsla(${coreHue}, 60%, 85%, ${flareAlpha})`;
+        ctx.lineWidth    = 1.2 + scrollIntensity * 2;
+        for (let r = 0; r < 4; r++) {
+          const ang = (r * Math.PI) / 2 + Math.PI / 4;
+          ctx.beginPath();
+          ctx.moveTo(n.x - Math.cos(ang) * flareLen, n.y - Math.sin(ang) * flareLen);
+          ctx.lineTo(n.x + Math.cos(ang) * flareLen, n.y + Math.sin(ang) * flareLen);
+          ctx.stroke();
+        }
+
+        // Shockwave ring (pulses with scroll intensity)
+        if (scrollIntensity > 0.1) {
+          const ringR     = n.radius * (10 + scrollIntensity * 30 + pulse * 8);
+          const ringAlpha = scrollIntensity * 0.2 * (0.5 + pulse * 0.5);
+          ctx.strokeStyle = `hsla(${coreHue + 10}, 70%, 75%, ${ringAlpha})`;
+          ctx.lineWidth   = 1.5 + scrollIntensity * 2;
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, ringR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        // White-hot core dot
+        const coreR = n.radius * (1 + scrollIntensity * 2 + pulse * 0.5);
+        ctx.fillStyle = `hsla(${coreHue}, 20%, ${90 + scrollIntensity * 10}%, ${Math.min(alpha * 1.5, 1)})`;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, coreR, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        // Normal star rendering
+        const glowR = n.radius * (3 + pulse * 4 + (brightnessRatio - 1) * 3);
+
+        const grad = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, glowR);
+        grad.addColorStop(0,   `hsla(${n.hue}, 75%, 70%, ${alpha * 0.55})`);
+        grad.addColorStop(0.4, `hsla(${n.hue}, 65%, 58%, ${alpha * 0.20})`);
+        grad.addColorStop(1,   `hsla(${n.hue}, 50%, 50%, 0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, glowR, 0, Math.PI * 2);
+        ctx.fill();
+
+        const coreLum = 82 + (brightnessRatio - 1) * 12;
+        ctx.fillStyle = `hsla(${n.hue}, 85%, ${Math.min(coreLum, 97)}%, ${Math.min(alpha * 1.5, 1)})`;
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, n.radius * (1 + (brightnessRatio - 1) * 0.4), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    // White flash (explosion)
+    if (explosionPhase > 0 && core) {
+      const flashR    = Math.max(cW, cH) * 1.5 * explosionPhase;
+      const flashAlpha = explosionPhase * 0.7 * (1 - explosionPhase * 0.5);
+      const flashGrad = ctx.createRadialGradient(core.x, core.y, 0, core.x, core.y, flashR);
+      flashGrad.addColorStop(0,   `hsla(45, 60%, 95%, ${flashAlpha})`);
+      flashGrad.addColorStop(0.3, `hsla(45, 50%, 80%, ${flashAlpha * 0.5})`);
+      flashGrad.addColorStop(0.6, `hsla(280, 40%, 60%, ${flashAlpha * 0.15})`);
+      flashGrad.addColorStop(1,   `hsla(280, 30%, 40%, 0)`);
+      ctx.fillStyle = flashGrad;
+      ctx.beginPath();
+      ctx.arc(core.x, core.y, flashR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Mouse glow halo
+    if (mouse.active && explosionPhase < 0.5) {
+      const haloAlpha = 1 - explosionPhase * 2;
+      const haloGrad  = ctx.createRadialGradient(
+        smoothMouse.x, smoothMouse.y, 0,
+        smoothMouse.x, smoothMouse.y, MOUSE_RADIUS * 0.6,
+      );
+      haloGrad.addColorStop(0,   `hsla(250, 70%, 65%, ${0.04 * haloAlpha})`);
+      haloGrad.addColorStop(0.5, `hsla(260, 60%, 55%, ${0.015 * haloAlpha})`);
+      haloGrad.addColorStop(1,   "hsla(270, 50%, 50%, 0)");
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(smoothMouse.x, smoothMouse.y, MOUSE_RADIUS * 0.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.globalAlpha = 1;
+  }
+
+  // Animation loop
+  function loop(time: number) {
+    requestAnimationFrame(loop);
+    drawFrame(time);
+  }
+  requestAnimationFrame(loop);
+
+  // ═══════════════════════════════════════════════════════════════
+  //  11. GSAP SCROLL TIMELINE
+  // ═══════════════════════════════════════════════════════════════
+
+  gsap.timeline({
+    scrollTrigger: {
+      trigger: "#hero-scroll-container",
+      start: "top top",
+      end: "bottom bottom",
+      scrub: 1,
+      onUpdate: (self) => {
+        heroScrollProgress = self.progress;
+
+        const hint = document.getElementById("scroll-hint");
+        if (hint) hint.style.opacity = String(Math.max(0, 1 - self.progress * 15));
+      },
+    },
+  });
+
+  // ═══════════════════════════════════════════════════════════════
+  //  12. RESIZE HANDLER
+  // ═══════════════════════════════════════════════════════════════
+
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    updateStarCounts();
+    initNodes();
+    initNebulae();
+    ScrollTrigger.refresh();
+  });
+</script>
