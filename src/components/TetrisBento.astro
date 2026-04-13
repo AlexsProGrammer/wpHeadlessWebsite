@@ -1,0 +1,724 @@
+---
+// TetrisBento — GSAP ScrollTrigger tetris-drop project grid
+// Cards fly in from below as user scrolls and fall back out when scrolling up.
+// 1:1 port of demo tetris-bento.astro, adapted to live WP project data.
+
+interface Image {
+  url?: string;
+  alt?: string;
+}
+
+interface ProjectEntry {
+  project: any;
+  acf: any;
+  image: Image | null;
+}
+
+interface Props {
+  projectsWithImages: ProjectEntry[];
+}
+
+const { projectsWithImages } = Astro.props;
+
+// ── Helpers ───────────────────────────────────────────────────
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+// ── Rotating accent colors ─────────────────────────────────────
+const COLORS = [
+  "#6366f1", "#06b6d4", "#10b981", "#f59e0b",
+  "#ec4899", "#8b5cf6", "#14b8a6", "#f97316",
+  "#3b82f6", "#a855f7",
+];
+
+// ── Rotating SVG icon paths (stroke-based, 24×24 viewBox) ─────
+const ICONS = [
+  '<path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>',
+  '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10A15.3 15.3 0 0112 2z"/>',
+  '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1"/>',
+  '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  '<path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/>',
+  '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+  '<path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>',
+  '<path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>',
+  '<polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>',
+  '<path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>',
+];
+
+// ── Band slot patterns (4 cols × 2 rows = up to 5 cards each) ──
+type SlotDef = { colStart: number; colSpan: number; rowStart: number; rowSpan: number };
+
+const BAND_PATTERNS: SlotDef[][] = [
+  /* Band A: hero left + 4 smalls right */
+  [
+    { colStart: 1, colSpan: 2, rowStart: 1, rowSpan: 2 },
+    { colStart: 3, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 4, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 3, colSpan: 1, rowStart: 2, rowSpan: 1 },
+    { colStart: 4, colSpan: 1, rowStart: 2, rowSpan: 1 },
+  ],
+  /* Band B: wide + tall + 2 smalls */
+  [
+    { colStart: 1, colSpan: 2, rowStart: 1, rowSpan: 1 },
+    { colStart: 3, colSpan: 1, rowStart: 1, rowSpan: 2 },
+    { colStart: 4, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 1, colSpan: 2, rowStart: 2, rowSpan: 1 },
+    { colStart: 4, colSpan: 1, rowStart: 2, rowSpan: 1 },
+  ],
+  /* Band C: tall left + small + wide / wide center + small */
+  [
+    { colStart: 1, colSpan: 1, rowStart: 1, rowSpan: 2 },
+    { colStart: 2, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 3, colSpan: 2, rowStart: 1, rowSpan: 1 },
+    { colStart: 2, colSpan: 2, rowStart: 2, rowSpan: 1 },
+    { colStart: 4, colSpan: 1, rowStart: 2, rowSpan: 1 },
+  ],
+  /* Band D: small + hero center + 3 smalls */
+  [
+    { colStart: 1, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 2, colSpan: 2, rowStart: 1, rowSpan: 2 },
+    { colStart: 4, colSpan: 1, rowStart: 1, rowSpan: 1 },
+    { colStart: 1, colSpan: 1, rowStart: 2, rowSpan: 1 },
+    { colStart: 4, colSpan: 1, rowStart: 2, rowSpan: 1 },
+  ],
+];
+
+function deriveSizeClass(cs: number, rs: number): string {
+  if (cs >= 2 && rs >= 2) return "block-hero";
+  if (cs >= 2) return "block-wide";
+  if (rs >= 2) return "block-tall";
+  return "block-small";
+}
+
+// ── Map WP projects → card data ───────────────────────────────
+const cards = projectsWithImages.map(({ project, acf, image }, i) => {
+  const techStack: string[] = acf.tech_stack
+    ? acf.tech_stack.split(',').map((t: string) => t.trim()).filter(Boolean)
+    : [];
+  const year = project.date ? String(new Date(project.date).getFullYear()) : '';
+  const desc = stripHtml(project.excerpt?.rendered ?? project.content?.rendered ?? '');
+  const title = stripHtml(project.title?.rendered ?? 'Untitled');
+  return {
+    title,
+    desc,
+    tags:     techStack,
+    color:    COLORS[i % COLORS.length],
+    icon:     ICONS[i % ICONS.length],
+    year,
+    slug:     project.slug as string,
+    imageUrl: image?.url ?? null,
+    imageAlt: image?.alt ?? title,
+  };
+});
+
+// ── Build bands ───────────────────────────────────────────────
+type CardDatum = typeof cards[number];
+type BandCard = CardDatum & {
+  sizeClass: string;
+  colStart: number; colSpan: number;
+  rowStart: number; rowSpan: number;
+};
+
+const bands: BandCard[][] = [];
+let cardIdx = 0;
+
+while (cardIdx < cards.length) {
+  const patIdx = bands.length % BAND_PATTERNS.length;
+  const pattern = BAND_PATTERNS[patIdx];
+  const band: BandCard[] = [];
+
+  for (let si = 0; si < pattern.length && cardIdx < cards.length; si++) {
+    const slot = pattern[si];
+    band.push({
+      ...cards[cardIdx],
+      sizeClass: deriveSizeClass(slot.colSpan, slot.rowSpan),
+      colStart: slot.colStart,
+      colSpan:  slot.colSpan,
+      rowStart: slot.rowStart,
+      rowSpan:  slot.rowSpan,
+    });
+    cardIdx++;
+  }
+
+  bands.push(band);
+}
+---
+
+{bands.length === 0 ? (
+  <p class="tb-empty" data-i18n="projects.empty">Keine Projekte gefunden.</p>
+) : (
+  <section class="bento-section" id="bento-section">
+    <div class="bento-ambient" aria-hidden="true"></div>
+
+    <div class="bento-tetris-container" id="bento-tetris-container">
+      {bands.map((band, bandIdx) => (
+        <div class="bento-row" data-row={bandIdx}>
+          {band.map((b) => (
+            <a
+              href={`/projects/${b.slug}`}
+              class={`tetris-block ${b.sizeClass}`}
+              data-row={bandIdx}
+              style={`--accent: ${b.color}; --cs: ${b.colStart}; --ce: ${b.colSpan}; --rs: ${b.rowStart}; --re: ${b.rowSpan};`}
+            >
+              {/* Image header — real image if available, otherwise SVG icon */}
+              <div class="block-img-placeholder" aria-hidden="true">
+                {b.imageUrl ? (
+                  <img
+                    src={b.imageUrl}
+                    alt={b.imageAlt}
+                    class="block-real-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <svg
+                    class="block-img-icon"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    set:html={b.icon}
+                  />
+                )}
+              </div>
+
+              <div class="block-body">
+                <div class="block-meta">
+                  <span class="block-client" data-i18n="card.details">Details →</span>
+                  {b.year && <span class="block-year">{b.year}</span>}
+                </div>
+                <h2 class="block-title">{b.title}</h2>
+                {b.desc && <p class="block-desc">{b.desc}</p>}
+                {b.tags.length > 0 && (
+                  <div class="block-tags">
+                    {b.tags.map((tag) => (
+                      <span class="tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div class="block-shine" aria-hidden="true"></div>
+
+              <div class="block-pulse" aria-hidden="true">
+                <span class="pulse-dot"></span>
+                <span class="pulse-ring"></span>
+              </div>
+            </a>
+          ))}
+        </div>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  /* ── Empty state ─────────────────────────────────────────── */
+  .tb-empty {
+    text-align: center;
+    color: rgba(148, 163, 184, 0.5);
+    padding: 4rem 0;
+  }
+
+  /* ── Bento section ───────────────────────────────────────── */
+  .bento-section {
+    position: relative;
+    padding: 4rem 2rem 12rem;
+    overflow: hidden;
+  }
+
+  .bento-ambient {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(
+      circle,
+      rgba(99, 102, 241, 0.07) 0%,
+      rgba(139, 92, 246, 0.03) 35%,
+      transparent 65%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Container: vertical stack of row bands ──────────────── */
+  .bento-tetris-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* ── Row band: 4-col sub-grid ────────────────────────────── */
+  .bento-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: minmax(280px, auto);
+    gap: 24px;
+  }
+
+  /* ── Base card ───────────────────────────────────────────── */
+  .tetris-block {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 300px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    grid-column: var(--cs) / span var(--ce);
+    grid-row: var(--rs) / span var(--re);
+    will-change: transform, opacity;
+    backface-visibility: hidden;
+
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      0 1px 2px rgba(0, 0, 0, 0.6);
+
+    transition:
+      transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+      box-shadow 0.35s ease,
+      border-color 0.35s ease;
+  }
+
+  /* Accent radial glow overlay */
+  .tetris-block::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(
+      ellipse at 20% 15%,
+      color-mix(in srgb, var(--accent) 14%, transparent),
+      transparent 60%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .tetris-block:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: rgba(255, 255, 255, 0.18);
+    border-top-color: rgba(255, 255, 255, 0.28);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 20px 60px color-mix(in srgb, var(--accent) 12%, transparent),
+      0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ── Size variants ───────────────────────────────────────── */
+  .block-hero { min-height: 624px; }
+
+  /* ── Image header ────────────────────────────────────────── */
+  .block-img-placeholder {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--accent) 8%, rgba(255, 255, 255, 0.02));
+    border-bottom: 1px solid color-mix(in srgb, var(--accent) 14%, rgba(255, 255, 255, 0.04));
+  }
+
+  .block-hero  .block-img-placeholder { height: 280px; }
+  .block-wide  .block-img-placeholder { height: 140px; }
+  .block-tall  .block-img-placeholder { height: 180px; }
+  .block-small .block-img-placeholder { height: 120px; }
+
+  .block-real-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    display: block;
+  }
+
+  .block-img-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--accent);
+    opacity: 0.4;
+  }
+
+  .block-hero .block-img-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  /* ── Card body ───────────────────────────────────────────── */
+  .block-body {
+    position: relative;
+    z-index: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+    justify-content: flex-end;
+  }
+
+  .block-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .block-client {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent) 80%, #fff);
+  }
+
+  .block-year {
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    color: rgba(148, 163, 184, 0.4);
+  }
+
+  .block-title {
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: rgba(255, 255, 255, 0.92);
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  .block-hero .block-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+  }
+
+  .block-desc {
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: rgba(148, 163, 184, 0.55);
+    max-width: 52ch;
+    margin: 0;
+  }
+
+  .block-small .block-desc {
+    display: none;
+  }
+
+  /* ── Tech tags ───────────────────────────────────────────── */
+  .block-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+  }
+
+  .tag {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.63rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent) 90%, #fff);
+    background: color-mix(in srgb, var(--accent) 12%, rgba(255, 255, 255, 0.03));
+    border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+
+  /* ── Shine sweep on hover ────────────────────────────────── */
+  .block-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      105deg,
+      transparent 40%,
+      rgba(255, 255, 255, 0.03) 45%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.03) 55%,
+      transparent 60%
+    );
+    transform: translateX(-120%);
+    transition: transform 0.6s ease;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .tetris-block:hover .block-shine {
+    transform: translateX(120%);
+  }
+
+  /* ── Pulse dot ───────────────────────────────────────────── */
+  .block-pulse {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    width: 8px;
+    height: 8px;
+    z-index: 3;
+  }
+
+  .pulse-dot {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.75;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    opacity: 0;
+    animation: pulse-ring 2.8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%   { transform: scale(1);   opacity: 0.45; }
+    70%  { transform: scale(2.4); opacity: 0; }
+    100% { transform: scale(2.4); opacity: 0; }
+  }
+
+  /* ── Wobble keyframes (used by JS) ──────────────────────── */
+  @keyframes wobble {
+    0%,  100% { transform: translateY(0); }
+    25%       { transform: translateY(-6px) rotate(-1deg); }
+    50%       { transform: translateY(15px) rotate(1.5deg); }
+    75%       { transform: translateY(-4px) rotate(-0.5deg); }
+  }
+
+  /* ── Mobile ──────────────────────────────────────────────── */
+  @media (max-width: 1024px) {
+    .bento-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .tetris-block {
+      grid-column: auto !important;
+      grid-row: auto !important;
+    }
+
+    .block-hero  { min-height: 360px; }
+    .block-small .block-desc { display: block; }
+  }
+
+  @media (max-width: 580px) {
+    .bento-section {
+      padding: 2rem 1rem 8rem;
+    }
+
+    .bento-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ═══════════════════════════════════════════════════════════
+   * BlockController — per-card state machine
+   *   offscreen → entering → docked → falling → fallen
+   * ═══════════════════════════════════════════════════════════ */
+  type BlockState = "offscreen" | "entering" | "docked" | "falling" | "fallen";
+
+  let vh = window.innerHeight;
+  window.addEventListener("resize", () => { vh = window.innerHeight; });
+
+  class BlockController {
+    el: HTMLElement;
+    row: number;
+    state: BlockState = "offscreen";
+    private _entryTween: gsap.core.Tween | null = null;
+    private _fallTl: gsap.core.Timeline | null = null;
+    private _randA = Math.random();
+    private _randB = Math.random();
+    private _randC = Math.random();
+
+    constructor(el: HTMLElement) {
+      this.el = el;
+      this.row = Number(el.dataset.row ?? 0);
+      /* Start below viewport, slightly rotated */
+      gsap.set(el, {
+        opacity: 0,
+        y: vh + 80 + this._randB * 200,
+        rotation: -10 + this._randC * 20,
+        scale: 0.85,
+      });
+    }
+
+    flyIn(delay = 0): void {
+      if (this.state === "entering" || this.state === "docked") return;
+      this._killFall();
+
+      const needsReset = this.state === "offscreen" || this.state === "fallen";
+      this.state = "entering";
+      this._entryTween?.kill();
+
+      if (needsReset) {
+        gsap.set(this.el, {
+          opacity: 0,
+          y: vh + 80 + this._randB * 200,
+          rotation: -10 + this._randC * 20,
+          scale: 0.85,
+        });
+      }
+
+      this._entryTween = gsap.to(this.el, {
+        x: 0, y: 0, rotation: 0, scale: 1, opacity: 1,
+        ease: "back.out(1.2)",
+        duration: 0.85 + this._randA * 0.35,
+        delay,
+        force3D: true,
+        overwrite: true,
+        onComplete: () => {
+          this.state = "docked";
+          this._entryTween = null;
+        },
+      });
+    }
+
+    fall(delay = 0): void {
+      if (this.state !== "entering" && this.state !== "docked") return;
+      this._entryTween?.kill();
+      this._entryTween = null;
+      this.state = "falling";
+
+      const xDrift = -40 + Math.random() * 80;
+
+      this._fallTl = gsap.timeline({
+        delay,
+        onComplete: () => {
+          this.state = "fallen";
+          this._fallTl = null;
+        },
+      });
+
+      /* Wobble tremor before falling */
+      this._fallTl
+        .to(this.el, { rotation: -4,   y: "-=4",   duration: 0.06, ease: "none" })
+        .to(this.el, { rotation: 4,    y: "+=8",   duration: 0.06, ease: "none" })
+        .to(this.el, { rotation: -2.5, y: "-=5",   duration: 0.06, ease: "none" })
+        .to(this.el, { rotation: 1.5,  y: "+=3",   duration: 0.05, ease: "none" })
+        .to(this.el, { rotation: -0.5, y: "-=1.5", duration: 0.04, ease: "none" })
+        .to(this.el, { rotation: 0,    y: "-=0.5", duration: 0.04, ease: "none" });
+
+      /* Gravity drop */
+      this._fallTl.to(this.el, {
+        y: `+=${vh + 300}`,
+        x: `+=${xDrift}`,
+        opacity: 0,
+        rotation: xDrift * 0.14,
+        duration: 0.55,
+        ease: "power2.in",
+        force3D: true,
+      });
+    }
+
+    reset(): void {
+      this._entryTween?.kill();
+      this._entryTween = null;
+      this._killFall();
+      gsap.set(this.el, {
+        opacity: 0,
+        y: vh + 80 + this._randB * 200,
+        rotation: -10 + this._randC * 20,
+        scale: 0.85,
+        x: 0,
+      });
+      this.state = "offscreen";
+    }
+
+    private _killFall(): void {
+      this._fallTl?.kill();
+      this._fallTl = null;
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+   * INITIALIZE & GROUP BY ROW
+   * ═══════════════════════════════════════════════════════════ */
+  function init() {
+    const blockEls = gsap.utils.toArray<HTMLElement>(".tetris-block");
+    if (blockEls.length === 0) return;
+
+    const controllers = blockEls.map((el) => new BlockController(el));
+
+    const rowMap = new Map<number, BlockController[]>();
+    controllers.forEach((ctrl) => {
+      if (!rowMap.has(ctrl.row)) rowMap.set(ctrl.row, []);
+      rowMap.get(ctrl.row)!.push(ctrl);
+    });
+
+    const ENTRY_STAGGER = 0.09;
+    const FALL_STAGGER  = 0.045;
+
+    /* ─────────────────────────────────────────────────────────
+     * PER-ROW SCROLL TRIGGERS
+     * ───────────────────────────────────────────────────────── */
+    const rowEls = gsap.utils.toArray<HTMLElement>(".bento-row");
+
+    rowEls.forEach((rowEl) => {
+      const rowIdx = Number(rowEl.dataset.row ?? 0);
+      const group = rowMap.get(rowIdx);
+      if (!group) return;
+
+      const flyInRow = () => {
+        const shuffled = [...group].sort(() => Math.random() - 0.5);
+        shuffled.forEach((ctrl, i) => ctrl.flyIn(i * ENTRY_STAGGER));
+      };
+
+      const fallRow = () => {
+        group.forEach((ctrl, i) => ctrl.fall(i * FALL_STAGGER));
+      };
+
+      ScrollTrigger.create({
+        trigger: rowEl,
+        start: "top 55%",
+        end: "bottom 10%",
+        onEnter: flyInRow,
+        onEnterBack: flyInRow,
+        onLeaveBack: fallRow,
+      });
+    });
+
+    /* Sentinel — reset all when section scrolls out upward */
+    ScrollTrigger.create({
+      trigger: "#bento-section",
+      start: "top bottom",
+      end: "bottom top",
+      onLeaveBack() { controllers.forEach((c) => c.reset()); },
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init, { once: true });
+  } else {
+    init();
+  }
+</script>
