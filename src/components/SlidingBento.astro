@@ -1,108 +1,66 @@
 ---
-// SlidingBento — GSAP Flip + Draggable bento puzzle showing 4 portfolio views
-// that orbit around a central drag-slider card.
-// content-a = German · content-b = English
-// Language face-flip is driven by the existing `langchange` CustomEvent.
-// Step advancement only repositions cards via GSAP FLIP (no face swap on drag).
+// SlidingBento — 4 topics × 4 orbit sub-cards, flip-on-drag, glassmorphic center button
+// Topic 0: About Me  |  Topic 1: The Origin  |  Topic 2: Leistungen  |  Topic 3: Projects
+// Sub-cards orbit clockwise on each drag. Content swaps mid-flip.
+// Language face-flip driven by `langchange` CustomEvent.
+
+interface HighlightedProject {
+  project: any;
+  acf: any;
+  image: any;
+}
+
+interface Props {
+  highlightedProjects?: HighlightedProject[];
+}
+
+const { highlightedProjects = [] } = Astro.props;
+
+const projectsJSON = JSON.stringify(
+  highlightedProjects.slice(0, 3).map(({ project, acf, image }) => ({
+    title: project.title?.rendered ?? '',
+    excerpt: project.excerpt?.rendered ?? project.content?.rendered ?? '',
+    slug: project.slug ?? '',
+    imageUrl: image?.url ?? '',
+    imageAlt: image?.alt ?? '',
+    techStack: acf?.tech_stack ?? '',
+  }))
+);
 ---
 
 <section class="bento-section" id="leistungen">
 
+  <!-- Project data island -->
+  <script type="application/json" id="sb-projects-data" set:html={projectsJSON}></script>
+
   <!-- ── Category labels ────────────────────────────────── -->
   <div class="category-row" id="sb-category-row">
-    <span class="cat-label cat-label--active" id="sb-cat-0">Identität</span>
+    <span class="cat-label cat-label--active" id="sb-cat-0" data-de="Über Mich" data-en="About Me">Über Mich</span>
     <span class="cat-divider">↻</span>
-    <span class="cat-label" id="sb-cat-1">Tech Stack</span>
+    <span class="cat-label" id="sb-cat-1" data-de="Die Geschichte" data-en="The Origin">Die Geschichte</span>
     <span class="cat-divider">↻</span>
-    <span class="cat-label" id="sb-cat-2">Backend</span>
+    <span class="cat-label" id="sb-cat-2" data-de="Leistungen" data-en="Services">Leistungen</span>
     <span class="cat-divider">↻</span>
-    <span class="cat-label" id="sb-cat-3">Frontend</span>
+    <span class="cat-label" id="sb-cat-3" data-de="Projekte" data-en="Projects">Projekte</span>
   </div>
 
   <!-- ── Bento Grid ──────────────────────────────────────── -->
   <div class="bento-container layout-0" id="sb-bento-container">
 
-    <!-- Card: About / Identity ─────────── North in step 0 -->
-    <div class="bento-card card-about">
-      <div class="content-a">
-        <p class="card-label">Developer</p>
-        <h2 class="card-title">Alex — Fullstack Dev</h2>
-        <p class="card-desc">Ich baue moderne, schnelle Web-Applikationen mit Fokus auf saubere Architektur und außergewöhnliche User Experience.</p>
-        <p class="card-desc card-desc--sm">Verfügbar für Projekte, White-Label & Consulting.</p>
-      </div>
-      <div class="content-b">
-        <p class="card-label">Developer</p>
-        <h2 class="card-title">Alex — Fullstack Dev</h2>
-        <p class="card-desc">I build modern, fast web applications with a focus on clean architecture and exceptional user experience.</p>
-        <p class="card-desc card-desc--sm">Available for projects, white-label & consulting.</p>
-      </div>
-    </div>
+    <div class="bento-card orbit-card" id="sb-orbit-0"><div class="card-face"></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-1"><div class="card-face"></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-2"><div class="card-face"></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-3"><div class="card-face"></div></div>
 
-    <!-- Card: Frontend ─────────────────── East  in step 0 -->
-    <div class="bento-card card-frontend">
-      <div class="content-a">
-        <p class="card-label">Frontend</p>
-        <h2 class="card-title">UI & Motion</h2>
-        <p class="card-desc">Pixel-genaue Komponenten, flüssige Animationen, responsive Layouts.</p>
-        <p class="card-desc card-desc--sm">Astro · TypeScript · React · GSAP · CSS custom properties</p>
+    <!-- Center glassmorphic button -->
+    <div class="card-center" id="sb-center-card">
+      <div class="center-btn-wrap">
+        <button class="center-btn" id="sb-center-btn" aria-label="Drag to change topic">
+          <span class="center-btn-icon">⇄</span>
+        </button>
+        <p class="center-hint" id="sb-center-hint" data-de="ziehen" data-en="drag">ziehen</p>
       </div>
-      <div class="content-b">
-        <p class="card-label">Frontend</p>
-        <h2 class="card-title">UI & Motion</h2>
-        <p class="card-desc">Pixel-perfect components, fluid animations, responsive layouts.</p>
-        <p class="card-desc card-desc--sm">Astro · TypeScript · React · GSAP · CSS custom properties</p>
-      </div>
-    </div>
-
-    <!-- Card: Backend ──────────────────── South in step 0 -->
-    <div class="bento-card card-backend">
-      <div class="content-a">
-        <p class="card-label">Backend</p>
-        <h2 class="card-title">APIs & Systeme</h2>
-        <p class="card-desc">Skalierbare REST & GraphQL-Services, Headless CMS-Integration, cloud-native Deployments mit Docker & CI/CD.</p>
-      </div>
-      <div class="content-b">
-        <p class="card-label">Backend</p>
-        <h2 class="card-title">APIs & Systems</h2>
-        <p class="card-desc">Scalable REST & GraphQL services, Headless CMS integration, cloud-native deployments with Docker & CI/CD.</p>
-      </div>
-    </div>
-
-    <!-- Card: Tech Stack ───────────────── West  in step 0 -->
-    <div class="bento-card card-stack">
-      <div class="content-a">
-        <p class="card-label">Tech Stack</p>
-        <h2 class="card-title">Werkzeuge</h2>
-        <div class="tech-pills">
-          <span>TypeScript</span><span>Astro</span><span>React</span>
-          <span>Node.js</span><span>Python</span><span>PostgreSQL</span>
-          <span>Docker</span><span>WordPress</span><span>AWS</span>
-        </div>
-      </div>
-      <div class="content-b">
-        <p class="card-label">Tech Stack</p>
-        <h2 class="card-title">Tools</h2>
-        <div class="tech-pills">
-          <span>TypeScript</span><span>Astro</span><span>React</span>
-          <span>Node.js</span><span>Python</span><span>PostgreSQL</span>
-          <span>Docker</span><span>WordPress</span><span>AWS</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Card: Drag (Center — fixed in all layouts) ────────── -->
-    <div class="bento-card card-drag" id="sb-drag-card">
-      <span class="step-title" id="sb-step-title">Identität</span>
-      <span class="drag-label">DRAG</span>
-      <div class="slider-track" id="sb-slider-track">
-        <div class="slider-fill" id="sb-slider-fill"></div>
-        <div class="slider-thumb" id="sb-slider-thumb">
-          <span class="slider-thumb-icon">⇄</span>
-        </div>
-        <span class="slider-arrow slider-arrow--left">‹</span>
-        <span class="slider-arrow slider-arrow--right">›</span>
-      </div>
-      <p class="drag-hint">← drag to rotate →</p>
+      <p class="center-topic" id="sb-center-topic">Über Mich</p>
     </div>
 
   </div>
@@ -138,6 +96,7 @@
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.25);
     transition: color 0.4s, text-shadow 0.4s;
+    cursor: pointer;
   }
 
   .cat-label--active {
@@ -159,255 +118,337 @@
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
+    position: relative; /* required for GSAP Flip absolute:true */
   }
 
-  /* ── Card base ───────────────────────────────────────── */
+  /* ── Card base (glass) ───────────────────────────────── */
   .bento-card {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.05) 0%,
+      rgba(255, 255, 255, 0.02) 50%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
+    backdrop-filter: blur(40px) saturate(1.6);
+    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
     overflow: hidden;
-    transition: border-color 0.3s;
+    position: relative;
     transform-style: preserve-3d;
     perspective: 1200px;
-    position: relative;
-    padding: 0; /* faces handle their own padding */
   }
 
-  .bento-card:not(.card-drag):hover {
-    border-color: rgba(255, 255, 255, 0.18);
+  .orbit-card {
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
 
-  /* ── Content faces ───────────────────────────────────── */
-  .content-a,
-  .content-b {
+  .orbit-card:hover {
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.35),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Card face ───────────────────────────────────────── */
+  .card-face {
     position: absolute;
     inset: 0;
-    padding: 2rem;
+    padding: 1.4rem 1.6rem;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
     overflow: hidden;
-    border-radius: 24px;
+    backface-visibility: hidden;
   }
 
-  /* ── Layout positions (4-step clockwise cycle) ───────── */
-  /*
-    Positions around the center drag card:
-      North  = row 1, cols 1-2    → 1/1/2/3
-      East   = rows 1-3, col 3   → 1/3/4/4
-      South  = row 3, col 2      → 3/2/4/3
-      West   = rows 2-3, col 1   → 2/1/4/2
-      Center = row 2, col 2      → 2/2/3/3
+  /* ── Layout positions — 4-step clockwise orbit ───────── */
+  /* Step 0: orbit-0=N, orbit-1=E, orbit-2=S, orbit-3=W */
+  .layout-0 #sb-orbit-0 { grid-area: 1 / 1 / 2 / 3; }
+  .layout-0 #sb-orbit-1 { grid-area: 1 / 3 / 4 / 4; }
+  .layout-0 #sb-orbit-2 { grid-area: 3 / 2 / 4 / 3; }
+  .layout-0 #sb-orbit-3 { grid-area: 2 / 1 / 4 / 2; }
+  .layout-0 .card-center { grid-area: 2 / 2 / 3 / 3; }
 
-    Clockwise orbit (each step +90° CW):
-      Step 0: about=N  frontend=E  backend=S  stack=W
-      Step 1: stack=N  about=E     frontend=S backend=W
-      Step 2: backend=N stack=E    about=S    frontend=W
-      Step 3: frontend=N backend=E stack=S    about=W
-  */
+  /* Step 1: orbit-3=N, orbit-0=E, orbit-1=S, orbit-2=W */
+  .layout-1 #sb-orbit-3 { grid-area: 1 / 1 / 2 / 3; }
+  .layout-1 #sb-orbit-0 { grid-area: 1 / 3 / 4 / 4; }
+  .layout-1 #sb-orbit-1 { grid-area: 3 / 2 / 4 / 3; }
+  .layout-1 #sb-orbit-2 { grid-area: 2 / 1 / 4 / 2; }
+  .layout-1 .card-center { grid-area: 2 / 2 / 3 / 3; }
 
-  /* Step 0 */
-  .layout-0 .card-about    { grid-area: 1 / 1 / 2 / 3; } /* North */
-  .layout-0 .card-frontend { grid-area: 1 / 3 / 4 / 4; } /* East  */
-  .layout-0 .card-backend  { grid-area: 3 / 2 / 4 / 3; } /* South */
-  .layout-0 .card-stack    { grid-area: 2 / 1 / 4 / 2; } /* West  */
-  .layout-0 .card-drag     { grid-area: 2 / 2 / 3 / 3; } /* Center */
+  /* Step 2: orbit-2=N, orbit-3=E, orbit-0=S, orbit-1=W */
+  .layout-2 #sb-orbit-2 { grid-area: 1 / 1 / 2 / 3; }
+  .layout-2 #sb-orbit-3 { grid-area: 1 / 3 / 4 / 4; }
+  .layout-2 #sb-orbit-0 { grid-area: 3 / 2 / 4 / 3; }
+  .layout-2 #sb-orbit-1 { grid-area: 2 / 1 / 4 / 2; }
+  .layout-2 .card-center { grid-area: 2 / 2 / 3 / 3; }
 
-  /* Step 1 */
-  .layout-1 .card-stack    { grid-area: 1 / 1 / 2 / 3; } /* North */
-  .layout-1 .card-about    { grid-area: 1 / 3 / 4 / 4; } /* East  */
-  .layout-1 .card-frontend { grid-area: 3 / 2 / 4 / 3; } /* South */
-  .layout-1 .card-backend  { grid-area: 2 / 1 / 4 / 2; } /* West  */
-  .layout-1 .card-drag     { grid-area: 2 / 2 / 3 / 3; } /* Center */
+  /* Step 3: orbit-1=N, orbit-2=E, orbit-3=S, orbit-0=W */
+  .layout-3 #sb-orbit-1 { grid-area: 1 / 1 / 2 / 3; }
+  .layout-3 #sb-orbit-2 { grid-area: 1 / 3 / 4 / 4; }
+  .layout-3 #sb-orbit-3 { grid-area: 3 / 2 / 4 / 3; }
+  .layout-3 #sb-orbit-0 { grid-area: 2 / 1 / 4 / 2; }
+  .layout-3 .card-center { grid-area: 2 / 2 / 3 / 3; }
 
-  /* Step 2 */
-  .layout-2 .card-backend  { grid-area: 1 / 1 / 2 / 3; } /* North */
-  .layout-2 .card-stack    { grid-area: 1 / 3 / 4 / 4; } /* East  */
-  .layout-2 .card-about    { grid-area: 3 / 2 / 4 / 3; } /* South */
-  .layout-2 .card-frontend { grid-area: 2 / 1 / 4 / 2; } /* West  */
-  .layout-2 .card-drag     { grid-area: 2 / 2 / 3 / 3; } /* Center */
+  /* ── Center card ─────────────────────────────────────── */
+  .card-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.1) 0%,
+      rgba(124, 58, 237, 0.06) 50%,
+      rgba(168, 85, 247, 0.08) 100%
+    );
+    border: 1px solid rgba(168, 85, 247, 0.3);
+    border-radius: 24px;
+    backdrop-filter: blur(40px) saturate(1.6);
+    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    box-shadow:
+      0 0 28px rgba(168, 85, 247, 0.12),
+      0 4px 24px rgba(0, 0, 0, 0.25),
+      inset 0 1px 0 rgba(168, 85, 247, 0.15);
+    gap: 0.6rem;
+    user-select: none;
+    -webkit-user-select: none;
+  }
 
-  /* Step 3 */
-  .layout-3 .card-frontend { grid-area: 1 / 1 / 2 / 3; } /* North */
-  .layout-3 .card-backend  { grid-area: 1 / 3 / 4 / 4; } /* East  */
-  .layout-3 .card-stack    { grid-area: 3 / 2 / 4 / 3; } /* South */
-  .layout-3 .card-about    { grid-area: 2 / 1 / 4 / 2; } /* West  */
-  .layout-3 .card-drag     { grid-area: 2 / 2 / 3 / 3; } /* Center */
+  .center-btn-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+  }
 
-  /* ── Card inner content ──────────────────────────────── */
-  .card-label {
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+  .center-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a855f7, #7c3aed);
+    border: none;
+    cursor: grab;
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow:
+      0 0 20px rgba(168, 85, 247, 0.45),
+      0 4px 14px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transition: box-shadow 0.2s, transform 0.15s;
+    outline: none;
+    -webkit-user-drag: none;
+  }
+
+  .center-btn:active {
+    cursor: grabbing;
+    box-shadow:
+      0 0 36px rgba(168, 85, 247, 0.7),
+      0 4px 14px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    transform: scale(1.05);
+  }
+
+  .center-btn-icon {
+    font-size: 1.4rem;
+    color: rgba(255, 255, 255, 0.92);
+    pointer-events: none;
+  }
+
+  .center-hint {
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.28em;
     text-transform: uppercase;
-    color: rgba(168, 85, 247, 0.8);
-    margin-bottom: 0.25rem;
+    color: rgba(168, 85, 247, 0.4);
+  }
+
+  .center-topic {
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: rgba(255, 255, 255, 0.8);
+    transition: opacity 0.2s;
+  }
+
+  /* ── Card face typography ────────────────────────────── */
+  .card-label {
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(168, 85, 247, 0.9);
+    margin-bottom: 0.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .card-label::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(168, 85, 247, 0.8);
+    flex-shrink: 0;
   }
 
   .card-title {
     font-size: 1.1rem;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: rgba(255, 255, 255, 0.88);
-    line-height: 1.3;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.2;
+    margin: 0;
   }
 
   .card-desc {
-    font-size: 0.85rem;
-    line-height: 1.65;
-    color: rgba(148, 163, 184, 0.7);
-    margin-top: 0.35rem;
+    font-size: 0.8rem;
+    line-height: 1.7;
+    color: rgba(148, 163, 184, 0.9);
+    margin-top: 0.2rem;
   }
 
   .card-desc--sm {
-    font-size: 0.78rem;
-    color: rgba(148, 163, 184, 0.5);
+    font-size: 0.72rem;
+    line-height: 1.6;
+    color: rgba(148, 163, 184, 0.6);
+  }
+
+  .card-year {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    color: rgba(168, 85, 247, 0.65);
+    line-height: 1;
+    margin-bottom: -0.2rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Profile tile ────────────────────────────────────── */
+  .profile-tile {
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    background: rgba(148, 163, 184, 0.08);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .profile-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    filter: grayscale(1) contrast(1.05);
+    opacity: 0.6;
+  }
+
+  .profile-tile-placeholder {
+    font-size: 2.5rem;
+    opacity: 0.25;
   }
 
   /* ── Tech pills ──────────────────────────────────────── */
   .tech-pills {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.4rem;
-    margin-top: 0.5rem;
+    gap: 0.35rem;
+    margin-top: 0.4rem;
   }
 
   .tech-pills span {
-    font-size: 0.7rem;
+    font-size: 0.68rem;
     font-weight: 600;
     letter-spacing: 0.06em;
-    padding: 0.2rem 0.55rem;
+    padding: 0.18rem 0.5rem;
     border-radius: 999px;
     background: rgba(168, 85, 247, 0.1);
-    border: 1px solid rgba(168, 85, 247, 0.25);
-    color: rgba(168, 85, 247, 0.9);
+    border: 1px solid rgba(168, 85, 247, 0.22);
+    color: rgba(168, 85, 247, 0.88);
   }
 
-  /* ── Drag card ───────────────────────────────────────── */
-  .card-drag {
+  /* ── Project card inside bento ───────────────────────── */
+  .bento-project {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    height: 100%;
+  }
+
+  .bento-project-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+  }
+
+  .bento-project-excerpt {
+    font-size: 0.76rem;
+    color: rgba(148, 163, 184, 0.85);
+    line-height: 1.6;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    flex: 1;
+  }
+
+  .bento-project-link {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(168, 85, 247, 0.8);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s;
+    margin-top: auto;
+  }
+
+  .bento-project-link:hover {
+    color: rgba(192, 132, 252, 1);
+  }
+
+  /* ── View all card ───────────────────────────────────── */
+  .bento-viewall {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: default;
-    user-select: none;
-    -webkit-user-select: none;
-    background: rgba(168, 85, 247, 0.06);
-    border: 1px solid rgba(168, 85, 247, 0.35);
-    box-shadow:
-      0 0 24px rgba(168, 85, 247, 0.1),
-      inset 0 0 20px rgba(168, 85, 247, 0.04);
     gap: 0.5rem;
-    transform-style: flat;
-    perspective: none;
-    padding: 1.5rem;
-  }
-
-  .step-title {
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: rgba(255, 255, 255, 0.85);
-    transition: opacity 0.25s ease;
-  }
-
-  /* ── Slider ──────────────────────────────────────────── */
-  .drag-label {
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    background: linear-gradient(90deg, #a855f7, #c084fc, #a855f7);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: sb-shimmer-label 3s ease-in-out infinite;
-  }
-
-  @keyframes sb-shimmer-label {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .slider-track {
-    position: relative;
-    width: 80%;
-    height: 44px;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(168, 85, 247, 0.2);
-    border-radius: 999px;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
-  }
-
-  .slider-fill {
-    position: absolute;
-    left: 0;
-    top: 0;
     height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, rgba(168, 85, 247, 0.15), rgba(192, 132, 252, 0.25));
-    border-radius: inherit;
-    transition: width 0.06s linear;
+    text-align: center;
   }
 
-  .slider-thumb {
-    position: absolute;
-    left: 4px;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #a855f7, #7c3aed);
-    box-shadow: 0 0 16px rgba(168, 85, 247, 0.5), 0 2px 8px rgba(0, 0, 0, 0.4);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: grab;
-    touch-action: none;
-    z-index: 2;
-    transition: box-shadow 0.2s;
+  .bento-viewall-icon {
+    font-size: 1.8rem;
+    opacity: 0.35;
   }
 
-  .slider-thumb:active {
-    cursor: grabbing;
-    box-shadow: 0 0 28px rgba(168, 85, 247, 0.8), 0 2px 8px rgba(0, 0, 0, 0.4);
-  }
-
-  .slider-thumb-icon {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.9);
-    pointer-events: none;
-  }
-
-  .slider-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 0.75rem;
-    color: rgba(168, 85, 247, 0.3);
+  .bento-viewall-link {
+    font-size: 0.78rem;
     font-weight: 700;
-    animation: sb-pulse-arrow 2s ease-in-out infinite;
-    z-index: 1;
-  }
-
-  .slider-arrow--left  { left: 48px; }
-  .slider-arrow--right { right: 10px; }
-
-  @keyframes sb-pulse-arrow {
-    0%, 100% { opacity: 0.2; }
-    50%       { opacity: 0.7; }
-  }
-
-  .drag-hint {
-    font-size: 0.58rem;
     letter-spacing: 0.1em;
-    color: rgba(168, 85, 247, 0.3);
     text-transform: uppercase;
+    color: rgba(168, 85, 247, 0.85);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .bento-viewall-link:hover {
+    color: rgba(192, 132, 252, 1);
   }
 
   /* ── Responsive ──────────────────────────────────────── */
@@ -418,6 +459,9 @@
     }
     .bento-card {
       min-height: 160px;
+    }
+    .card-center {
+      min-height: 180px;
     }
   }
 </style>
@@ -430,26 +474,146 @@
   gsap.registerPlugin(Draggable, Flip);
 
   /* ─────────────────────────────────────────────────────────
+     TOPIC CONTENT DEFINITIONS
+  ───────────────────────────────────────────────────────── */
+  interface CardContent {
+    label: string;
+    title: string;
+    desc?: string;
+    descSm?: string;
+    yearBadge?: string;
+    pills?: string[];
+    isProfile?: boolean;
+    isProject?: number;
+    isViewAll?: boolean;
+  }
+
+  interface Topic {
+    de: { name: string; cards: CardContent[] };
+    en: { name: string; cards: CardContent[] };
+  }
+
+  // Cards ordered [N, E, S, W] per topic
+  const TOPICS: Topic[] = [
+    // ── Topic 0: Über Mich ────────────────────────
+    {
+      de: {
+        name: "Über Mich",
+        cards: [
+          { label: "Wer ich bin", title: "Informatikstudent, LMU München", desc: "Ich studiere Informatik an der LMU München und baue seit 2018 Web­anwendungen — von kleinen Tools bis zu komplexen Headless-Architekturen." },
+          { label: "Was mich antreibt", title: "Erschaffen. Planen. Entwickeln.", desc: "Mein Fokus: präzise Architektur, sauberer Code und außergewöhnliche User Experiences. Qualität vor Quantität." },
+          { label: "Profil", title: "", isProfile: true },
+          { label: "Jenseits des Codes", title: "Musik · Gaming · Astronomie", desc: "Wenn ich nicht am Computer bin, finde ich Inspiration in Musik, Spielen und dem Blick ins Universum." },
+        ],
+      },
+      en: {
+        name: "About Me",
+        cards: [
+          { label: "Who I am", title: "CS Student, LMU Munich", desc: "Studying computer science at LMU Munich while building web applications since 2018 — from small tools to complex headless architectures." },
+          { label: "What drives me", title: "Create. Plan. Develop.", desc: "My focus: precise architecture, clean code and exceptional user experiences. Quality over quantity." },
+          { label: "Profile", title: "", isProfile: true },
+          { label: "Beyond Code", title: "Music · Gaming · Astronomy", desc: "When I'm not at the computer, I find inspiration in music, games, and gazing at the universe." },
+        ],
+      },
+    },
+    // ── Topic 1: Die Geschichte ───────────────────
+    {
+      de: {
+        name: "Die Geschichte",
+        cards: [
+          { label: "Der Anfang", title: "Erste Zeile Code", yearBadge: "2018", desc: "Mit einem einfachen Python-Skript begann alles. Seitdem hat mich die Faszination fürs Programmieren nicht losgelassen." },
+          { label: "Erster Meilenstein", title: "Erste FullStack App", yearBadge: "2021", desc: "Entwicklung meiner ersten vollständigen Web-Applikation mit eigenem Backend, Datenbank und Live-Deployment." },
+          { label: "Berufserfahrung", title: "Werbeagentur Gerer", yearBadge: "2025", desc: "Softwareingenieur — reale Projekte, echte Kunden, professionelle Standards." },
+          { label: "Gründung", title: "Pro-Grammer", yearBadge: "2026", desc: "Gründung meines eigenen Softwareunternehmens: präziser Code für ambitionierte Projekte." },
+        ],
+      },
+      en: {
+        name: "The Origin",
+        cards: [
+          { label: "The Beginning", title: "First Line of Code", yearBadge: "2018", desc: "It all started with a simple Python script. Since then, the fascination for programming has never left me." },
+          { label: "First Milestone", title: "First FullStack App", yearBadge: "2021", desc: "Built my first complete web application with its own backend, database and live deployment." },
+          { label: "Professional", title: "Werbeagentur Gerer", yearBadge: "2025", desc: "Software engineer — real projects, real clients, professional standards." },
+          { label: "Founded", title: "Pro-Grammer", yearBadge: "2026", desc: "Founded my own software company: precise code for ambitious projects." },
+        ],
+      },
+    },
+    // ── Topic 2: Leistungen ───────────────────────
+    {
+      de: {
+        name: "Leistungen",
+        cards: [
+          { label: "Entwicklung", title: "FullStack Development", desc: "Komplette Web-Applikationen von Frontend bis Backend — Astro, React, Node.js, Headless CMS.", pills: ["Astro", "React", "Node.js", "TypeScript"] },
+          { label: "Infrastruktur", title: "Datenbanken & APIs", desc: "Skalierbare REST & GraphQL-Services, PostgreSQL, MySQL, cloud-native Deployments mit Docker & CI/CD.", pills: ["PostgreSQL", "GraphQL", "Docker", "AWS"] },
+          { label: "Maßarbeit", title: "Custom Solutions", desc: "Keine Baukästen. Individuelle Lösungen, die exakt auf Ihre Anforderungen zugeschnitten sind." },
+          { label: "Beratung", title: "Consulting & White-Label", desc: "Strategische Beratung, Code Reviews, Architektur-Audits und diskrete White-Label-Entwicklung." },
+        ],
+      },
+      en: {
+        name: "Services",
+        cards: [
+          { label: "Development", title: "FullStack Development", desc: "Complete web applications from frontend to backend — Astro, React, Node.js, Headless CMS.", pills: ["Astro", "React", "Node.js", "TypeScript"] },
+          { label: "Infrastructure", title: "Databases & APIs", desc: "Scalable REST & GraphQL services, PostgreSQL, MySQL, cloud-native deployments with Docker & CI/CD.", pills: ["PostgreSQL", "GraphQL", "Docker", "AWS"] },
+          { label: "Tailored", title: "Custom Solutions", desc: "No page builders. Individual solutions precisely tailored to your requirements." },
+          { label: "Advisory", title: "Consulting & White-Label", desc: "Strategic consulting, code reviews, architecture audits and discreet white-label development." },
+        ],
+      },
+    },
+    // ── Topic 3: Projekte ─────────────────────────
+    {
+      de: {
+        name: "Projekte",
+        cards: [
+          { label: "Projekt", title: "", isProject: 0 },
+          { label: "Projekt", title: "", isProject: 1 },
+          { label: "Projekt", title: "", isProject: 2 },
+          { label: "Mehr", title: "", isViewAll: true },
+        ],
+      },
+      en: {
+        name: "Projects",
+        cards: [
+          { label: "Project", title: "", isProject: 0 },
+          { label: "Project", title: "", isProject: 1 },
+          { label: "Project", title: "", isProject: 2 },
+          { label: "More", title: "", isViewAll: true },
+        ],
+      },
+    },
+  ];
+
+  /* ─────────────────────────────────────────────────────────
+     PROJECTS DATA (from server island)
+  ───────────────────────────────────────────────────────── */
+  interface ProjectData {
+    title: string;
+    excerpt: string;
+    slug: string;
+    imageUrl: string;
+    imageAlt: string;
+    techStack: string;
+  }
+
+  let projects: ProjectData[] = [];
+  try {
+    const el = document.getElementById("sb-projects-data");
+    if (el) projects = JSON.parse(el.textContent ?? "[]");
+  } catch { /* empty */ }
+
+  /* ─────────────────────────────────────────────────────────
      CONFIG
   ───────────────────────────────────────────────────────── */
   const STEPS = 4;
   const LAYOUT_CLASSES = ["layout-0", "layout-1", "layout-2", "layout-3"] as const;
 
-  const STEP_NAMES_DE = ["Identität", "Tech Stack", "Backend", "Frontend"] as const;
-  const STEP_NAMES_EN = ["Identity", "Tech Stack", "Backend", "Frontend"] as const;
-
-  const CAT_NAMES_DE = ["Identität", "Tech Stack", "Backend", "Frontend"] as const;
-  const CAT_NAMES_EN = ["Identity", "Tech Stack", "Backend", "Frontend"] as const;
-
   /* ─────────────────────────────────────────────────────────
      DOM REFS
   ───────────────────────────────────────────────────────── */
-  let container:    HTMLElement | null = null;
-  let sliderTrack:  HTMLElement | null = null;
-  let sliderThumb:  HTMLElement | null = null;
-  let sliderFill:   HTMLElement | null = null;
-  let stepTitleEl:  HTMLElement | null = null;
-  let catEls:       HTMLElement[]      = [];
+  let container:   HTMLElement | null = null;
+  let centerBtn:   HTMLElement | null = null;
+  let centerTopic: HTMLElement | null = null;
+  let centerHint:  HTMLElement | null = null;
+  let catEls:      HTMLElement[]      = [];
+  let orbitCards:  HTMLElement[]      = [];
   let activeDraggable: Draggable | null = null;
 
   /* ─────────────────────────────────────────────────────────
@@ -463,42 +627,138 @@
   ───────────────────────────────────────────────────────── */
   function mod(n: number, m: number) { return ((n % m) + m) % m; }
 
-  function getCurrentLang(): 'de' | 'en' {
-    const stored = localStorage.getItem('lang');
-    if (stored === 'de' || stored === 'en') return stored;
-    const browser = navigator.language || 'de';
-    return browser.startsWith('de') ? 'de' : 'en';
-  }
-
-  function getCurrentFace(): 'a' | 'b' {
-    return getCurrentLang() === 'en' ? 'b' : 'a';
-  }
-
-  function getContentCards(): HTMLElement[] {
-    return Array.from(
-      container?.querySelectorAll<HTMLElement>(".bento-card:not(.card-drag)") ?? []
-    );
+  function getCurrentLang(): "de" | "en" {
+    const stored = localStorage.getItem("lang");
+    if (stored === "de" || stored === "en") return stored;
+    const browser = navigator.language || "de";
+    return browser.startsWith("de") ? "de" : "en";
   }
 
   /* ─────────────────────────────────────────────────────────
-     FACE SWAP  — 180° Y-flip, used for language switching
+     CONTENT RENDERING
   ───────────────────────────────────────────────────────── */
-  function flipCardFaces(cards: HTMLElement[], toFace: "a" | "b"): Promise<void> {
-    return new Promise(resolve => {
-      gsap.to(cards, {
+  function stripHtml(html: string): string {
+    return html.replace(/<[^>]*>/g, "").trim();
+  }
+
+  function renderCardContent(face: HTMLElement, content: CardContent, lang: "de" | "en") {
+    face.innerHTML = "";
+
+    if (content.isViewAll) {
+      face.innerHTML = `<div class="bento-viewall"><span class="bento-viewall-icon">→</span><a href="/projects" class="bento-viewall-link">${lang === "de" ? "Alle Projekte ansehen →" : "View all projects →"}</a></div>`;
+      return;
+    }
+
+    if (content.isProfile) {
+      face.innerHTML = `<div class="profile-tile"><span class="profile-tile-placeholder">👤</span></div>`;
+      return;
+    }
+
+    if (typeof content.isProject === "number") {
+      const proj = projects[content.isProject];
+      if (proj) {
+        const excerpt = stripHtml(proj.excerpt).slice(0, 140);
+        face.innerHTML = `<p class="card-label">${content.label}</p><div class="bento-project"><p class="bento-project-title">${proj.title}</p><p class="bento-project-excerpt">${excerpt}</p><a href="/projects/${proj.slug}" class="bento-project-link">Details →</a></div>`;
+      } else {
+        face.innerHTML = `<p class="card-label">${content.label}</p><p class="card-title" style="opacity:0.4">${lang === "de" ? "Bald verfügbar" : "Coming soon"}</p>`;
+      }
+      return;
+    }
+
+    let html = `<p class="card-label">${content.label}</p>`;
+    if (content.yearBadge) html += `<p class="card-year">${content.yearBadge}</p>`;
+    if (content.title)     html += `<h3 class="card-title">${content.title}</h3>`;
+    if (content.desc)      html += `<p class="card-desc">${content.desc}</p>`;
+    if (content.descSm)    html += `<p class="card-desc card-desc--sm">${content.descSm}</p>`;
+    if (content.pills?.length) {
+      html += `<div class="tech-pills">${content.pills.map(p => `<span>${p}</span>`).join("")}</div>`;
+    }
+    face.innerHTML = html;
+  }
+
+  // For step s, the orbit card at grid position pos (N=0,E=1,S=2,W=3)
+  // is orbit card with index: (pos - s + 4) % 4
+  // So for populating topic topicIndex at layout step topicIndex,
+  // orbit card orbitIdx gets content for position pos = (orbitIdx + topicIndex) % 4
+  function populateTopicCards(topicIndex: number, lang: "de" | "en") {
+    const topic = TOPICS[topicIndex];
+    if (!topic) return;
+    const data = topic[lang];
+
+    for (let orbitIdx = 0; orbitIdx < 4; orbitIdx++) {
+      const pos = mod(orbitIdx + topicIndex, 4);
+      const face = orbitCards[orbitIdx]?.querySelector<HTMLElement>(".card-face");
+      if (face) renderCardContent(face, data.cards[pos], lang);
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     LABELS
+  ───────────────────────────────────────────────────────── */
+  function updateLabels(targetStep?: number, lang?: "de" | "en") {
+    const s = targetStep ?? step;
+    const l = lang ?? getCurrentLang();
+    catEls.forEach((el, i) => {
+      el.textContent = el.getAttribute(`data-${l}`) ?? el.textContent;
+      el.classList.toggle("cat-label--active", i === s);
+    });
+    if (centerTopic) centerTopic.textContent = TOPICS[s]?.[l]?.name ?? "";
+    if (centerHint)  centerHint.textContent  = centerHint.getAttribute(`data-${l}`) ?? "";
+  }
+
+  /* ─────────────────────────────────────────────────────────
+     ADVANCE STEP — Flip reposition + card-face flip + content swap
+  ───────────────────────────────────────────────────────── */
+  async function advanceStep(direction: 1 | -1) {
+    if (!container || isTransitioning) return;
+    isTransitioning = true;
+
+    const nextStep = mod(step + direction, STEPS);
+    const lang = getCurrentLang();
+
+    // Fade center topic text
+    if (centerTopic) {
+      gsap.to(centerTopic, {
+        opacity: 0, duration: 0.15, onComplete() {
+          if (centerTopic) {
+            centerTopic.textContent = TOPICS[nextStep]?.[lang]?.name ?? "";
+            gsap.to(centerTopic, { opacity: 1, duration: 0.25 });
+          }
+        },
+      });
+    }
+
+    // Update category labels
+    catEls.forEach((el, i) => {
+      el.textContent = el.getAttribute(`data-${lang}`) ?? el.textContent;
+      el.classList.toggle("cat-label--active", i === nextStep);
+    });
+
+    // Capture FLIP state before layout change
+    const state = Flip.getState(orbitCards);
+
+    // Swap layout class
+    LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
+    container!.classList.add(LAYOUT_CLASSES[nextStep]);
+
+    // Start FLIP repositioning in parallel with card-face flip
+    Flip.from(state, {
+      duration: 0.65,
+      ease: "power3.inOut",
+      absolute: true,
+      stagger: 0.04,
+    });
+
+    // Card-face flip: 0→90° (hide), swap content, -90→0° (reveal)
+    await new Promise<void>(resolve => {
+      gsap.to(orbitCards, {
         rotateY: 90,
         duration: 0.28,
         ease: "power2.in",
         stagger: 0.04,
         onComplete() {
-          cards.forEach(card => {
-            const fA = card.querySelector<HTMLElement>(".content-a");
-            const fB = card.querySelector<HTMLElement>(".content-b");
-            if (!fA || !fB) return;
-            gsap.set(fA, { opacity: toFace === "a" ? 1 : 0 });
-            gsap.set(fB, { opacity: toFace === "b" ? 1 : 0 });
-          });
-          gsap.fromTo(cards, { rotateY: -90 }, {
+          populateTopicCards(nextStep, lang);
+          gsap.fromTo(orbitCards, { rotateY: -90 }, {
             rotateY: 0,
             duration: 0.28,
             ease: "power2.out",
@@ -508,115 +768,35 @@
         },
       });
     });
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     LABELS — update category row and step title text
-  ───────────────────────────────────────────────────────── */
-  function updateLabels(targetStep?: number) {
-    const s = targetStep ?? step;
-    const isEN = getCurrentFace() === 'b';
-    const catNames = isEN ? CAT_NAMES_EN : CAT_NAMES_DE;
-    const stepNames = isEN ? STEP_NAMES_EN : STEP_NAMES_DE;
-
-    catEls.forEach((el, i) => {
-      el.textContent = catNames[i];
-      el.classList.toggle("cat-label--active", i === s);
-    });
-
-    if (stepTitleEl) stepTitleEl.textContent = stepNames[s];
-  }
-
-  /* ─────────────────────────────────────────────────────────
-     LAYOUT TRANSITION — Flip repositioning only, no face swap
-  ───────────────────────────────────────────────────────── */
-  async function advanceStep(direction: 1 | -1) {
-    if (!container || isTransitioning) return;
-    isTransitioning = true;
-
-    const nextStep = mod(step + direction, STEPS);
-
-    // Animate step title fade
-    if (stepTitleEl) {
-      const isEN = getCurrentFace() === 'b';
-      const stepNames = isEN ? STEP_NAMES_EN : STEP_NAMES_DE;
-      gsap.to(stepTitleEl, {
-        opacity: 0, duration: 0.15, onComplete() {
-          stepTitleEl!.textContent = stepNames[nextStep];
-          gsap.to(stepTitleEl, { opacity: 1, duration: 0.25 });
-        }
-      });
-    }
-
-    // Update active category label
-    catEls.forEach((el, i) => {
-      el.classList.toggle("cat-label--active", i === nextStep);
-    });
-
-    // ── GSAP FLIP: capture state → swap class → animate delta ──
-    const state = Flip.getState(".bento-card");
-
-    LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
-    container!.classList.add(LAYOUT_CLASSES[nextStep]);
 
     step = nextStep;
-
-    await new Promise<void>(resolve => {
-      Flip.from(state, {
-        duration: 1.0,
-        ease: "power3.inOut",
-        absolute: true,
-        stagger: 0.04,
-        onComplete: resolve,
-      });
-    });
-
     isTransitioning = false;
   }
 
   /* ─────────────────────────────────────────────────────────
-     DRAG SLIDER SETUP
+     CENTER BUTTON DRAGGABLE
   ───────────────────────────────────────────────────────── */
-  function setupSlider() {
-    if (!sliderTrack || !sliderThumb || !sliderFill) return;
+  function setupCenterBtn() {
+    if (!centerBtn) return;
     if (activeDraggable) { activeDraggable.kill(); activeDraggable = null; }
 
-    const trackW = sliderTrack.offsetWidth;
-    const thumbW = sliderThumb.offsetWidth;
-    const minX   = 4;
-    const maxX   = trackW - thumbW - 4;
-    const midX   = (minX + maxX) / 2;
-    const range  = maxX - minX;
+    const THRESHOLD = 36;
 
-    gsap.set(sliderThumb, { x: midX - minX });
-    gsap.set(sliderFill,  { width: "50%" });
-
-    activeDraggable = Draggable.create(sliderThumb, {
+    activeDraggable = Draggable.create(centerBtn, {
       type: "x",
-      bounds: sliderTrack,
       inertia: false,
       cursor: "grab",
       activeCursor: "grabbing",
       zIndexBoost: false,
-
-      onDrag() {
-        const x = gsap.getProperty(sliderThumb, "x") as number;
-        const pct = Math.max(0, Math.min(100, ((x - minX + thumbW / 2) / (range + thumbW)) * 100));
-        if (sliderFill) sliderFill.style.width = `${pct}%`;
-      },
+      bounds: { minX: -80, maxX: 80 },
 
       onRelease() {
-        const x = gsap.getProperty(sliderThumb, "x") as number;
-        const center    = midX - minX;
-        const threshold = range * 0.2;
-
+        const x = gsap.getProperty(centerBtn, "x") as number;
         let direction: 1 | -1 | null = null;
-        if (x > center + threshold) direction =  1; // right → clockwise
-        if (x < center - threshold) direction = -1; // left  → counter-clockwise
+        if (x >  THRESHOLD) direction =  1;
+        if (x < -THRESHOLD) direction = -1;
 
-        // Spring-snap thumb back to center
-        gsap.to(sliderThumb, { x: midX - minX, duration: 0.7, ease: "elastic.out(0.8, 0.5)" });
-        gsap.to(sliderFill,  { width: "50%",   duration: 0.4, ease: "power2.out" });
+        gsap.to(centerBtn, { x: 0, duration: 0.7, ease: "elastic.out(0.8, 0.5)" });
 
         if (direction) advanceStep(direction);
       },
@@ -627,18 +807,8 @@
      ENTRY ANIMATION
   ───────────────────────────────────────────────────────── */
   function playEntryAnimation() {
-    const cards = container?.querySelectorAll<HTMLElement>(".bento-card");
+    const cards = container?.querySelectorAll<HTMLElement>(".bento-card, .card-center");
     if (!cards) return;
-
-    // Show the face for the current language; hide the other
-    const face = getCurrentFace();
-    container?.querySelectorAll<HTMLElement>(".content-a").forEach(el =>
-      gsap.set(el, { opacity: face === "a" ? 1 : 0 })
-    );
-    container?.querySelectorAll<HTMLElement>(".content-b").forEach(el =>
-      gsap.set(el, { opacity: face === "b" ? 1 : 0 })
-    );
-
     gsap.from(Array.from(cards), {
       opacity: 0,
       scale: 0.88,
@@ -649,13 +819,26 @@
   }
 
   /* ─────────────────────────────────────────────────────────
-     LANGUAGE CHANGE — flip card faces when user switches language
+     LANGUAGE CHANGE
   ───────────────────────────────────────────────────────── */
   function onLangChange() {
-    const face = getCurrentFace();
-    const cards = getContentCards();
-    flipCardFaces(cards, face);
-    updateLabels();
+    const lang = getCurrentLang();
+    gsap.to(orbitCards, {
+      rotateY: 90,
+      duration: 0.28,
+      ease: "power2.in",
+      stagger: 0.04,
+      onComplete() {
+        populateTopicCards(step, lang);
+        gsap.fromTo(orbitCards, { rotateY: -90 }, {
+          rotateY: 0,
+          duration: 0.28,
+          ease: "power2.out",
+          stagger: 0.04,
+        });
+      },
+    });
+    updateLabels(step, lang);
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -663,29 +846,40 @@
   ───────────────────────────────────────────────────────── */
   function init() {
     container   = document.getElementById("sb-bento-container");
-    sliderTrack = document.getElementById("sb-slider-track");
-    sliderThumb = document.getElementById("sb-slider-thumb");
-    sliderFill  = document.getElementById("sb-slider-fill");
-    stepTitleEl = document.getElementById("sb-step-title");
+    centerBtn   = document.getElementById("sb-center-btn");
+    centerTopic = document.getElementById("sb-center-topic");
+    centerHint  = document.getElementById("sb-center-hint");
     catEls      = [0, 1, 2, 3]
       .map(i => document.getElementById(`sb-cat-${i}`)!)
       .filter(Boolean) as HTMLElement[];
+    orbitCards  = [0, 1, 2, 3]
+      .map(i => document.getElementById(`sb-orbit-${i}`)!)
+      .filter(Boolean) as HTMLElement[];
 
-    if (!container || !sliderTrack || !sliderThumb) return;
+    if (!container || !centerBtn || orbitCards.length < 4) return;
 
-    // Reset to initial layout state
     step = 0;
     LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
     container.classList.add("layout-0");
-    updateLabels(0);
 
-    // Slider needs one paint tick for accurate offsetWidth
+    const lang = getCurrentLang();
+    populateTopicCards(0, lang);
+    updateLabels(0, lang);
+
     requestAnimationFrame(() => {
-      setupSlider();
+      setupCenterBtn();
       playEntryAnimation();
     });
 
-    // Re-wire language listener (remove any stale one first)
+    // Click category labels → jump to topic
+    catEls.forEach((el, i) => {
+      el.addEventListener("click", () => {
+        if (i === step || isTransitioning) return;
+        const diff = mod(i - step, STEPS);
+        advanceStep(diff <= 2 ? 1 : -1);
+      });
+    });
+
     window.removeEventListener("langchange", onLangChange);
     window.addEventListener("langchange", onLangChange);
   }
