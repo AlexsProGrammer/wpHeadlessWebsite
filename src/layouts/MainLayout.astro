@@ -1,16 +1,12 @@
 ---
 import '@fontsource/inter';
 import Footer from '../components/Footer.astro';
-import PillNav from '../components/PillNav.astro';
-import LangToggle from '../components/LangToggle.astro';
 
 interface Props {
   title: string;
-  activeNav?: 'identity' | 'work' | 'terminal';
-  showPillNav?: boolean;
 }
 
-const { title, activeNav = 'identity', showPillNav = false } = Astro.props;
+const { title } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Pro-Grammer';
 const fullTitle = `${siteName} - ${title}`;
 ---
@@ -33,10 +29,6 @@ const fullTitle = `${siteName} - ${title}`;
     <div class="scroll-edge scroll-edge-top" aria-hidden="true"></div>
     <div class="scroll-edge scroll-edge-bottom" aria-hidden="true"></div>
     <div class="overscroll-wrapper" id="overscroll-wrapper">
-      <div class="side-rail" id="side-rail">
-        {showPillNav && <PillNav active={activeNav} />}
-        <LangToggle />
-      </div>
       <main class="page-content">
         <slot />
       </main>
@@ -122,24 +114,6 @@ const fullTitle = `${siteName} - ${title}`;
 
   .page-content {
     flex: 1 0 auto;
-  }
-
-  .side-rail {
-    position: fixed;
-    right: 1rem;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 100;
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.35rem;
-  }
-
-  @media (min-width: 1024px) {
-    .side-rail {
-      display: flex;
-    }
   }
 
   .bg-blobs-container {
@@ -263,15 +237,32 @@ const fullTitle = `${siteName} - ${title}`;
 </script>
 
 <script>
+  import Lenis from "@studio-freight/lenis";
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  const lenis = new Lenis();
+
+  // Keep ScrollTrigger in sync with Lenis scroll position
+  lenis.on("scroll", () => ScrollTrigger.update());
+
+  // Drive Lenis via GSAP ticker for precise frame timing
+  gsap.ticker.add((time: number) => {
+    lenis.raf(time * 1000);
+  });
+
+  gsap.ticker.lagSmoothing(0);
+
+  // Expose globally so child components (hero, bento) can call .scrollTo()
+  (window as any).__lenis = lenis;
+</script>
+
+<script>
   const root = document.documentElement;
   const body = document.body;
-  const wrapper = document.getElementById('overscroll-wrapper');
   let scrollHintTimer: number | undefined;
-  let releaseTimer: number | undefined;
-
-  function clamp(value: number, min: number, max: number): number {
-    return Math.max(min, Math.min(max, value));
-  }
 
   function updateScrollEdges(): void {
     const scrollTop = root.scrollTop || body.scrollTop;
@@ -292,36 +283,8 @@ const fullTitle = `${siteName} - ${title}`;
     }, 120);
   }
 
-  function releaseOverscroll(): void {
-    if (releaseTimer) {
-      window.clearTimeout(releaseTimer);
-    }
-
-    releaseTimer = window.setTimeout(() => {
-      if (wrapper) wrapper.style.transform = '';
-    }, 50);
-  }
-
   window.addEventListener('scroll', updateScrollEdges, { passive: true });
   window.addEventListener('resize', updateScrollEdges, { passive: true });
-
-  window.addEventListener(
-    'wheel',
-    (event: WheelEvent) => {
-      const scrollTop = root.scrollTop || body.scrollTop;
-      const maxScroll = Math.max(0, root.scrollHeight - root.clientHeight);
-      const atTop = scrollTop <= 0;
-      const atBottom = scrollTop >= maxScroll - 1;
-
-      if ((atTop && event.deltaY < 0) || (atBottom && event.deltaY > 0)) {
-        event.preventDefault();
-        const pull = clamp(event.deltaY * 0.15, -18, 18);
-        if (wrapper) wrapper.style.transform = `translateY(${pull}px)`;
-        releaseOverscroll();
-      }
-    },
-    { passive: false }
-  );
 
   updateScrollEdges();
 </script>
