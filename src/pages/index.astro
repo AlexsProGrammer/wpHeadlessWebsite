@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import SolarLoader from '../components/SolarLoader.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TerminalSection from '../components/TerminalFooter.astro';
 import { getAllProjects, getProjectImage } from '../lib/api';
@@ -33,6 +34,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
 ---
 
 <MainLayout title="Home">
+  <SolarLoader />
   <!-- Hero -->
   <section class="hero" id="hero">
     <div class="hero-inner">
