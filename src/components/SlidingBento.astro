@@ -47,10 +47,10 @@ const projectsJSON = JSON.stringify(
   <!-- ── Bento Grid ──────────────────────────────────────── -->
   <div class="bento-container layout-0" id="sb-bento-container">
 
-    <div class="bento-card orbit-card" id="sb-orbit-0"><div class="card-face"></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-1"><div class="card-face"></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-2"><div class="card-face"></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-3"><div class="card-face"></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-0"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-1"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-2"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
+    <div class="bento-card orbit-card" id="sb-orbit-3"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
 
     <!-- Center glassmorphic toggle -->
     <div class="card-center" id="sb-center-card">
@@ -141,60 +141,134 @@ const projectsJSON = JSON.stringify(
   /* ── Card base (glass) ───────────────────────────────── */
   .bento-card {
     background: linear-gradient(
-      135deg,
-      rgba(15, 15, 25, 0.65) 0%,
-      rgba(10, 10, 20, 0.55) 50%,
-      rgba(15, 15, 30, 0.6) 100%
+      145deg,
+      rgba(8, 8, 18, 0.82) 0%,
+      rgba(12, 10, 22, 0.72) 40%,
+      rgba(8, 8, 16, 0.78) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: 24px;
-    backdrop-filter: blur(40px) saturate(1.6);
-    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 20px;
+    backdrop-filter: blur(60px) saturate(1.8);
+    -webkit-backdrop-filter: blur(60px) saturate(1.8);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.3),
-      0 1px 0 rgba(255, 255, 255, 0.04) inset,
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 8px 32px rgba(0, 0, 0, 0.3),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    overflow: visible;
+    overflow: hidden;
     position: relative;
   }
 
-  .orbit-card {
-    transition:
-      border-color 0.4s ease,
-      box-shadow 0.4s ease,
-      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Subtle noise texture overlay */
+  .bento-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 20px;
+    opacity: 0.035;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 128px 128px;
+    z-index: 1;
   }
 
+  .orbit-card {
+    perspective: 1200px;
+    transition:
+      border-color 0.4s ease,
+      box-shadow 0.5s ease;
+  }
+
+  /* Animated gradient border glow */
   .orbit-card::before {
     content: '';
     position: absolute;
     inset: -1px;
-    border-radius: 24px;
+    border-radius: 20px;
     opacity: 0;
     z-index: -1;
     background: conic-gradient(
-      from 180deg,
-      rgba(0, 240, 255, 0.12),
-      rgba(138, 43, 226, 0.12),
-      rgba(255, 0, 127, 0.08),
-      rgba(0, 240, 255, 0.12)
+      from var(--glow-angle, 180deg),
+      rgba(120, 60, 255, 0.2),
+      rgba(0, 210, 255, 0.15),
+      rgba(255, 0, 160, 0.12),
+      rgba(120, 60, 255, 0.2)
     );
-    filter: blur(20px);
+    filter: blur(18px);
     transition: opacity 0.5s ease;
     pointer-events: none;
+    animation: border-spin 6s linear infinite paused;
+  }
+
+  @keyframes border-spin {
+    to { --glow-angle: 540deg; }
+  }
+
+  @property --glow-angle {
+    syntax: '<angle>';
+    initial-value: 180deg;
+    inherits: false;
   }
 
   .orbit-card:hover::before {
     opacity: 1;
+    animation-play-state: running;
   }
 
   .orbit-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-6px) scale(1.01);
     border-color: rgba(255, 255, 255, 0.12);
     box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.4),
-      0 0 40px rgba(0, 240, 255, 0.05),
+      0 12px 40px rgba(0, 0, 0, 0.45),
+      0 0 50px rgba(120, 60, 255, 0.06),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  }
+
+  /* Suppress hover interference during FLIP transitions */
+  .is-transitioning .orbit-card {
+    transition: none !important;
+    pointer-events: none;
+  }
+
+  /* ── Glowing orb — decorative light blob ─────────────── */
+  .card-orb {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    filter: blur(30px);
+    opacity: 0.5;
+    pointer-events: none;
+    z-index: 0;
+    animation: orb-float 5s ease-in-out infinite;
+  }
+
+  .card-orb--cyan {
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.6) 0%, transparent 70%);
+    bottom: 10%;
+    left: 10%;
+  }
+
+  .card-orb--purple {
+    background: radial-gradient(circle, rgba(140, 60, 255, 0.55) 0%, transparent 70%);
+    bottom: 15%;
+    right: 12%;
+  }
+
+  .card-orb--magenta {
+    background: radial-gradient(circle, rgba(255, 0, 180, 0.5) 0%, transparent 70%);
+    top: 20%;
+    right: 8%;
+  }
+
+  @keyframes orb-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(6px, -8px) scale(1.08); }
+    66% { transform: translate(-4px, 5px) scale(0.95); }
+  }
+
+  .orbit-card:hover .card-orb {
+    opacity: 0.75;
   }
 
   /* ── Card inner (3D flip container) ──────────────────── */
@@ -202,19 +276,26 @@ const projectsJSON = JSON.stringify(
     position: absolute;
     inset: 0;
     transform-style: preserve-3d;
-    border-radius: 24px;
+    border-radius: 20px;
   }
 
   /* ── Card face ───────────────────────────────────────── */
   .card-face {
     position: absolute;
     inset: 0;
-    padding: 1.1rem 1.3rem;
+    padding: 1.2rem 1.4rem;
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.2rem;
     overflow: hidden;
-    border-radius: 24px;
+    border-radius: 20px;
+    z-index: 2;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
+  .card-face-back {
+    transform: rotateY(180deg);
   }
 
   /* Position-aware face overrides: N=wide, E=tall-3, S=small, W=tall-2 */
@@ -295,18 +376,19 @@ const projectsJSON = JSON.stringify(
     align-items: center;
     justify-content: center;
     background: linear-gradient(
-      135deg,
-      rgba(12, 12, 22, 0.75) 0%,
-      rgba(10, 10, 18, 0.6) 50%,
-      rgba(15, 12, 25, 0.65) 100%
+      145deg,
+      rgba(10, 10, 20, 0.82) 0%,
+      rgba(8, 8, 16, 0.7) 50%,
+      rgba(12, 10, 22, 0.75) 100%
     );
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 24px;
-    backdrop-filter: blur(40px) saturate(1.6);
-    -webkit-backdrop-filter: blur(40px) saturate(1.6);
+    border-radius: 20px;
+    backdrop-filter: blur(60px) saturate(1.8);
+    -webkit-backdrop-filter: blur(60px) saturate(1.8);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.3),
-      0 0 20px rgba(168, 85, 247, 0.04),
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(120, 60, 255, 0.04),
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
     gap: 0.5rem;
     user-select: none;
@@ -315,10 +397,11 @@ const projectsJSON = JSON.stringify(
   }
 
   .card-center:hover {
-    border-color: rgba(168, 85, 247, 0.15);
+    border-color: rgba(120, 60, 255, 0.18);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.3),
-      0 0 30px rgba(168, 85, 247, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.4),
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 35px rgba(120, 60, 255, 0.1),
       inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
@@ -343,7 +426,7 @@ const projectsJSON = JSON.stringify(
 
   .step-num--active {
     color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+    text-shadow: 0 0 12px rgba(120, 60, 255, 0.4);
   }
 
   .step-line {
@@ -357,7 +440,7 @@ const projectsJSON = JSON.stringify(
   .step-line-fill {
     position: absolute;
     inset: 0;
-    background: rgba(168, 85, 247, 0.4);
+    background: linear-gradient(90deg, rgba(120, 60, 255, 0.5), rgba(0, 200, 255, 0.4));
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -432,7 +515,7 @@ const projectsJSON = JSON.stringify(
     box-shadow:
       0 1px 4px rgba(0, 0, 0, 0.25),
       0 4px 12px rgba(0, 0, 0, 0.15),
-      0 0 8px rgba(168, 85, 247, 0.08),
+      0 0 8px rgba(120, 60, 255, 0.1),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
     transition: box-shadow 0.25s;
@@ -448,7 +531,7 @@ const projectsJSON = JSON.stringify(
 
   .toggle-thumb-icon {
     font-size: 0.85rem;
-    color: rgba(100, 60, 160, 0.6);
+    color: rgba(90, 50, 200, 0.65);
     z-index: 3;
     pointer-events: none;
     line-height: 1;
@@ -471,7 +554,7 @@ const projectsJSON = JSON.stringify(
     box-shadow:
       0 2px 8px rgba(0, 0, 0, 0.3),
       0 6px 20px rgba(0, 0, 0, 0.15),
-      0 0 18px rgba(168, 85, 247, 0.2),
+      0 0 18px rgba(120, 60, 255, 0.25),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
     animation: none;
@@ -481,7 +564,7 @@ const projectsJSON = JSON.stringify(
     cursor: grabbing;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.35),
-      0 4px 16px rgba(168, 85, 247, 0.25),
+      0 4px 16px rgba(120, 60, 255, 0.3),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
     animation: none;
@@ -492,7 +575,7 @@ const projectsJSON = JSON.stringify(
       box-shadow:
         0 1px 4px rgba(0, 0, 0, 0.25),
         0 4px 12px rgba(0, 0, 0, 0.15),
-        0 0 8px rgba(168, 85, 247, 0.08),
+        0 0 8px rgba(120, 60, 255, 0.1),
         inset 0 -1px 2px rgba(0, 0, 0, 0.06),
         inset 0 1px 1px rgba(255, 255, 255, 1);
     }
@@ -500,7 +583,7 @@ const projectsJSON = JSON.stringify(
       box-shadow:
         0 1px 4px rgba(0, 0, 0, 0.25),
         0 4px 12px rgba(0, 0, 0, 0.15),
-        0 0 16px rgba(168, 85, 247, 0.18),
+        0 0 18px rgba(120, 60, 255, 0.22),
         inset 0 -1px 2px rgba(0, 0, 0, 0.06),
         inset 0 1px 1px rgba(255, 255, 255, 1);
     }
@@ -538,19 +621,19 @@ const projectsJSON = JSON.stringify(
   }
 
   .card-title {
-    font-size: 1.15rem;
+    font-size: 1.2rem;
     font-weight: 800;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-    margin: 0.2rem 0 0;
-    color: rgba(255, 255, 255, 0.92);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+    margin: 0.25rem 0 0;
+    color: rgba(255, 255, 255, 0.95);
   }
 
   .card-desc {
-    font-size: 0.76rem;
-    line-height: 1.5;
-    color: rgba(148, 163, 184, 0.65);
-    margin: 0.1rem 0 0;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    color: rgba(160, 170, 190, 0.6);
+    margin: 0.15rem 0 0;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 4;
@@ -558,16 +641,16 @@ const projectsJSON = JSON.stringify(
   }
 
   .card-desc--sm {
-    font-size: 0.68rem;
+    font-size: 0.7rem;
     line-height: 1.45;
-    color: rgba(148, 163, 184, 0.45);
+    color: rgba(160, 170, 190, 0.4);
   }
 
   .card-year {
     font-size: 1.1rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    color: rgba(168, 85, 247, 0.85);
+    color: rgba(120, 60, 255, 0.85);
     line-height: 1;
     margin: 0.1rem 0 0;
     font-variant-numeric: tabular-nums;
@@ -590,31 +673,51 @@ const projectsJSON = JSON.stringify(
   }
 
   .profile-avatar {
-    width: 60px;
-    height: 60px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: linear-gradient(
       135deg,
-      rgba(168, 85, 247, 0.5) 0%,
-      rgba(0, 200, 255, 0.3) 100%
+      rgba(120, 60, 255, 0.55) 0%,
+      rgba(0, 200, 255, 0.35) 100%
     );
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow:
-      0 0 24px rgba(168, 85, 247, 0.15),
+      0 0 28px rgba(120, 60, 255, 0.2),
       inset 0 1px 0 rgba(255, 255, 255, 0.15);
     flex-shrink: 0;
     position: relative;
+    animation: avatar-glow 4s ease-in-out infinite;
+  }
+
+  @keyframes avatar-glow {
+    0%, 100% { box-shadow: 0 0 28px rgba(120, 60, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
+    50% { box-shadow: 0 0 36px rgba(120, 60, 255, 0.3), 0 0 60px rgba(0, 200, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.15); }
   }
 
   .profile-avatar::after {
     content: '';
     position: absolute;
-    inset: -3px;
+    inset: -4px;
     border-radius: 50%;
-    border: 1px solid rgba(168, 85, 247, 0.15);
+    border: 1.5px solid rgba(120, 60, 255, 0.2);
     pointer-events: none;
+    animation: ring-spin 8s linear infinite;
+    background: conic-gradient(
+      from 0deg,
+      rgba(120, 60, 255, 0.25),
+      transparent 30%,
+      transparent 70%,
+      rgba(0, 200, 255, 0.2)
+    );
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 1.5px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 1.5px));
+  }
+
+  @keyframes ring-spin {
+    to { transform: rotate(360deg); }
   }
 
   .profile-avatar-initials {
@@ -677,9 +780,10 @@ const projectsJSON = JSON.stringify(
   }
 
   .orbit-card:hover .tech-pills span {
-    border-color: rgba(255, 255, 255, 0.12);
-    color: rgba(255, 255, 255, 0.7);
-    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(120, 60, 255, 0.2);
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(120, 60, 255, 0.06);
+    box-shadow: 0 0 8px rgba(120, 60, 255, 0.1);
   }
 
   /* ── Project card inside bento ───────────────────────── */
@@ -722,7 +826,7 @@ const projectsJSON = JSON.stringify(
     font-size: 0.65rem;
     font-weight: 700;
     letter-spacing: 0.08em;
-    color: rgba(168, 85, 247, 0.7);
+    color: rgba(120, 60, 255, 0.75);
     text-decoration: none;
     text-transform: uppercase;
     transition: color 0.2s, transform 0.2s;
@@ -733,7 +837,7 @@ const projectsJSON = JSON.stringify(
   }
 
   .bento-project-link:hover {
-    color: rgba(192, 132, 252, 1);
+    color: rgba(160, 120, 255, 1);
   }
 
   /* ── View all card ───────────────────────────────────── */
@@ -762,14 +866,14 @@ const projectsJSON = JSON.stringify(
   }
 
   .bento-viewall-count {
-    font-size: 2.2rem;
+    font-size: 2.4rem;
     font-weight: 900;
     letter-spacing: -0.04em;
     line-height: 1;
     background: linear-gradient(
       180deg,
-      rgba(168, 85, 247, 0.9) 0%,
-      rgba(168, 85, 247, 0.5) 100%
+      rgba(120, 60, 255, 0.95) 0%,
+      rgba(0, 200, 255, 0.7) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -810,8 +914,8 @@ const projectsJSON = JSON.stringify(
   }
 
   .bento-viewall:hover .bento-viewall-grid span {
-    border-color: rgba(168, 85, 247, 0.12);
-    background: rgba(168, 85, 247, 0.04);
+    border-color: rgba(120, 60, 255, 0.15);
+    background: rgba(120, 60, 255, 0.06);
   }
 
   .bento-viewall-cta {
@@ -833,8 +937,8 @@ const projectsJSON = JSON.stringify(
   }
 
   .bento-viewall-cta:hover {
-    background: rgba(168, 85, 247, 0.12);
-    border-color: rgba(168, 85, 247, 0.25);
+    background: rgba(120, 60, 255, 0.14);
+    border-color: rgba(120, 60, 255, 0.3);
     color: rgba(255, 255, 255, 0.95);
   }
 
@@ -850,30 +954,31 @@ const projectsJSON = JSON.stringify(
   .card-barchart {
     display: flex;
     align-items: flex-end;
-    gap: 6px;
-    height: 48px;
+    gap: 7px;
+    height: 52px;
     margin-top: auto;
     padding-bottom: 0.2rem;
   }
 
   .card-barchart span {
-    width: 14px;
-    border-radius: 3px 3px 0 0;
+    width: 20px;
+    border-radius: 4px 4px 0 0;
     background: linear-gradient(
       to top,
-      rgba(168, 85, 247, 0.3) 0%,
-      rgba(168, 85, 247, 0.7) 100%
+      rgba(255, 0, 160, 0.35) 0%,
+      rgba(255, 0, 160, 0.8) 100%
     );
-    transition: background 0.3s;
+    transition: background 0.3s, height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     min-height: 4px;
   }
 
   .orbit-card:hover .card-barchart span {
     background: linear-gradient(
       to top,
-      rgba(168, 85, 247, 0.5) 0%,
-      rgba(192, 132, 252, 0.9) 100%
+      rgba(255, 0, 160, 0.5) 0%,
+      rgba(255, 60, 200, 0.95) 100%
     );
+    box-shadow: 0 0 10px rgba(255, 0, 160, 0.2);
   }
 
   /* ── Large metric display ────────────────────────────── */
@@ -885,11 +990,18 @@ const projectsJSON = JSON.stringify(
   }
 
   .card-metric-value {
-    font-size: 2rem;
+    font-size: 2.2rem;
     font-weight: 900;
     letter-spacing: -0.04em;
     line-height: 1;
-    color: rgba(168, 85, 247, 0.8);
+    background: linear-gradient(
+      180deg,
+      rgba(120, 60, 255, 0.95) 0%,
+      rgba(0, 180, 255, 0.7) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   .card-metric-label {
@@ -902,39 +1014,67 @@ const projectsJSON = JSON.stringify(
 
   /* Metric color variants */
   .glow-cyan .card-metric-value {
-    color: rgba(0, 240, 255, 0.8);
+    background: linear-gradient(180deg, rgba(0, 230, 255, 0.95) 0%, rgba(0, 160, 255, 0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .glow-magenta .card-metric-value {
-    color: rgba(255, 0, 180, 0.8);
+    background: linear-gradient(180deg, rgba(255, 0, 180, 0.95) 0%, rgba(200, 0, 255, 0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
   /* ── Terminal lines ──────────────────────────────────── */
   .card-terminal {
     display: flex;
     flex-direction: column;
-    gap: 0.15rem;
+    gap: 0.2rem;
     margin-top: auto;
-    padding: 0.5rem 0.6rem;
-    border-left: 2px solid rgba(0, 240, 255, 0.2);
-    border-radius: 0 4px 4px 0;
-    background: rgba(0, 0, 0, 0.15);
+    padding: 0.55rem 0.7rem;
+    border-left: 2px solid rgba(0, 220, 255, 0.25);
+    border-radius: 0 6px 6px 0;
+    background: rgba(0, 0, 0, 0.2);
   }
 
   .card-terminal span {
     font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.6rem;
+    font-size: 0.62rem;
     font-weight: 500;
     line-height: 1.7;
-    color: rgba(0, 240, 255, 0.65);
+    color: rgba(0, 220, 255, 0.65);
     letter-spacing: 0.02em;
+    opacity: 0;
+    animation: term-line-in 0.3s ease forwards;
+  }
+
+  .card-terminal span:nth-child(1) { animation-delay: 0s; }
+  .card-terminal span:nth-child(2) { animation-delay: 0.12s; }
+  .card-terminal span:nth-child(3) { animation-delay: 0.24s; }
+
+  @keyframes term-line-in {
+    to { opacity: 1; }
+  }
+
+  .card-terminal span:last-child::after {
+    content: '\2588';
+    margin-left: 2px;
+    animation: blink-cursor 1s step-end infinite;
+    color: rgba(0, 220, 255, 0.7);
+  }
+
+  @keyframes blink-cursor {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
   }
 
   .orbit-card:hover .card-terminal span {
-    color: rgba(0, 240, 255, 0.85);
+    color: rgba(0, 220, 255, 0.9);
   }
 
   .orbit-card:hover .card-terminal {
-    border-left-color: rgba(0, 240, 255, 0.4);
+    border-left-color: rgba(0, 220, 255, 0.45);
   }
 
   /* ── Inline icon ─────────────────────────────────────── */
@@ -953,40 +1093,44 @@ const projectsJSON = JSON.stringify(
   /* ── Per-card glow color variants ────────────────────── */
   .orbit-card.glow-purple::before {
     background: conic-gradient(
-      from 180deg,
-      rgba(168, 85, 247, 0.15),
-      rgba(138, 43, 226, 0.12),
-      rgba(192, 132, 252, 0.1),
-      rgba(168, 85, 247, 0.15)
+      from var(--glow-angle, 180deg),
+      rgba(120, 60, 255, 0.2),
+      rgba(80, 30, 200, 0.15),
+      rgba(160, 100, 255, 0.12),
+      rgba(120, 60, 255, 0.2)
     );
   }
 
   .orbit-card.glow-cyan::before {
     background: conic-gradient(
-      from 180deg,
-      rgba(0, 240, 255, 0.15),
-      rgba(0, 180, 220, 0.12),
-      rgba(100, 220, 255, 0.1),
-      rgba(0, 240, 255, 0.15)
+      from var(--glow-angle, 180deg),
+      rgba(0, 220, 255, 0.2),
+      rgba(0, 160, 220, 0.15),
+      rgba(80, 200, 255, 0.12),
+      rgba(0, 220, 255, 0.2)
     );
   }
 
   .orbit-card.glow-magenta::before {
     background: conic-gradient(
-      from 180deg,
-      rgba(255, 0, 180, 0.15),
-      rgba(200, 0, 140, 0.12),
-      rgba(255, 80, 200, 0.1),
-      rgba(255, 0, 180, 0.15)
+      from var(--glow-angle, 180deg),
+      rgba(255, 0, 160, 0.2),
+      rgba(200, 0, 140, 0.15),
+      rgba(255, 80, 200, 0.12),
+      rgba(255, 0, 160, 0.2)
     );
   }
 
   .orbit-card.glow-cyan:hover {
-    border-color: rgba(0, 240, 255, 0.12);
+    border-color: rgba(0, 220, 255, 0.15);
   }
 
   .orbit-card.glow-magenta:hover {
-    border-color: rgba(255, 0, 180, 0.12);
+    border-color: rgba(255, 0, 160, 0.15);
+  }
+
+  .orbit-card.glow-purple:hover {
+    border-color: rgba(120, 60, 255, 0.15);
   }
 
   /* ── Status badge pill ──────────────────────────────── */
@@ -994,7 +1138,7 @@ const projectsJSON = JSON.stringify(
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.2rem 0.55rem;
+    padding: 0.22rem 0.6rem;
     border-radius: 999px;
     background: rgba(34, 197, 94, 0.08);
     border: 1px solid rgba(34, 197, 94, 0.2);
@@ -1004,6 +1148,28 @@ const projectsJSON = JSON.stringify(
     text-transform: uppercase;
     color: rgba(34, 197, 94, 0.85);
     margin: 0.15rem 0;
+  }
+
+  .card-badge--purple {
+    background: rgba(120, 60, 255, 0.08);
+    border-color: rgba(120, 60, 255, 0.25);
+    color: rgba(160, 120, 255, 0.9);
+  }
+
+  .card-badge--purple .card-badge-dot {
+    background: rgba(120, 60, 255, 0.9);
+    box-shadow: 0 0 8px rgba(120, 60, 255, 0.5);
+  }
+
+  .card-badge--cyan {
+    background: rgba(0, 220, 255, 0.06);
+    border-color: rgba(0, 220, 255, 0.2);
+    color: rgba(0, 220, 255, 0.85);
+  }
+
+  .card-badge--cyan .card-badge-dot {
+    background: rgba(0, 220, 255, 0.9);
+    box-shadow: 0 0 8px rgba(0, 220, 255, 0.5);
   }
 
   .card-badge-dot {
@@ -1024,13 +1190,13 @@ const projectsJSON = JSON.stringify(
   /* ── Code snippet ────────────────────────────────────── */
   .card-code {
     font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
-    font-size: 0.58rem;
-    color: rgba(168, 85, 247, 0.6);
-    background: rgba(0, 0, 0, 0.2);
-    padding: 0.35rem 0.55rem;
-    border-radius: 6px;
-    border-left: 2px solid rgba(168, 85, 247, 0.3);
-    margin-top: 0.3rem;
+    font-size: 0.6rem;
+    color: rgba(120, 60, 255, 0.65);
+    background: rgba(0, 0, 0, 0.22);
+    padding: 0.4rem 0.6rem;
+    border-radius: 8px;
+    border-left: 2px solid rgba(120, 60, 255, 0.35);
+    margin-top: 0.35rem;
     line-height: 1.6;
     white-space: nowrap;
     overflow: hidden;
@@ -1038,8 +1204,8 @@ const projectsJSON = JSON.stringify(
   }
 
   .orbit-card:hover .card-code {
-    color: rgba(192, 132, 252, 0.8);
-    border-left-color: rgba(168, 85, 247, 0.5);
+    color: rgba(160, 120, 255, 0.85);
+    border-left-color: rgba(120, 60, 255, 0.55);
   }
 
   /* ── Timeline ────────────────────────────────────────── */
@@ -1125,9 +1291,20 @@ const projectsJSON = JSON.stringify(
     }
     .card-barchart {
       height: 36px;
+      gap: 5px;
+    }
+    .card-barchart span {
+      width: 16px;
     }
     .card-metric-value {
       font-size: 1.6rem;
+    }
+    .card-orb {
+      width: 40px;
+      height: 40px;
+    }
+    .bento-viewall-count {
+      font-size: 1.8rem;
     }
   }
 </style>
@@ -1219,14 +1396,16 @@ const projectsJSON = JSON.stringify(
       case 0: // N — wide: intro + availability badge
         setGlow(orbitCard, "purple");
         face.innerHTML = `
+          <div class="card-orb card-orb--purple"></div>
           <p class="card-label">${t('bento.about.n.label', lang)}</p>
-          <div class="card-badge"><span class="card-badge-dot"></span>${t('bento.about.n.badge', lang)}</div>
+          <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.about.n.badge', lang)}</div>
           <h3 class="card-title">${t('bento.about.n.title', lang)}</h3>
           <p class="card-desc">${t('bento.about.n.desc', lang)}</p>`;
         break;
       case 1: // E — tall: drive + code snippet + metric
         setGlow(orbitCard);
         face.innerHTML = `
+          <div class="card-orb card-orb--cyan"></div>
           <p class="card-label">${t('bento.about.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.about.e.title', lang)}</h3>
           <p class="card-desc">${t('bento.about.e.desc', lang)}</p>
@@ -1241,11 +1420,12 @@ const projectsJSON = JSON.stringify(
         face.innerHTML = `
           <p class="card-label">${t('bento.about.s.label', lang)}</p>
           <h3 class="card-title">${t('bento.about.s.title', lang)}</h3>
-          <div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="1.5"/><circle cx="6" cy="6" r="1" fill="rgba(0,240,255,0.4)" stroke="none"/><circle cx="18" cy="8" r="0.8" fill="rgba(168,85,247,0.5)" stroke="none"/><circle cx="8" cy="18" r="0.6" fill="rgba(0,240,255,0.3)" stroke="none"/><circle cx="17" cy="16" r="1.2" fill="rgba(168,85,247,0.3)" stroke="none"/><line x1="6" y1="6" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="18" y1="8" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="8" y1="18" x2="12" y2="12" stroke-dasharray="2 3"/></svg></div>`;
+          <div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,220,255,0.6)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="1.5"/><circle cx="6" cy="6" r="1" fill="rgba(0,220,255,0.4)" stroke="none"/><circle cx="18" cy="8" r="0.8" fill="rgba(120,60,255,0.5)" stroke="none"/><circle cx="8" cy="18" r="0.6" fill="rgba(0,220,255,0.3)" stroke="none"/><circle cx="17" cy="16" r="1.2" fill="rgba(120,60,255,0.3)" stroke="none"/><line x1="6" y1="6" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="18" y1="8" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="8" y1="18" x2="12" y2="12" stroke-dasharray="2 3"/></svg></div>`;
         break;
       case 3: // W — tall: profile tile
-        setGlow(orbitCard);
+        setGlow(orbitCard, "purple");
         face.innerHTML = `<div class="profile-tile">
+          <div class="card-orb card-orb--magenta"></div>
           <p class="card-label">${t('bento.about.w.label', lang)}</p>
           <div class="profile-avatar"><span class="profile-avatar-initials">&lt;/&gt;</span></div>
           <div class="profile-info">
@@ -1266,13 +1446,14 @@ const projectsJSON = JSON.stringify(
       case 0: // N — wide: genesis + year badge
         setGlow(orbitCard, "purple");
         face.innerHTML = `
+          <div class="card-orb card-orb--purple"></div>
           <p class="card-label">${t('bento.origin.n.label', lang)}</p>
           <p class="card-year">2018</p>
           <h3 class="card-title">${t('bento.origin.n.title', lang)}</h3>
           <p class="card-desc">${t('bento.origin.n.desc', lang)}</p>`;
         break;
       case 1: // E — tall: timeline milestones + bar chart
-        setGlow(orbitCard);
+        setGlow(orbitCard, "magenta");
         face.innerHTML = `
           <p class="card-label">${t('bento.origin.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.origin.e.title', lang)}</h3>
@@ -1285,7 +1466,7 @@ const projectsJSON = JSON.stringify(
           <div class="card-barchart"><span style="height:20%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:100%"></span></div>`;
         break;
       case 2: // S — small: current role
-        setGlow(orbitCard);
+        setGlow(orbitCard, "cyan");
         face.innerHTML = `
           <p class="card-label">${t('bento.origin.s.label', lang)}</p>
           <p class="card-year">2025</p>
@@ -1293,14 +1474,15 @@ const projectsJSON = JSON.stringify(
           <p class="card-desc">${t('bento.origin.s.desc', lang)}</p>`;
         break;
       case 3: // W — tall: founding story + star icon
-        setGlow(orbitCard);
+        setGlow(orbitCard, "purple");
         face.innerHTML = `
+          <div class="card-orb card-orb--cyan"></div>
           <p class="card-label">${t('bento.origin.w.label', lang)}</p>
-          <div class="card-badge" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:rgba(168,85,247,0.85)"><span class="card-badge-dot" style="background:rgba(168,85,247,0.9);box-shadow:0 0 8px rgba(168,85,247,0.5)"></span>${t('bento.origin.w.badge', lang)}</div>
+          <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.origin.w.badge', lang)}</div>
           <p class="card-year">2026</p>
           <h3 class="card-title">${t('bento.origin.w.title', lang)}</h3>
           <p class="card-desc">${t('bento.origin.w.desc', lang)}</p>
-          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(168,85,247,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></div>`;
+          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(120,60,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></div>`;
         break;
     }
   }
@@ -1309,15 +1491,16 @@ const projectsJSON = JSON.stringify(
   function renderServicesCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
       case 0: // N — wide: fullstack dev + tech pills
-        setGlow(orbitCard);
+        setGlow(orbitCard, "cyan");
         face.innerHTML = `
+          <div class="card-orb card-orb--cyan"></div>
           <p class="card-label">${t('bento.services.n.label', lang)}</p>
           <h3 class="card-title">${t('bento.services.n.title', lang)}</h3>
           <p class="card-desc">${t('bento.services.n.desc', lang)}</p>
           <div class="tech-pills"><span>Astro</span><span>React</span><span>Node</span><span>TS</span></div>`;
         break;
       case 1: // E — tall: infrastructure + terminal output
-        setGlow(orbitCard);
+        setGlow(orbitCard, "cyan");
         face.innerHTML = `
           <p class="card-label">${t('bento.services.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.services.e.title', lang)}</h3>
@@ -1340,13 +1523,14 @@ const projectsJSON = JSON.stringify(
           </div>`;
         break;
       case 3: // W — tall: consulting + shield icon
-        setGlow(orbitCard);
+        setGlow(orbitCard, "purple");
         face.innerHTML = `
+          <div class="card-orb card-orb--purple"></div>
           <p class="card-label">${t('bento.services.w.label', lang)}</p>
           <h3 class="card-title">${t('bento.services.w.title', lang)}</h3>
           <p class="card-desc">${t('bento.services.w.desc', lang)}</p>
           <div class="tech-pills"><span>Review</span><span>Audit</span><span>White-Label</span></div>
-          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>`;
+          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,220,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>`;
         break;
     }
   }
@@ -1355,9 +1539,10 @@ const projectsJSON = JSON.stringify(
   function renderProjectCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     if (pos === 3) {
       // View All card
-      setGlow(orbitCard);
+      setGlow(orbitCard, "purple");
       const countNum = projects.length > 0 ? `${projects.length}+` : "8+";
       face.innerHTML = `<div class="bento-viewall">
+        <div class="card-orb card-orb--purple"></div>
         <p class="card-label">${t('bento.projects.viewall.label', lang)}</p>
         <div class="bento-viewall-metric">
           <span class="bento-viewall-count">${countNum}</span>
@@ -1377,16 +1562,21 @@ const projectsJSON = JSON.stringify(
 
     // Project cards (pos 0, 1, 2)
     const proj = projects[pos];
-    setGlow(orbitCard);
+    const glowColors = ["cyan", "magenta", "purple"] as const;
+    setGlow(orbitCard, glowColors[pos]);
     if (proj) {
       const maxLen = pos === 2 ? 60 : pos === 0 ? 120 : 140;
       const excerpt = stripHtml(proj.excerpt).slice(0, maxLen);
       const labelNum = `0${pos + 1}`;
+      const techPills = proj.techStack
+        ? `<div class="tech-pills">${proj.techStack.split(',').slice(0, 4).map((t: string) => `<span>${t.trim()}</span>`).join('')}</div>`
+        : '';
       face.innerHTML = `
         <p class="card-label">${labelNum} // ${t('bento.projects.label', lang)}</p>
         <div class="bento-project">
           <p class="bento-project-title">${proj.title}</p>
           <p class="bento-project-excerpt">${excerpt}</p>
+          ${techPills}
           <a href="/projects/${proj.slug}" class="bento-project-link">
             ${t('bento.projects.details', lang)} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
@@ -1405,7 +1595,7 @@ const projectsJSON = JSON.stringify(
 
     for (let orbitIdx = 0; orbitIdx < 4; orbitIdx++) {
       const pos = mod(orbitIdx + topicIndex, 4);
-      const face = orbitCards[orbitIdx]?.querySelector<HTMLElement>(".card-face");
+      const face = orbitCards[orbitIdx]?.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
       if (!face) continue;
       face.innerHTML = "";
       face.setAttribute("data-pos", String(pos));
@@ -1444,58 +1634,74 @@ const projectsJSON = JSON.stringify(
   /* ─────────────────────────────────────────────────────────
      GO TO STEP — Flip reposition + opacity content swap
   ───────────────────────────────────────────────────────── */
-  function goToStep(targetStep: number) {
+  async function goToStep(targetStep: number) {
     if (!container || isTransitioning || targetStep === step) return;
     isTransitioning = true;
+    container.classList.add("is-transitioning");
 
     const lang = getCurrentLang();
-    const faces = orbitCards
-      .map(c => c.querySelector<HTMLElement>(".card-face"))
-      .filter(Boolean) as HTMLElement[];
 
-    // 1. Capture Flip state BEFORE any DOM changes
+    // 1. Populate BACK faces with the new content before flipping
+    const renderers = [renderAboutMeCard, renderOriginCard, renderServicesCard, renderProjectCard];
+    const renderer = renderers[targetStep];
+    if (renderer) {
+      for (let orbitIdx = 0; orbitIdx < 4; orbitIdx++) {
+        const pos = mod(orbitIdx + targetStep, 4);
+        const backFace = orbitCards[orbitIdx]?.querySelector<HTMLElement>(".card-face-back");
+        if (!backFace) continue;
+        backFace.innerHTML = "";
+        backFace.setAttribute("data-pos", String(pos));
+        const orbitCard = backFace.closest(".orbit-card") as HTMLElement | null;
+        renderer(backFace, pos, lang, orbitCard);
+      }
+    }
+
+    // 2. Capture Flip state BEFORE layout change
     const state = Flip.getState(orbitCards);
 
-    // 2. Squeeze faces to invisible (covers content swap)
-    gsap.to(faces, {
-      scaleX: 0,
-      duration: 0.22,
-      ease: "power2.in",
-      stagger: 0.025,
-      onComplete() {
-        // 3. Content invisible — swap it
-        populateTopicCards(targetStep, lang);
+    // 3. Swap layout class (moves grid positions)
+    LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
+    container!.classList.add(LAYOUT_CLASSES[targetStep]);
 
-        // 4. Swap layout class (moves grid positions)
-        LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
-        container!.classList.add(LAYOUT_CLASSES[targetStep]);
+    // 4. Flip position animation + 3D rotateY flip run IN PARALLEL
+    const inners = orbitCards
+      .map(c => c.querySelector<HTMLElement>(".card-inner"))
+      .filter(Boolean) as HTMLElement[];
 
-        // 5. Update step immediately
-        step = targetStep;
-
-        // 6. Flip from old positions → new with absolute positioning
-        Flip.from(state, {
-          duration: 1.0,
-          ease: "power3.inOut",
-          absolute: true,
-          stagger: 0.04,
-          onComplete() {
-            isTransitioning = false;
-          },
-        });
-
-        // 7. Expand faces back (reveal new content)
-        gsap.to(faces, {
-          scaleX: 1,
-          duration: 0.28,
-          ease: "power2.out",
-          stagger: 0.025,
-          delay: 0.08,
-        });
-      },
+    // Position movement via Flip (absolute: true prevents grid reflow jump)
+    const flipMoveDone = new Promise<void>(resolve => {
+      Flip.from(state, {
+        duration: 0.85,
+        ease: "power3.inOut",
+        absolute: true,
+        stagger: 0.03,
+        onComplete: resolve,
+      });
     });
 
-    // Update labels and center topic
+    // 3D flip rotation (runs simultaneously — matched easing for lockstep feel)
+    const flipRotateDone = new Promise<void>(resolve => {
+      gsap.to(inners, {
+        rotateY: 180,
+        duration: 0.85,
+        ease: "power3.inOut",
+        stagger: 0.04,
+        onUpdate() {
+          // At 90° midpoint, hide old front face to prevent backface bleedthrough
+          inners.forEach(inner => {
+            const rotY = gsap.getProperty(inner, "rotateY") as number;
+            const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+            if (front) {
+              front.style.visibility = rotY >= 88 ? "hidden" : "visible";
+            }
+          });
+        },
+        onComplete: resolve,
+      });
+    });
+
+    // 5. Update step + labels immediately (non-blocking)
+    step = targetStep;
     updateLabels(targetStep, lang);
     if (centerTopic) {
       gsap.to(centerTopic, {
@@ -1509,6 +1715,29 @@ const projectsJSON = JSON.stringify(
         },
       });
     }
+
+    // 6. Wait for BOTH animations to finish before cleanup
+    await Promise.all([flipMoveDone, flipRotateDone]);
+
+    // Cleanup: swap back→front, reset rotation
+    for (let i = 0; i < orbitCards.length; i++) {
+      const frontFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+      const backFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face-back");
+      if (frontFace && backFace) {
+        frontFace.innerHTML = backFace.innerHTML;
+        const pos = backFace.getAttribute("data-pos");
+        if (pos) frontFace.setAttribute("data-pos", pos);
+        backFace.innerHTML = "";
+      }
+    }
+    gsap.set(inners, { rotateY: 0 });
+    // Restore front face visibility after cleanup
+    inners.forEach(inner => {
+      const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+      if (front) front.style.visibility = "visible";
+    });
+    container.classList.remove("is-transitioning");
+    isTransitioning = false;
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -1583,7 +1812,7 @@ const projectsJSON = JSON.stringify(
       scale: 0.88,
       duration: 0.7,
       ease: "back.out(1.7)",
-      stagger: { from: "random", amount: 0.45 },
+      stagger: { from: "center", amount: 0.45 },
     });
   }
 
@@ -1593,7 +1822,7 @@ const projectsJSON = JSON.stringify(
   function onLangChange() {
     const lang = getCurrentLang();
     const faces = orbitCards
-      .map(c => c.querySelector<HTMLElement>(".card-face"))
+      .map(c => c.querySelector<HTMLElement>(".card-face:not(.card-face-back)"))
       .filter(Boolean) as HTMLElement[];
 
     gsap.to(faces, {
