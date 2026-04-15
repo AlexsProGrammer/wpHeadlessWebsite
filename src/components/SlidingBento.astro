@@ -55,18 +55,29 @@ const projectsJSON = JSON.stringify(
     <!-- Center glassmorphic toggle -->
     <div class="card-center" id="sb-center-card">
       <p class="center-topic" id="sb-center-topic">Über Mich</p>
+
+      <!-- Step indicator -->
+      <div class="step-indicator" id="sb-step-indicator">
+        <span class="step-num step-num--active" data-step="0">01</span>
+        <span class="step-line"><span class="step-line-fill"></span></span>
+        <span class="step-num" data-step="1">02</span>
+        <span class="step-line"><span class="step-line-fill"></span></span>
+        <span class="step-num" data-step="2">03</span>
+        <span class="step-line"><span class="step-line-fill"></span></span>
+        <span class="step-num" data-step="3">04</span>
+      </div>
+
       <div class="toggle-track" id="sb-toggle-track">
-        <span class="toggle-arrow toggle-arrow--left">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-        </span>
+        <span class="toggle-arrow toggle-arrow--left" id="sb-arrow-left">←</span>
+        <span class="toggle-divider"></span>
         <div class="toggle-thumb" id="sb-center-btn">
+          <span class="toggle-thumb-icon">↻</span>
           <div class="toggle-thumb-shine"></div>
         </div>
-        <span class="toggle-arrow toggle-arrow--right">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
-        </span>
+        <span class="toggle-divider"></span>
+        <span class="toggle-arrow toggle-arrow--right" id="sb-arrow-right">→</span>
       </div>
-      <p class="center-hint" id="sb-center-hint" data-de="ziehen" data-en="drag">ziehen</p>
+      <p class="center-hint" id="sb-center-hint" data-de="navigieren" data-en="navigate">navigieren</p>
     </div>
 
   </div>
@@ -119,8 +130,8 @@ const projectsJSON = JSON.stringify(
   .bento-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(3, 200px);
-    gap: 20px;
+    grid-template-rows: 220px 180px 220px;
+    gap: 16px;
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
@@ -131,23 +142,27 @@ const projectsJSON = JSON.stringify(
   .bento-card {
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(255, 255, 255, 0.04) 100%
+      rgba(15, 15, 25, 0.65) 0%,
+      rgba(10, 10, 20, 0.55) 50%,
+      rgba(15, 15, 30, 0.6) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 24px;
     backdrop-filter: blur(40px) saturate(1.6);
     -webkit-backdrop-filter: blur(40px) saturate(1.6);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.25),
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      0 1px 0 rgba(255, 255, 255, 0.04) inset,
       inset 0 1px 0 rgba(255, 255, 255, 0.06);
     overflow: visible;
     position: relative;
   }
 
   .orbit-card {
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    transition:
+      border-color 0.4s ease,
+      box-shadow 0.4s ease,
+      transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .orbit-card::before {
@@ -174,10 +189,11 @@ const projectsJSON = JSON.stringify(
   }
 
   .orbit-card:hover {
-    border-color: rgba(255, 255, 255, 0.14);
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.12);
     box-shadow:
-      0 20px 60px rgba(0, 0, 0, 0.35),
-      0 0 40px rgba(0, 240, 255, 0.06),
+      0 20px 60px rgba(0, 0, 0, 0.4),
+      0 0 40px rgba(0, 240, 255, 0.05),
       inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
@@ -193,10 +209,10 @@ const projectsJSON = JSON.stringify(
   .card-face {
     position: absolute;
     inset: 0;
-    padding: 1.3rem 1.5rem;
+    padding: 1.1rem 1.3rem;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.15rem;
     overflow: hidden;
     border-radius: 24px;
   }
@@ -204,7 +220,7 @@ const projectsJSON = JSON.stringify(
   /* Position-aware face overrides: N=wide, E=tall-3, S=small, W=tall-2 */
   .card-face[data-pos="0"] {
     /* N — wide short: horizontal feel */
-    padding: 1.2rem 1.5rem;
+    padding: 1.1rem 1.4rem;
   }
   .card-face[data-pos="0"] .card-desc {
     -webkit-line-clamp: 2;
@@ -212,7 +228,7 @@ const projectsJSON = JSON.stringify(
 
   .card-face[data-pos="1"] {
     /* E — tall narrow: full vertical */
-    padding: 1.4rem 1.4rem;
+    padding: 1.2rem 1.3rem;
     justify-content: flex-start;
   }
   .card-face[data-pos="1"] .card-desc {
@@ -221,20 +237,23 @@ const projectsJSON = JSON.stringify(
 
   .card-face[data-pos="2"] {
     /* S — small square: minimal */
-    padding: 1rem 1.2rem;
+    padding: 0.8rem 1rem;
     justify-content: center;
   }
   .card-face[data-pos="2"] .card-desc {
     -webkit-line-clamp: 2;
-    font-size: 0.74rem;
+    font-size: 0.72rem;
   }
   .card-face[data-pos="2"] .card-title {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  .card-face[data-pos="2"] .card-label {
+    font-size: 0.5rem;
   }
 
   .card-face[data-pos="3"] {
     /* W — tall 2-row */
-    padding: 1.3rem 1.4rem;
+    padding: 1.1rem 1.3rem;
   }
   .card-face[data-pos="3"] .card-desc {
     -webkit-line-clamp: 6;
@@ -277,55 +296,120 @@ const projectsJSON = JSON.stringify(
     justify-content: center;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.05) 0%,
-      rgba(255, 255, 255, 0.02) 50%,
-      rgba(168, 85, 247, 0.04) 100%
+      rgba(12, 12, 22, 0.75) 0%,
+      rgba(10, 10, 18, 0.6) 50%,
+      rgba(15, 12, 25, 0.65) 100%
     );
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 24px;
     backdrop-filter: blur(40px) saturate(1.6);
     -webkit-backdrop-filter: blur(40px) saturate(1.6);
     box-shadow:
-      0 4px 24px rgba(0, 0, 0, 0.25),
-      0 0 20px rgba(168, 85, 247, 0.06),
-      inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    gap: 0.6rem;
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      0 0 20px rgba(168, 85, 247, 0.04),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    gap: 0.5rem;
     user-select: none;
     -webkit-user-select: none;
     transition: border-color 0.3s, box-shadow 0.3s;
   }
 
-  /* ── Toggle track (Apple pill) ────────────────────────── */
+  .card-center:hover {
+    border-color: rgba(168, 85, 247, 0.15);
+    box-shadow:
+      0 4px 24px rgba(0, 0, 0, 0.3),
+      0 0 30px rgba(168, 85, 247, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+
+  /* ── Step indicator ──────────────────────────────────── */
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 0.15rem;
+  }
+
+  .step-num {
+    font-size: 0.6rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.2);
+    letter-spacing: 0.05em;
+    padding: 0 0.2rem;
+    transition: color 0.35s, text-shadow 0.35s;
+    cursor: pointer;
+  }
+
+  .step-num--active {
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+  }
+
+  .step-line {
+    width: 28px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-line-fill {
+    position: absolute;
+    inset: 0;
+    background: rgba(168, 85, 247, 0.4);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Fill lines up to the active step */
+  .step-num--active ~ .step-line .step-line-fill,
+  .step-indicator .step-line:has(+ .step-num:not(.step-num--active)) .step-line-fill {
+    transform: scaleX(0);
+  }
+
+  /* ── Toggle track (refined pill) ──────────────────────── */
   .toggle-track {
     position: relative;
-    width: 120px;
-    height: 44px;
+    width: 180px;
+    height: 48px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(24px) saturate(1.5);
     -webkit-backdrop-filter: blur(24px) saturate(1.5);
     box-shadow:
-      inset 0 2px 8px rgba(0, 0, 0, 0.25),
-      inset 0 1px 0 rgba(255, 255, 255, 0.06),
-      0 2px 12px rgba(0, 0, 0, 0.2);
+      inset 0 3px 12px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 2px 12px rgba(0, 0, 0, 0.25);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 10px;
+    padding: 0 14px;
   }
 
   .toggle-arrow {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: rgba(255, 255, 255, 0.18);
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.15);
     pointer-events: none;
-    transition: color 0.3s;
+    transition: color 0.3s, text-shadow 0.3s;
+    width: 20px;
   }
 
   .toggle-track:hover .toggle-arrow {
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .toggle-divider {
+    width: 1px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
   }
 
   /* ── Toggle thumb (draggable knob) ───────────────────── */
@@ -334,13 +418,13 @@ const projectsJSON = JSON.stringify(
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 36px;
-    height: 36px;
+    width: 38px;
+    height: 38px;
     border-radius: 50%;
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.95) 0%,
-      rgba(255, 255, 255, 0.75) 100%
+      rgba(255, 255, 255, 0.92) 0%,
+      rgba(230, 220, 240, 0.78) 100%
     );
     border: none;
     cursor: grab;
@@ -348,13 +432,26 @@ const projectsJSON = JSON.stringify(
     box-shadow:
       0 1px 4px rgba(0, 0, 0, 0.25),
       0 4px 12px rgba(0, 0, 0, 0.15),
+      0 0 8px rgba(168, 85, 247, 0.08),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
-    transition: box-shadow 0.25s, width 0.2s, height 0.2s;
+    transition: box-shadow 0.25s;
     outline: none;
     -webkit-user-drag: none;
     z-index: 2;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: thumb-pulse 3s ease-in-out infinite;
+  }
+
+  .toggle-thumb-icon {
+    font-size: 0.85rem;
+    color: rgba(100, 60, 160, 0.6);
+    z-index: 3;
+    pointer-events: none;
+    line-height: 1;
   }
 
   .toggle-thumb-shine {
@@ -363,10 +460,10 @@ const projectsJSON = JSON.stringify(
     border-radius: 50%;
     background: linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.8) 0%,
       transparent 50%
     );
-    opacity: 0.6;
+    opacity: 0.5;
     pointer-events: none;
   }
 
@@ -374,83 +471,86 @@ const projectsJSON = JSON.stringify(
     box-shadow:
       0 2px 8px rgba(0, 0, 0, 0.3),
       0 6px 20px rgba(0, 0, 0, 0.15),
-      0 0 16px rgba(168, 85, 247, 0.15),
+      0 0 18px rgba(168, 85, 247, 0.2),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
+    animation: none;
   }
 
   .toggle-thumb:active {
     cursor: grabbing;
     box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.35),
-      0 4px 16px rgba(168, 85, 247, 0.2),
+      0 4px 16px rgba(168, 85, 247, 0.25),
       inset 0 -1px 2px rgba(0, 0, 0, 0.06),
       inset 0 1px 1px rgba(255, 255, 255, 1);
+    animation: none;
+  }
+
+  @keyframes thumb-pulse {
+    0%, 100% {
+      box-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 0 8px rgba(168, 85, 247, 0.08),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.06),
+        inset 0 1px 1px rgba(255, 255, 255, 1);
+    }
+    50% {
+      box-shadow:
+        0 1px 4px rgba(0, 0, 0, 0.25),
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 0 16px rgba(168, 85, 247, 0.18),
+        inset 0 -1px 2px rgba(0, 0, 0, 0.06),
+        inset 0 1px 1px rgba(255, 255, 255, 1);
+    }
   }
 
   .center-hint {
-    font-size: 0.5rem;
-    font-weight: 700;
-    letter-spacing: 0.3em;
+    font-size: 0.48rem;
+    font-weight: 600;
+    letter-spacing: 0.25em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.15);
-    margin-top: 0.15rem;
+    color: rgba(255, 255, 255, 0.12);
+    margin-top: 0.1rem;
   }
 
   .center-topic {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     font-weight: 700;
     letter-spacing: -0.01em;
-    color: rgba(255, 255, 255, 0.7);
+    color: rgba(255, 255, 255, 0.65);
     transition: opacity 0.2s;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.1rem;
   }
 
   /* ── Card face typography ────────────────────────────── */
   .card-label {
-    font-size: 0.55rem;
-    font-weight: 800;
-    letter-spacing: 0.2em;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
     text-transform: uppercase;
-    color: rgba(168, 85, 247, 0.8);
+    color: rgba(255, 255, 255, 0.3);
     margin: 0;
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
+    display: block;
     flex-shrink: 0;
-  }
-
-  .card-label::before {
-    content: '';
-    display: inline-block;
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: rgba(168, 85, 247, 0.7);
-    flex-shrink: 0;
+    line-height: 1.3;
   }
 
   .card-title {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
     font-weight: 800;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
     line-height: 1.2;
-    margin: 0.1rem 0 0;
-    background: linear-gradient(
-      180deg,
-      rgba(255, 255, 255, 0.95) 30%,
-      rgba(255, 255, 255, 0.6) 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin: 0.2rem 0 0;
+    color: rgba(255, 255, 255, 0.92);
   }
 
   .card-desc {
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: rgba(148, 163, 184, 0.8);
-    margin: 0.15rem 0 0;
+    font-size: 0.76rem;
+    line-height: 1.5;
+    color: rgba(148, 163, 184, 0.65);
+    margin: 0.1rem 0 0;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 4;
@@ -458,54 +558,100 @@ const projectsJSON = JSON.stringify(
   }
 
   .card-desc--sm {
-    font-size: 0.7rem;
-    line-height: 1.5;
-    color: rgba(148, 163, 184, 0.55);
+    font-size: 0.68rem;
+    line-height: 1.45;
+    color: rgba(148, 163, 184, 0.45);
   }
 
   .card-year {
-    font-size: 1.6rem;
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    background: linear-gradient(
-      180deg,
-      rgba(168, 85, 247, 0.7) 0%,
-      rgba(168, 85, 247, 0.35) 100%
-    );
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: rgba(168, 85, 247, 0.85);
     line-height: 1;
-    margin: 0;
+    margin: 0.1rem 0 0;
     font-variant-numeric: tabular-nums;
   }
 
   /* ── Profile tile ────────────────────────────────────── */
   .profile-tile {
     width: 100%;
-    flex: 1;
-    min-height: 0;
-    background: rgba(148, 163, 184, 0.08);
-    border-radius: 12px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.1rem 1rem;
+  }
+
+  .profile-tile .card-label {
+    align-self: flex-start;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(
+      135deg,
+      rgba(168, 85, 247, 0.5) 0%,
+      rgba(0, 200, 255, 0.3) 100%
+    );
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow:
+      0 0 24px rgba(168, 85, 247, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+    position: relative;
   }
 
-  .profile-tile img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: top;
-    filter: grayscale(1) contrast(1.05);
-    opacity: 0.6;
+  .profile-avatar::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    border: 1px solid rgba(168, 85, 247, 0.15);
+    pointer-events: none;
   }
 
-  .profile-tile-placeholder {
-    font-size: 2.5rem;
-    opacity: 0.25;
+  .profile-avatar-initials {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: -0.02em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  .profile-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+  }
+
+  .profile-role {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .profile-location {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.6rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.25);
+    letter-spacing: 0.04em;
+  }
+
+  .profile-location svg {
+    opacity: 0.5;
   }
 
   /* ── Tech pills ──────────────────────────────────────── */
@@ -596,71 +742,373 @@ const projectsJSON = JSON.stringify(
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.8rem;
+    gap: 0.7rem;
     height: 100%;
     text-align: center;
     position: relative;
+    padding: 1rem 0.8rem;
   }
 
-  .bento-viewall-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    opacity: 0.15;
+  .bento-viewall .card-label {
+    align-self: flex-start;
   }
 
-  .bento-viewall-grid span {
-    width: 20px;
-    height: 14px;
-    border-radius: 4px;
-    border: 1.5px solid rgba(255, 255, 255, 0.6);
-  }
-
-  .bento-viewall-text {
+  .bento-viewall-metric {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.25rem;
+    gap: 0.15rem;
+    margin: 0.2rem 0;
   }
 
   .bento-viewall-count {
-    font-size: 1.4rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
+    line-height: 1;
     background: linear-gradient(
       180deg,
-      rgba(255, 255, 255, 0.8) 0%,
-      rgba(255, 255, 255, 0.4) 100%
+      rgba(168, 85, 247, 0.9) 0%,
+      rgba(168, 85, 247, 0.5) 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    line-height: 1;
   }
 
-  .bento-viewall-link {
-    font-size: 0.68rem;
+  .bento-viewall-count-label {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  .bento-viewall-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 5px;
+    width: 64px;
+    height: 44px;
+    margin: 0.15rem 0;
+  }
+
+  .bento-viewall-grid span {
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.03);
+    transition: border-color 0.3s, background 0.3s;
+  }
+
+  .bento-viewall-grid .viewall-grid--tall {
+    grid-row: span 2;
+  }
+
+  .bento-viewall-grid .viewall-grid--wide {
+    grid-column: span 2;
+  }
+
+  .bento-viewall:hover .bento-viewall-grid span {
+    border-color: rgba(168, 85, 247, 0.12);
+    background: rgba(168, 85, 247, 0.04);
+  }
+
+  .bento-viewall-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.62rem;
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(168, 85, 247, 0.75);
     text-decoration: none;
-    transition: color 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.3rem;
+    color: rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    padding: 0.4rem 1.1rem;
+    transition: background 0.3s, color 0.3s, border-color 0.3s;
+    margin-top: auto;
   }
 
-  .bento-viewall-link:hover {
-    color: rgba(192, 132, 252, 1);
+  .bento-viewall-cta:hover {
+    background: rgba(168, 85, 247, 0.12);
+    border-color: rgba(168, 85, 247, 0.25);
+    color: rgba(255, 255, 255, 0.95);
   }
 
-  .bento-viewall-link svg {
+  .bento-viewall-cta svg {
     transition: transform 0.3s;
   }
 
-  .bento-viewall-link:hover svg {
+  .bento-viewall-cta:hover svg {
     transform: translateX(3px);
+  }
+
+  /* ── Mini bar chart ─────────────────────────────────── */
+  .card-barchart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 48px;
+    margin-top: auto;
+    padding-bottom: 0.2rem;
+  }
+
+  .card-barchart span {
+    width: 14px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(
+      to top,
+      rgba(168, 85, 247, 0.3) 0%,
+      rgba(168, 85, 247, 0.7) 100%
+    );
+    transition: background 0.3s;
+    min-height: 4px;
+  }
+
+  .orbit-card:hover .card-barchart span {
+    background: linear-gradient(
+      to top,
+      rgba(168, 85, 247, 0.5) 0%,
+      rgba(192, 132, 252, 0.9) 100%
+    );
+  }
+
+  /* ── Large metric display ────────────────────────────── */
+  .card-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: auto;
+  }
+
+  .card-metric-value {
+    font-size: 2rem;
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: rgba(168, 85, 247, 0.8);
+  }
+
+  .card-metric-label {
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Metric color variants */
+  .glow-cyan .card-metric-value {
+    color: rgba(0, 240, 255, 0.8);
+  }
+  .glow-magenta .card-metric-value {
+    color: rgba(255, 0, 180, 0.8);
+  }
+
+  /* ── Terminal lines ──────────────────────────────────── */
+  .card-terminal {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: auto;
+    padding: 0.5rem 0.6rem;
+    border-left: 2px solid rgba(0, 240, 255, 0.2);
+    border-radius: 0 4px 4px 0;
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .card-terminal span {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.6rem;
+    font-weight: 500;
+    line-height: 1.7;
+    color: rgba(0, 240, 255, 0.65);
+    letter-spacing: 0.02em;
+  }
+
+  .orbit-card:hover .card-terminal span {
+    color: rgba(0, 240, 255, 0.85);
+  }
+
+  .orbit-card:hover .card-terminal {
+    border-left-color: rgba(0, 240, 255, 0.4);
+  }
+
+  /* ── Inline icon ─────────────────────────────────────── */
+  .card-icon {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+
+  .orbit-card:hover .card-icon {
+    opacity: 1;
+  }
+
+  /* ── Per-card glow color variants ────────────────────── */
+  .orbit-card.glow-purple::before {
+    background: conic-gradient(
+      from 180deg,
+      rgba(168, 85, 247, 0.15),
+      rgba(138, 43, 226, 0.12),
+      rgba(192, 132, 252, 0.1),
+      rgba(168, 85, 247, 0.15)
+    );
+  }
+
+  .orbit-card.glow-cyan::before {
+    background: conic-gradient(
+      from 180deg,
+      rgba(0, 240, 255, 0.15),
+      rgba(0, 180, 220, 0.12),
+      rgba(100, 220, 255, 0.1),
+      rgba(0, 240, 255, 0.15)
+    );
+  }
+
+  .orbit-card.glow-magenta::before {
+    background: conic-gradient(
+      from 180deg,
+      rgba(255, 0, 180, 0.15),
+      rgba(200, 0, 140, 0.12),
+      rgba(255, 80, 200, 0.1),
+      rgba(255, 0, 180, 0.15)
+    );
+  }
+
+  .orbit-card.glow-cyan:hover {
+    border-color: rgba(0, 240, 255, 0.12);
+  }
+
+  .orbit-card.glow-magenta:hover {
+    border-color: rgba(255, 0, 180, 0.12);
+  }
+
+  /* ── Status badge pill ──────────────────────────────── */
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(34, 197, 94, 0.85);
+    margin: 0.15rem 0;
+  }
+
+  .card-badge-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.9);
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+    animation: badge-dot-pulse 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes badge-dot-pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; box-shadow: 0 0 12px rgba(34, 197, 94, 0.7); }
+  }
+
+  /* ── Code snippet ────────────────────────────────────── */
+  .card-code {
+    font-family: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.58rem;
+    color: rgba(168, 85, 247, 0.6);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 0.35rem 0.55rem;
+    border-radius: 6px;
+    border-left: 2px solid rgba(168, 85, 247, 0.3);
+    margin-top: 0.3rem;
+    line-height: 1.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .orbit-card:hover .card-code {
+    color: rgba(192, 132, 252, 0.8);
+    border-left-color: rgba(168, 85, 247, 0.5);
+  }
+
+  /* ── Timeline ────────────────────────────────────────── */
+  .card-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 0.4rem;
+    position: relative;
+    padding-left: 16px;
+  }
+
+  .card-timeline::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: rgba(168, 85, 247, 0.15);
+  }
+
+  .card-timeline-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+  }
+
+  .card-timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -16px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(168, 85, 247, 0.2);
+    border: 1px solid rgba(168, 85, 247, 0.4);
+  }
+
+  .card-timeline-item--active::before {
+    background: rgba(168, 85, 247, 0.8);
+    box-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+    border-color: rgba(168, 85, 247, 0.8);
+  }
+
+  .card-timeline-year {
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(168, 85, 247, 0.7);
+    font-variant-numeric: tabular-nums;
+    min-width: 30px;
+  }
+
+  .card-timeline-text {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .orbit-card:hover .card-timeline-item--active::before {
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.6);
+  }
+
+  .orbit-card:hover .card-timeline-text {
+    color: rgba(255, 255, 255, 0.55);
   }
 
   /* ── Responsive ──────────────────────────────────────── */
@@ -675,6 +1123,12 @@ const projectsJSON = JSON.stringify(
     .card-center {
       min-height: 180px;
     }
+    .card-barchart {
+      height: 36px;
+    }
+    .card-metric-value {
+      font-size: 1.6rem;
+    }
   }
 </style>
 
@@ -682,116 +1136,16 @@ const projectsJSON = JSON.stringify(
   import { gsap } from "gsap";
   import { Draggable } from "gsap/Draggable";
   import { Flip } from "gsap/Flip";
+  import { translations } from "../i18n/translations";
 
   gsap.registerPlugin(Draggable, Flip);
 
   /* ─────────────────────────────────────────────────────────
-     TOPIC CONTENT DEFINITIONS
+     I18N HELPER
   ───────────────────────────────────────────────────────── */
-  interface CardContent {
-    label: string;
-    title: string;
-    desc?: string;
-    descSm?: string;
-    yearBadge?: string;
-    pills?: string[];
-    isProfile?: boolean;
-    isProject?: number;
-    isViewAll?: boolean;
+  function t(key: string, lang: "de" | "en"): string {
+    return translations[lang]?.[key] ?? key;
   }
-
-  interface Topic {
-    de: { name: string; cards: CardContent[] };
-    en: { name: string; cards: CardContent[] };
-  }
-
-  // Cards ordered [N, E, S, W] per topic
-  const TOPICS: Topic[] = [
-    // ── Topic 0: Über Mich ────────────────────────
-    {
-      de: {
-        name: "Über Mich",
-        cards: [
-          { label: "Wer ich bin", title: "Informatikstudent, LMU München", desc: "Ich studiere Informatik an der LMU München und baue seit 2018 Web­anwendungen — von kleinen Tools bis zu komplexen Headless-Architekturen." },
-          { label: "Was mich antreibt", title: "Erschaffen. Planen. Entwickeln.", desc: "Mein Fokus: präzise Architektur, sauberer Code und außergewöhnliche User Experiences. Qualität vor Quantität." },
-          { label: "Jenseits des Codes", title: "Musik · Gaming · Astronomie", desc: "Wenn ich nicht am Computer bin, finde ich Inspiration in Musik, Spielen und dem Blick ins Universum." },
-          { label: "Profil", title: "", isProfile: true },
-        ],
-      },
-      en: {
-        name: "About Me",
-        cards: [
-          { label: "Who I am", title: "CS Student, LMU Munich", desc: "Studying computer science at LMU Munich while building web applications since 2018 — from small tools to complex headless architectures." },
-          { label: "What drives me", title: "Create. Plan. Develop.", desc: "My focus: precise architecture, clean code and exceptional user experiences. Quality over quantity." },
-          { label: "Beyond Code", title: "Music · Gaming · Astronomy", desc: "When I'm not at the computer, I find inspiration in music, games, and gazing at the universe." },
-          { label: "Profile", title: "", isProfile: true },
-        ],
-      },
-    },
-    // ── Topic 1: Die Geschichte ───────────────────
-    {
-      de: {
-        name: "Die Geschichte",
-        cards: [
-          { label: "Der Anfang", title: "Erste Zeile Code", yearBadge: "2018", desc: "Mit einem einfachen Python-Skript begann alles. Seitdem hat mich die Faszination fürs Programmieren nicht losgelassen." },
-          { label: "Erster Meilenstein", title: "Erste FullStack App", yearBadge: "2021", desc: "Entwicklung meiner ersten vollständigen Web-Applikation mit eigenem Backend, Datenbank und Live-Deployment." },
-          { label: "Berufserfahrung", title: "Werbeagentur Gerer", yearBadge: "2025", desc: "Softwareingenieur — reale Projekte, echte Kunden, professionelle Standards." },
-          { label: "Gründung", title: "Pro-Grammer", yearBadge: "2026", desc: "Gründung meines eigenen Softwareunternehmens: präziser Code für ambitionierte Projekte." },
-        ],
-      },
-      en: {
-        name: "The Origin",
-        cards: [
-          { label: "The Beginning", title: "First Line of Code", yearBadge: "2018", desc: "It all started with a simple Python script. Since then, the fascination for programming has never left me." },
-          { label: "First Milestone", title: "First FullStack App", yearBadge: "2021", desc: "Built my first complete web application with its own backend, database and live deployment." },
-          { label: "Professional", title: "Werbeagentur Gerer", yearBadge: "2025", desc: "Software engineer — real projects, real clients, professional standards." },
-          { label: "Founded", title: "Pro-Grammer", yearBadge: "2026", desc: "Founded my own software company: precise code for ambitious projects." },
-        ],
-      },
-    },
-    // ── Topic 2: Leistungen ───────────────────────
-    {
-      de: {
-        name: "Leistungen",
-        cards: [
-          { label: "Entwicklung", title: "FullStack Development", desc: "Komplette Web-Applikationen von Frontend bis Backend — Astro, React, Node.js, Headless CMS.", pills: ["Astro", "React", "Node.js", "TypeScript"] },
-          { label: "Infrastruktur", title: "Datenbanken & APIs", desc: "Skalierbare REST & GraphQL-Services, PostgreSQL, MySQL, cloud-native Deployments mit Docker & CI/CD.", pills: ["PostgreSQL", "GraphQL", "Docker", "AWS"] },
-          { label: "Maßarbeit", title: "Custom Solutions", desc: "Keine Baukästen. Individuelle Lösungen, die exakt auf Ihre Anforderungen zugeschnitten sind." },
-          { label: "Beratung", title: "Consulting & White-Label", desc: "Strategische Beratung, Code Reviews, Architektur-Audits und diskrete White-Label-Entwicklung." },
-        ],
-      },
-      en: {
-        name: "Services",
-        cards: [
-          { label: "Development", title: "FullStack Development", desc: "Complete web applications from frontend to backend — Astro, React, Node.js, Headless CMS.", pills: ["Astro", "React", "Node.js", "TypeScript"] },
-          { label: "Infrastructure", title: "Databases & APIs", desc: "Scalable REST & GraphQL services, PostgreSQL, MySQL, cloud-native deployments with Docker & CI/CD.", pills: ["PostgreSQL", "GraphQL", "Docker", "AWS"] },
-          { label: "Tailored", title: "Custom Solutions", desc: "No page builders. Individual solutions precisely tailored to your requirements." },
-          { label: "Advisory", title: "Consulting & White-Label", desc: "Strategic consulting, code reviews, architecture audits and discreet white-label development." },
-        ],
-      },
-    },
-    // ── Topic 3: Projekte ─────────────────────────
-    {
-      de: {
-        name: "Projekte",
-        cards: [
-          { label: "Projekt", title: "", isProject: 0 },
-          { label: "Projekt", title: "", isProject: 1 },
-          { label: "Projekt", title: "", isProject: 2 },
-          { label: "Mehr", title: "", isViewAll: true },
-        ],
-      },
-      en: {
-        name: "Projects",
-        cards: [
-          { label: "Project", title: "", isProject: 0 },
-          { label: "Project", title: "", isProject: 1 },
-          { label: "Project", title: "", isProject: 2 },
-          { label: "More", title: "", isViewAll: true },
-        ],
-      },
-    },
-  ];
 
   /* ─────────────────────────────────────────────────────────
      PROJECTS DATA (from server island)
@@ -847,68 +1201,216 @@ const projectsJSON = JSON.stringify(
   }
 
   /* ─────────────────────────────────────────────────────────
-     CONTENT RENDERING
+     CONTENT RENDERING — Per-topic custom renderers
   ───────────────────────────────────────────────────────── */
   function stripHtml(html: string): string {
     return html.replace(/<[^>]*>/g, "").trim();
   }
 
-  function renderCardContent(face: HTMLElement, content: CardContent, lang: "de" | "en", pos: number) {
-    face.innerHTML = "";
-    face.setAttribute("data-pos", String(pos));
+  function setGlow(orbitCard: HTMLElement | null, color?: string) {
+    if (!orbitCard) return;
+    orbitCard.classList.remove("glow-purple", "glow-cyan", "glow-magenta");
+    if (color) orbitCard.classList.add(`glow-${color}`);
+  }
 
-    if (content.isViewAll) {
-      const label = lang === "de" ? "Alle ansehen" : "View all";
+  /* ── Topic 0: About Me ──────────────────────────────── */
+  function renderAboutMeCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
+    switch (pos) {
+      case 0: // N — wide: intro + availability badge
+        setGlow(orbitCard, "purple");
+        face.innerHTML = `
+          <p class="card-label">${t('bento.about.n.label', lang)}</p>
+          <div class="card-badge"><span class="card-badge-dot"></span>${t('bento.about.n.badge', lang)}</div>
+          <h3 class="card-title">${t('bento.about.n.title', lang)}</h3>
+          <p class="card-desc">${t('bento.about.n.desc', lang)}</p>`;
+        break;
+      case 1: // E — tall: drive + code snippet + metric
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.about.e.label', lang)}</p>
+          <h3 class="card-title">${t('bento.about.e.title', lang)}</h3>
+          <p class="card-desc">${t('bento.about.e.desc', lang)}</p>
+          <div class="card-code">${t('bento.about.e.code', lang)}</div>
+          <div class="card-metric">
+            <span class="card-metric-value">${t('bento.about.e.metric', lang)}</span>
+            <span class="card-metric-label">${t('bento.about.e.metricLabel', lang)}</span>
+          </div>`;
+        break;
+      case 2: // S — small: hobbies + constellation icon
+        setGlow(orbitCard, "cyan");
+        face.innerHTML = `
+          <p class="card-label">${t('bento.about.s.label', lang)}</p>
+          <h3 class="card-title">${t('bento.about.s.title', lang)}</h3>
+          <div class="card-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="rgba(0,240,255,0.6)" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="1.5"/><circle cx="6" cy="6" r="1" fill="rgba(0,240,255,0.4)" stroke="none"/><circle cx="18" cy="8" r="0.8" fill="rgba(168,85,247,0.5)" stroke="none"/><circle cx="8" cy="18" r="0.6" fill="rgba(0,240,255,0.3)" stroke="none"/><circle cx="17" cy="16" r="1.2" fill="rgba(168,85,247,0.3)" stroke="none"/><line x1="6" y1="6" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="18" y1="8" x2="12" y2="12" stroke-dasharray="2 3"/><line x1="8" y1="18" x2="12" y2="12" stroke-dasharray="2 3"/></svg></div>`;
+        break;
+      case 3: // W — tall: profile tile
+        setGlow(orbitCard);
+        face.innerHTML = `<div class="profile-tile">
+          <p class="card-label">${t('bento.about.w.label', lang)}</p>
+          <div class="profile-avatar"><span class="profile-avatar-initials">&lt;/&gt;</span></div>
+          <div class="profile-info">
+            <span class="profile-role">${t('bento.about.w.role', lang)}</span>
+            <span class="profile-location">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              ${t('bento.about.w.location', lang)}
+            </span>
+          </div>
+        </div>`;
+        break;
+    }
+  }
+
+  /* ── Topic 1: The Origin ─────────────────────────────── */
+  function renderOriginCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
+    switch (pos) {
+      case 0: // N — wide: genesis + year badge
+        setGlow(orbitCard, "purple");
+        face.innerHTML = `
+          <p class="card-label">${t('bento.origin.n.label', lang)}</p>
+          <p class="card-year">2018</p>
+          <h3 class="card-title">${t('bento.origin.n.title', lang)}</h3>
+          <p class="card-desc">${t('bento.origin.n.desc', lang)}</p>`;
+        break;
+      case 1: // E — tall: timeline milestones + bar chart
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.origin.e.label', lang)}</p>
+          <h3 class="card-title">${t('bento.origin.e.title', lang)}</h3>
+          <div class="card-timeline">
+            <div class="card-timeline-item"><span class="card-timeline-year">2018</span><span class="card-timeline-text">${t('bento.origin.e.t1', lang)}</span></div>
+            <div class="card-timeline-item"><span class="card-timeline-year">2021</span><span class="card-timeline-text">${t('bento.origin.e.t2', lang)}</span></div>
+            <div class="card-timeline-item"><span class="card-timeline-year">2025</span><span class="card-timeline-text">${t('bento.origin.e.t3', lang)}</span></div>
+            <div class="card-timeline-item card-timeline-item--active"><span class="card-timeline-year">2026</span><span class="card-timeline-text">${t('bento.origin.e.t4', lang)}</span></div>
+          </div>
+          <div class="card-barchart"><span style="height:20%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:100%"></span></div>`;
+        break;
+      case 2: // S — small: current role
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.origin.s.label', lang)}</p>
+          <p class="card-year">2025</p>
+          <h3 class="card-title">${t('bento.origin.s.title', lang)}</h3>
+          <p class="card-desc">${t('bento.origin.s.desc', lang)}</p>`;
+        break;
+      case 3: // W — tall: founding story + star icon
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.origin.w.label', lang)}</p>
+          <div class="card-badge" style="background:rgba(168,85,247,0.08);border-color:rgba(168,85,247,0.2);color:rgba(168,85,247,0.85)"><span class="card-badge-dot" style="background:rgba(168,85,247,0.9);box-shadow:0 0 8px rgba(168,85,247,0.5)"></span>${t('bento.origin.w.badge', lang)}</div>
+          <p class="card-year">2026</p>
+          <h3 class="card-title">${t('bento.origin.w.title', lang)}</h3>
+          <p class="card-desc">${t('bento.origin.w.desc', lang)}</p>
+          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(168,85,247,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg></div>`;
+        break;
+    }
+  }
+
+  /* ── Topic 2: Services ──────────────────────────────── */
+  function renderServicesCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
+    switch (pos) {
+      case 0: // N — wide: fullstack dev + tech pills
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.services.n.label', lang)}</p>
+          <h3 class="card-title">${t('bento.services.n.title', lang)}</h3>
+          <p class="card-desc">${t('bento.services.n.desc', lang)}</p>
+          <div class="tech-pills"><span>Astro</span><span>React</span><span>Node</span><span>TS</span></div>`;
+        break;
+      case 1: // E — tall: infrastructure + terminal output
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.services.e.label', lang)}</p>
+          <h3 class="card-title">${t('bento.services.e.title', lang)}</h3>
+          <p class="card-desc">${t('bento.services.e.desc', lang)}</p>
+          <div class="tech-pills"><span>PostgreSQL</span><span>GraphQL</span><span>Docker</span><span>AWS</span></div>
+          <div class="card-terminal">
+            <span>${t('bento.services.e.term1', lang)}</span>
+            <span>${t('bento.services.e.term2', lang)}</span>
+            <span>${t('bento.services.e.term3', lang)}</span>
+          </div>`;
+        break;
+      case 2: // S — small: custom solutions metric
+        setGlow(orbitCard, "magenta");
+        face.innerHTML = `
+          <p class="card-label">${t('bento.services.s.label', lang)}</p>
+          <h3 class="card-title">${t('bento.services.s.title', lang)}</h3>
+          <div class="card-metric">
+            <span class="card-metric-value">100%</span>
+            <span class="card-metric-label">${t('bento.services.s.metricLabel', lang)}</span>
+          </div>`;
+        break;
+      case 3: // W — tall: consulting + shield icon
+        setGlow(orbitCard);
+        face.innerHTML = `
+          <p class="card-label">${t('bento.services.w.label', lang)}</p>
+          <h3 class="card-title">${t('bento.services.w.title', lang)}</h3>
+          <p class="card-desc">${t('bento.services.w.desc', lang)}</p>
+          <div class="tech-pills"><span>Review</span><span>Audit</span><span>White-Label</span></div>
+          <div class="card-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="rgba(0,240,255,0.5)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>`;
+        break;
+    }
+  }
+
+  /* ── Topic 3: Projects ──────────────────────────────── */
+  function renderProjectCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
+    if (pos === 3) {
+      // View All card
+      setGlow(orbitCard);
+      const countNum = projects.length > 0 ? `${projects.length}+` : "8+";
       face.innerHTML = `<div class="bento-viewall">
-        <div class="bento-viewall-grid"><span></span><span></span><span></span><span></span></div>
-        <div class="bento-viewall-text">
-          <a href="/projects" class="bento-viewall-link">${label} <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        <p class="card-label">${t('bento.projects.viewall.label', lang)}</p>
+        <div class="bento-viewall-metric">
+          <span class="bento-viewall-count">${countNum}</span>
+          <span class="bento-viewall-count-label">${t('bento.projects.viewall.count', lang)}</span>
         </div>
+        <div class="bento-viewall-grid">
+          <span></span><span class="viewall-grid--tall"></span>
+          <span class="viewall-grid--wide"></span><span></span>
+        </div>
+        <a href="/projects" class="bento-viewall-cta">
+          ${t('bento.projects.viewall.cta', lang)}
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>`;
       return;
     }
 
-    if (content.isProfile) {
-      face.innerHTML = `<div class="profile-tile"><span class="profile-tile-placeholder">👤</span></div>`;
-      return;
+    // Project cards (pos 0, 1, 2)
+    const proj = projects[pos];
+    setGlow(orbitCard);
+    if (proj) {
+      const maxLen = pos === 2 ? 60 : pos === 0 ? 120 : 140;
+      const excerpt = stripHtml(proj.excerpt).slice(0, maxLen);
+      const labelNum = `0${pos + 1}`;
+      face.innerHTML = `
+        <p class="card-label">${labelNum} // ${t('bento.projects.label', lang)}</p>
+        <div class="bento-project">
+          <p class="bento-project-title">${proj.title}</p>
+          <p class="bento-project-excerpt">${excerpt}</p>
+          <a href="/projects/${proj.slug}" class="bento-project-link">
+            ${t('bento.projects.details', lang)} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>`;
+    } else {
+      face.innerHTML = `
+        <p class="card-label">0${pos + 1} // ${t('bento.projects.label', lang)}</p>
+        <p class="card-title" style="opacity:0.3">${t('bento.projects.coming', lang)}</p>`;
     }
-
-    if (typeof content.isProject === "number") {
-      const proj = projects[content.isProject];
-      if (proj) {
-        const maxLen = pos === 2 ? 60 : pos === 0 ? 120 : 140;
-        const excerpt = stripHtml(proj.excerpt).slice(0, maxLen);
-        face.innerHTML = `<p class="card-label">${content.label}</p><div class="bento-project"><p class="bento-project-title">${proj.title}</p><p class="bento-project-excerpt">${excerpt}</p><a href="/projects/${proj.slug}" class="bento-project-link">Details <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a></div>`;
-      } else {
-        face.innerHTML = `<p class="card-label">${content.label}</p><p class="card-title" style="opacity:0.3">${lang === "de" ? "Bald verfügbar" : "Coming soon"}</p>`;
-      }
-      return;
-    }
-
-    let html = `<p class="card-label">${content.label}</p>`;
-    if (content.yearBadge) html += `<p class="card-year">${content.yearBadge}</p>`;
-    if (content.title)     html += `<h3 class="card-title">${content.title}</h3>`;
-    if (content.desc)      html += `<p class="card-desc">${content.desc}</p>`;
-    if (content.descSm)    html += `<p class="card-desc card-desc--sm">${content.descSm}</p>`;
-    if (content.pills?.length) {
-      html += `<div class="tech-pills">${content.pills.map(p => `<span>${p}</span>`).join("")}</div>`;
-    }
-    face.innerHTML = html;
   }
 
-  // For step s, the orbit card at grid position pos (N=0,E=1,S=2,W=3)
-  // is orbit card with index: (pos - s + 4) % 4
-  // So for populating topic topicIndex at layout step topicIndex,
-  // orbit card orbitIdx gets content for position pos = (orbitIdx + topicIndex) % 4
   function populateTopicCards(topicIndex: number, lang: "de" | "en") {
-    const topic = TOPICS[topicIndex];
-    if (!topic) return;
-    const data = topic[lang];
+    const renderers = [renderAboutMeCard, renderOriginCard, renderServicesCard, renderProjectCard];
+    const renderer = renderers[topicIndex];
+    if (!renderer) return;
 
     for (let orbitIdx = 0; orbitIdx < 4; orbitIdx++) {
       const pos = mod(orbitIdx + topicIndex, 4);
       const face = orbitCards[orbitIdx]?.querySelector<HTMLElement>(".card-face");
-      if (face) renderCardContent(face, data.cards[pos], lang, pos);
+      if (!face) continue;
+      face.innerHTML = "";
+      face.setAttribute("data-pos", String(pos));
+      const orbitCard = face.closest(".orbit-card") as HTMLElement | null;
+      renderer(face, pos, lang, orbitCard);
     }
   }
 
@@ -919,11 +1421,24 @@ const projectsJSON = JSON.stringify(
     const s = targetStep ?? step;
     const l = lang ?? getCurrentLang();
     catEls.forEach((el, i) => {
-      el.textContent = el.getAttribute(`data-${l}`) ?? el.textContent;
+      el.textContent = t(`bento.cat.${i}`, l);
       el.classList.toggle("cat-label--active", i === s);
     });
-    if (centerTopic) centerTopic.textContent = TOPICS[s]?.[l]?.name ?? "";
-    if (centerHint)  centerHint.textContent  = centerHint.getAttribute(`data-${l}`) ?? "";
+    if (centerTopic) centerTopic.textContent = t(`bento.center.step${s}`, l);
+    if (centerHint)  centerHint.textContent  = t('bento.center.hint', l);
+
+    // Update step indicator active state
+    const stepIndicator = document.getElementById("sb-step-indicator");
+    if (stepIndicator) {
+      stepIndicator.querySelectorAll(".step-num").forEach(el => {
+        const idx = parseInt(el.getAttribute("data-step") ?? "-1", 10);
+        el.classList.toggle("step-num--active", idx === s);
+      });
+      const lines = stepIndicator.querySelectorAll<HTMLElement>(".step-line-fill");
+      lines.forEach((fill, i) => {
+        fill.style.transform = i < s ? "scaleX(1)" : "scaleX(0)";
+      });
+    }
   }
 
   /* ─────────────────────────────────────────────────────────
@@ -938,39 +1453,44 @@ const projectsJSON = JSON.stringify(
       .map(c => c.querySelector<HTMLElement>(".card-face"))
       .filter(Boolean) as HTMLElement[];
 
-    // Phase 1: squeeze cards to invisible (first half of flip)
+    // 1. Capture Flip state BEFORE any DOM changes
+    const state = Flip.getState(orbitCards);
+
+    // 2. Squeeze faces to invisible (covers content swap)
     gsap.to(faces, {
       scaleX: 0,
       duration: 0.22,
       ease: "power2.in",
       stagger: 0.025,
       onComplete() {
-        // Cards are edge-on (invisible): safe to swap content + reposition
+        // 3. Content invisible — swap it
         populateTopicCards(targetStep, lang);
 
-        // Capture Flip state BEFORE layout change
-        const state = Flip.getState(orbitCards);
+        // 4. Swap layout class (moves grid positions)
         LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
         container!.classList.add(LAYOUT_CLASSES[targetStep]);
 
-        // Move cards to new grid positions simultaneously with unfold
+        // 5. Update step immediately
+        step = targetStep;
+
+        // 6. Flip from old positions → new with absolute positioning
         Flip.from(state, {
-          duration: 0.55,
+          duration: 1.0,
           ease: "power3.inOut",
+          absolute: true,
           stagger: 0.04,
           onComplete() {
-            step = targetStep;
             isTransitioning = false;
           },
         });
 
-        // Phase 2: expand cards back (second half of flip, revealing new content)
+        // 7. Expand faces back (reveal new content)
         gsap.to(faces, {
           scaleX: 1,
           duration: 0.28,
           ease: "power2.out",
           stagger: 0.025,
-          delay: 0.06,
+          delay: 0.08,
         });
       },
     });
@@ -983,7 +1503,7 @@ const projectsJSON = JSON.stringify(
         duration: 0.12,
         onComplete() {
           if (centerTopic) {
-            centerTopic.textContent = TOPICS[targetStep]?.[lang]?.name ?? "";
+            centerTopic.textContent = t(`bento.center.step${targetStep}`, lang);
             gsap.to(centerTopic, { opacity: 1, duration: 0.2 });
           }
         },
@@ -1005,6 +1525,9 @@ const projectsJSON = JSON.stringify(
     const travel = (trackW - thumbW) / 2 - 4;
     const THRESHOLD = travel * 0.4;
 
+    const arrowLeft = document.getElementById("sb-arrow-left");
+    const arrowRight = document.getElementById("sb-arrow-right");
+
     activeDraggable = Draggable.create(centerBtn, {
       type: "x",
       inertia: false,
@@ -1017,6 +1540,17 @@ const projectsJSON = JSON.stringify(
         const x = gsap.getProperty(centerBtn, "x") as number;
         const pct = Math.abs(x) / travel;
         gsap.set(centerBtn, { scale: 1 - pct * 0.06 });
+
+        // Dynamic arrow glow proportional to drag distance
+        if (x < 0 && arrowLeft) {
+          const pctLeft = Math.min(Math.abs(x) / travel, 1);
+          gsap.set(arrowLeft, { color: `rgba(255,255,255,${(0.15 + pctLeft * 0.55).toFixed(2)})`, textShadow: `0 0 ${Math.round(pctLeft * 10)}px rgba(168,85,247,${(pctLeft * 0.4).toFixed(2)})` });
+          if (arrowRight) gsap.set(arrowRight, { color: 'rgba(255,255,255,0.15)', textShadow: 'none' });
+        } else if (x > 0 && arrowRight) {
+          const pctRight = Math.min(x / travel, 1);
+          gsap.set(arrowRight, { color: `rgba(255,255,255,${(0.15 + pctRight * 0.55).toFixed(2)})`, textShadow: `0 0 ${Math.round(pctRight * 10)}px rgba(168,85,247,${(pctRight * 0.4).toFixed(2)})` });
+          if (arrowLeft) gsap.set(arrowLeft, { color: 'rgba(255,255,255,0.15)', textShadow: 'none' });
+        }
       },
 
       onRelease() {
@@ -1027,6 +1561,10 @@ const projectsJSON = JSON.stringify(
           duration: 0.85,
           ease: "elastic.out(1, 0.28)",
         });
+
+        // Reset arrow glow
+        if (arrowLeft)  gsap.to(arrowLeft,  { color: 'rgba(255,255,255,0.15)', textShadow: 'none', duration: 0.4 });
+        if (arrowRight) gsap.to(arrowRight, { color: 'rgba(255,255,255,0.15)', textShadow: 'none', duration: 0.4 });
 
         if (x > THRESHOLD) goToStep(mod(step + 1, STEPS));
         else if (x < -THRESHOLD) goToStep(mod(step - 1, STEPS));
@@ -1111,6 +1649,15 @@ const projectsJSON = JSON.stringify(
       el.addEventListener("click", () => {
         if (i === step || isTransitioning) return;
         goToStep(i);
+      });
+    });
+
+    // Click step indicator numbers → jump to that step
+    const stepNums = document.querySelectorAll<HTMLElement>("#sb-step-indicator .step-num");
+    stepNums.forEach(el => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.getAttribute("data-step") ?? "-1", 10);
+        if (idx >= 0 && idx < STEPS && idx !== step && !isTransitioning) goToStep(idx);
       });
     });
 
