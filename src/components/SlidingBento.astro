@@ -174,7 +174,9 @@ const projectsJSON = JSON.stringify(
 
   .orbit-card {
     perspective: 1200px;
+    will-change: transform;
     transition:
+      transform 0.4s cubic-bezier(0.33, 1, 0.68, 1),
       border-color 0.4s ease,
       box-shadow 0.5s ease;
   }
@@ -277,6 +279,7 @@ const projectsJSON = JSON.stringify(
     inset: 0;
     transform-style: preserve-3d;
     border-radius: 20px;
+    will-change: transform;
   }
 
   /* ── Card face ───────────────────────────────────────── */
@@ -296,6 +299,7 @@ const projectsJSON = JSON.stringify(
 
   .card-face-back {
     transform: rotateY(180deg);
+    z-index: 1;
   }
 
   /* Position-aware face overrides: N=wide, E=tall-3, S=small, W=tall-2 */
@@ -1769,7 +1773,8 @@ const projectsJSON = JSON.stringify(
     const glowColors = ["cyan", "magenta", "purple"] as const;
     const accentVariants = ["card-accent-top--cyan", "card-accent-top--magenta", ""] as const;
     setGlow(orbitCard, glowColors[pos]);
-    face.classList.add("card-accent-top", accentVariants[pos] || "");
+    face.classList.add("card-accent-top");
+    if (accentVariants[pos]) face.classList.add(accentVariants[pos]);
     if (proj) {
       const maxLen = pos === 2 ? 60 : pos === 0 ? 120 : 140;
       const excerpt = stripHtml(proj.excerpt).slice(0, maxLen);
@@ -1882,12 +1887,12 @@ const projectsJSON = JSON.stringify(
         duration: 0.85,
         ease: "power3.inOut",
         absolute: true,
-        stagger: 0.03,
+        stagger: 0.04,
         onComplete: resolve,
       });
     });
 
-    // 3D flip rotation (runs simultaneously — matched easing for lockstep feel)
+    // 3D flip rotation (runs simultaneously — matched easing & stagger for lockstep)
     const flipRotateDone = new Promise<void>(resolve => {
       gsap.to(inners, {
         rotateY: 180,
@@ -1895,12 +1900,13 @@ const projectsJSON = JSON.stringify(
         ease: "power3.inOut",
         stagger: 0.04,
         onUpdate() {
-          // At 90° midpoint, hide old front face to prevent backface bleedthrough
+          // At 90° midpoint, fully deload old front face from render tree
+          // so it cannot interfere with back-face content layout
           inners.forEach(inner => {
             const rotY = gsap.getProperty(inner, "rotateY") as number;
             const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
             if (front) {
-              front.style.visibility = rotY >= 88 ? "hidden" : "visible";
+              front.style.display = rotY >= 88 ? "none" : "";
             }
           });
         },
@@ -1927,31 +1933,49 @@ const projectsJSON = JSON.stringify(
     // 6. Wait for BOTH animations to finish before cleanup
     await Promise.all([flipMoveDone, flipRotateDone]);
 
-    // Cleanup: swap back→front, reset rotation
-    for (let i = 0; i < orbitCards.length; i++) {
-      const frontFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
-      const backFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face-back");
-      if (frontFace && backFace) {
-        frontFace.innerHTML = backFace.innerHTML;
-        // Transfer accent classes from back to front
-        const accentClasses = ["card-accent-top", "card-accent-top--cyan", "card-accent-top--magenta"];
-        accentClasses.forEach(cls => {
-          frontFace.classList.toggle(cls, backFace.classList.contains(cls));
-          backFace.classList.remove(cls);
+    // Cleanup: batch all DOM mutations in a single rAF for atomic repaint
+    await new Promise<void>(resolve => {
+      requestAnimationFrame(() => {
+        // Restore front faces from display:none before content swap
+        inners.forEach(inner => {
+          const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+          if (front) front.style.display = "";
         });
-        const pos = backFace.getAttribute("data-pos");
-        if (pos) frontFace.setAttribute("data-pos", pos);
-        backFace.innerHTML = "";
-      }
-    }
-    gsap.set(inners, { rotateY: 0 });
-    // Restore front face visibility after cleanup
-    inners.forEach(inner => {
-      const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
-      if (front) front.style.visibility = "visible";
+        // Swap back→front, reset rotation
+        for (let i = 0; i < orbitCards.length; i++) {
+          const frontFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+          const backFace = orbitCards[i]?.querySelector<HTMLElement>(".card-face-back");
+          if (frontFace && backFace) {
+            frontFace.innerHTML = backFace.innerHTML;
+            // Transfer accent classes from back to front
+            const accentClasses = ["card-accent-top", "card-accent-top--cyan", "card-accent-top--magenta"];
+            accentClasses.forEach(cls => {
+              frontFace.classList.toggle(cls, backFace.classList.contains(cls));
+              backFace.classList.remove(cls);
+            });
+            const pos = backFace.getAttribute("data-pos");
+            if (pos) frontFace.setAttribute("data-pos", pos);
+            backFace.innerHTML = "";
+          }
+        }
+        // Clear ALL residual GSAP inline styles to prevent 1-frame layout snap
+        gsap.set(orbitCards, { clearProps: "position,top,left,width,height,margin,padding,transform,zIndex,opacity" });
+        gsap.set(inners, { rotateY: 0 });
+        // Force synchronous reflow so grid recalculates before next paint
+        void container!.offsetHeight;
+        // Clear any residual inline styles on faces
+        inners.forEach(inner => {
+          const front = inner.querySelector<HTMLElement>(".card-face:not(.card-face-back)");
+          if (front) {
+            front.style.display = "";
+            front.style.opacity = "";
+          }
+        });
+        container!.classList.remove("is-transitioning");
+        isTransitioning = false;
+        resolve();
+      });
     });
-    container.classList.remove("is-transitioning");
-    isTransitioning = false;
   }
 
   /* ─────────────────────────────────────────────────────────
