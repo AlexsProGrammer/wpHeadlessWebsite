@@ -1475,6 +1475,321 @@ const projectsJSON = JSON.stringify(
     color: rgba(255, 255, 255, 0.55);
   }
 
+  /* ── Typing cursor ──────────────────────────────────── */
+  .typing-cursor {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    background: rgba(120, 60, 255, 0.8);
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    animation: cursor-blink 1s step-end infinite;
+  }
+
+  @keyframes cursor-blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+  }
+
+  /* ── Mini bar chart variant ─────────────────────────── */
+  .card-barchart--mini {
+    margin-top: auto;
+    height: 28px;
+    gap: 4px;
+  }
+
+  .card-barchart--mini span {
+    width: 10px;
+    border-radius: 2px;
+  }
+
+  /* ── Gradient bar chart ─────────────────────────────── */
+  .card-barchart--gradient span {
+    background: linear-gradient(
+      to top,
+      rgba(255, 0, 160, 0.5) 0%,
+      rgba(120, 60, 255, 0.7) 100%
+    );
+  }
+
+  /* ── Purple skill bar fill ──────────────────────────── */
+  .skill-bar-fill--purple {
+    background: linear-gradient(90deg, rgba(120, 60, 255, 0.4) 0%, rgba(120, 60, 255, 0.8) 100%);
+  }
+
+  /* ── Enhanced signal dot ────────────────────────────── */
+  .signal-dot--enhanced {
+    width: 16px;
+    height: 16px;
+    box-shadow:
+      0 0 8px rgba(34, 197, 94, 0.6),
+      0 0 20px rgba(34, 197, 94, 0.3),
+      0 0 40px rgba(34, 197, 94, 0.15);
+  }
+
+  .signal-dot--enhanced::after {
+    width: 28px;
+    height: 28px;
+    top: -6px;
+    left: -6px;
+    border: 1.5px solid rgba(34, 197, 94, 0.25);
+  }
+
+  /* ── Profile link pills ─────────────────────────────── */
+  .profile-links {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+  }
+
+  .profile-link-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 0.3rem 0.7rem;
+    transition: color 0.3s, border-color 0.3s, background 0.3s;
+  }
+
+  .profile-link-pill:hover {
+    color: rgba(255, 255, 255, 0.85);
+    border-color: rgba(120, 60, 255, 0.3);
+    background: rgba(120, 60, 255, 0.08);
+  }
+
+  .profile-link-pill svg {
+    opacity: 0.6;
+    transition: opacity 0.3s;
+  }
+
+  .profile-link-pill:hover svg {
+    opacity: 1;
+  }
+
+  /* ── Code watermark ─────────────────────────────────── */
+  .card-watermark {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.02);
+    pointer-events: none;
+    white-space: nowrap;
+    line-height: 1;
+  }
+
+  /* ── Year glitch effect ─────────────────────────────── */
+  .card-year--glitch {
+    position: relative;
+  }
+
+  .card-year--glitch::before,
+  .card-year--glitch::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+  }
+
+  .orbit-card:hover .card-year--glitch::before {
+    opacity: 0.6;
+    color: rgba(0, 200, 255, 0.7);
+    animation: glitch-1 2s infinite linear;
+  }
+
+  .orbit-card:hover .card-year--glitch::after {
+    opacity: 0.6;
+    color: rgba(255, 0, 160, 0.7);
+    animation: glitch-2 2s infinite linear;
+  }
+
+  @keyframes glitch-1 {
+    0%, 100% { clip-path: inset(0 0 80% 0); transform: translate(-2px, 0); }
+    20% { clip-path: inset(20% 0 60% 0); transform: translate(2px, 0); }
+    40% { clip-path: inset(40% 0 40% 0); transform: translate(-1px, 0); }
+    60% { clip-path: inset(60% 0 20% 0); transform: translate(1px, 0); }
+    80% { clip-path: inset(80% 0 0 0); transform: translate(-2px, 0); }
+  }
+
+  @keyframes glitch-2 {
+    0%, 100% { clip-path: inset(80% 0 0 0); transform: translate(2px, 0); }
+    20% { clip-path: inset(60% 0 20% 0); transform: translate(-2px, 0); }
+    40% { clip-path: inset(40% 0 40% 0); transform: translate(1px, 0); }
+    60% { clip-path: inset(20% 0 60% 0); transform: translate(-1px, 0); }
+    80% { clip-path: inset(0 0 80% 0); transform: translate(2px, 0); }
+  }
+
+  /* ── Animated timeline variant ──────────────────────── */
+  .card-timeline--animated .card-timeline-item::before {
+    transition: box-shadow 0.4s ease, background 0.4s ease;
+  }
+
+  .orbit-card:hover .card-timeline--animated .card-timeline-item::before {
+    box-shadow: 0 0 6px rgba(120, 60, 255, 0.3);
+  }
+
+  /* ── Pulsing metric ─────────────────────────────────── */
+  .card-metric--pulse {
+    animation: metric-pulse 3s ease-in-out infinite;
+  }
+
+  @keyframes metric-pulse {
+    0%, 100% { text-shadow: 0 0 8px rgba(0, 200, 255, 0.3); }
+    50% { text-shadow: 0 0 20px rgba(0, 200, 255, 0.6), 0 0 40px rgba(120, 60, 255, 0.3); }
+  }
+
+  /* ── Tech pills grid variant ────────────────────────── */
+  .tech-pills--grid {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  /* ── Live terminal variant ──────────────────────────── */
+  .card-terminal--live span:last-child::after {
+    content: '█';
+    animation: blink-cursor 1s step-end infinite;
+    color: rgba(0, 200, 255, 0.7);
+    font-size: 0.7em;
+  }
+
+  /* ── Progress ring ──────────────────────────────────── */
+  .progress-ring {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+  }
+
+  .progress-ring-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .progress-ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.06);
+    stroke-width: 4;
+  }
+
+  .progress-ring-fill {
+    fill: none;
+    stroke: url(#progress-gradient);
+    stroke-width: 4;
+    stroke-linecap: round;
+    stroke-dasharray: 213.6;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s ease;
+    filter: drop-shadow(0 0 4px rgba(255, 0, 160, 0.4));
+  }
+
+  /* Fallback gradient for progress ring (CSS only) */
+  .progress-ring-fill {
+    stroke: rgba(255, 0, 160, 0.7);
+  }
+
+  .progress-ring-text {
+    position: absolute;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 0, 160, 0.7) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .orbit-card:hover .progress-ring-fill {
+    filter: drop-shadow(0 0 8px rgba(255, 0, 160, 0.6));
+  }
+
+  /* ── Services list ──────────────────────────────────── */
+  .services-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+  }
+
+  .services-list-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: rgba(148, 163, 184, 0.7);
+    letter-spacing: 0.02em;
+    transition: color 0.3s;
+  }
+
+  .services-list-item svg {
+    flex-shrink: 0;
+    transition: transform 0.3s;
+  }
+
+  .orbit-card:hover .services-list-item {
+    color: rgba(200, 210, 220, 0.85);
+  }
+
+  .orbit-card:hover .services-list-item svg {
+    transform: scale(1.15);
+  }
+
+  /* ── Project thumbnail ──────────────────────────────── */
+  .project-thumb {
+    position: relative;
+    width: 100%;
+    height: 48px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .project-thumb-pattern {
+    position: absolute;
+    inset: 0;
+    opacity: 0.15;
+    background-image:
+      linear-gradient(45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(255,255,255,0.03) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(255,255,255,0.03) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(255,255,255,0.03) 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  }
+
+  .orbit-card:hover .project-thumb {
+    transform: scaleY(1.05);
+    transition: transform 0.4s ease;
+  }
+
+  /* ── Animated viewall grid ──────────────────────────── */
+  .bento-viewall-grid--animated span {
+    animation: grid-pulse 4s ease-in-out infinite;
+  }
+
+  .bento-viewall-grid--animated span:nth-child(2) { animation-delay: 0.5s; }
+  .bento-viewall-grid--animated span:nth-child(3) { animation-delay: 1s; }
+  .bento-viewall-grid--animated span:nth-child(4) { animation-delay: 1.5s; }
+
+  @keyframes grid-pulse {
+    0%, 100% { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
+    50% { background: rgba(120, 60, 255, 0.06); border-color: rgba(120, 60, 255, 0.15); }
+  }
+
   /* ── Responsive ──────────────────────────────────────── */
   @media (max-width: 768px) {
     .bento-container {
@@ -1591,17 +1906,18 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 0: About Me ──────────────────────────────── */
   function renderAboutMeCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: gradient title hero + availability badge
+      case 0: // N — wide: gradient title hero + availability badge + typing cursor
         setGlow(orbitCard, "purple");
         face.classList.add("card-accent-top");
         face.innerHTML = `
           <div class="card-orb card-orb--purple"></div>
           <p class="card-label">${t('bento.about.n.label', lang)}</p>
           <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.about.n.badge', lang)}</div>
-          <h3 class="card-title card-title--gradient card-title--lg">${t('bento.about.n.title', lang)}</h3>
-          <p class="card-desc">${t('bento.about.n.desc', lang)}</p>`;
+          <h3 class="card-title card-title--gradient card-title--lg">${t('bento.about.n.title', lang)}<span class="typing-cursor"></span></h3>
+          <p class="card-desc">${t('bento.about.n.desc', lang)}</p>
+          <div class="card-barchart card-barchart--mini"><span style="height:92%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:78%"></span></div>`;
         break;
-      case 1: // E — tall: skill bars + code snippet
+      case 1: // E — tall: skill bars (5 rows) + code snippet
         setGlow(orbitCard);
         face.classList.add("card-accent-top", "card-accent-top--cyan");
         face.innerHTML = `
@@ -1609,22 +1925,24 @@ const projectsJSON = JSON.stringify(
           <p class="card-label">${t('bento.about.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.about.e.title', lang)}</h3>
           <div class="skill-bars">
-            <div class="skill-bar"><span class="skill-bar-label">Front</span><div class="skill-bar-track"><div class="skill-bar-fill" style="width:92%"></div></div></div>
-            <div class="skill-bar"><span class="skill-bar-label">Back</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--cyan" style="width:85%"></div></div></div>
+            <div class="skill-bar"><span class="skill-bar-label">Frontend</span><div class="skill-bar-track"><div class="skill-bar-fill" style="width:92%"></div></div></div>
+            <div class="skill-bar"><span class="skill-bar-label">Backend</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--cyan" style="width:85%"></div></div></div>
             <div class="skill-bar"><span class="skill-bar-label">DevOps</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--magenta" style="width:70%"></div></div></div>
+            <div class="skill-bar"><span class="skill-bar-label">Design</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--purple" style="width:55%"></div></div></div>
+            <div class="skill-bar"><span class="skill-bar-label">AI/ML</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--cyan" style="width:45%"></div></div></div>
           </div>
-          <div class="card-code">${t('bento.about.e.code', lang)}</div>`;
+          <div class="card-code">${t('bento.about.e.code', lang)}<span class="typing-cursor"></span></div>`;
         break;
-      case 2: // S — small: pulsing signal status dot
+      case 2: // S — small: pulsing signal status with enhanced glow ring
         setGlow(orbitCard, "cyan");
         face.innerHTML = `
           <div class="signal-card">
-            <div class="signal-dot"></div>
+            <div class="signal-dot signal-dot--enhanced"></div>
             <span class="signal-title">${t('bento.about.s.title', lang)}</span>
             <span class="signal-subtitle">${t('bento.about.s.subtitle', lang)}</span>
           </div>`;
         break;
-      case 3: // W — tall: profile tile (enhanced)
+      case 3: // W — tall: profile tile + social links row
         setGlow(orbitCard, "purple");
         face.classList.add("card-accent-top");
         face.innerHTML = `<div class="profile-tile">
@@ -1638,6 +1956,16 @@ const projectsJSON = JSON.stringify(
               ${t('bento.about.w.location', lang)}
             </span>
           </div>
+          <div class="profile-links">
+            <a class="profile-link-pill" href="https://github.com/AlexsProGrammer" target="_blank" rel="noopener">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              ${t('bento.about.w.github', lang)}
+            </a>
+            <a class="profile-link-pill" href="mailto:hello@pro-grammer.dev">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+              ${t('bento.about.w.email', lang)}
+            </a>
+          </div>
         </div>`;
         break;
     }
@@ -1646,39 +1974,41 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 1: The Origin ─────────────────────────────── */
   function renderOriginCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: large gradient year hero
+      case 0: // N — wide: large gradient year hero with code watermark
         setGlow(orbitCard, "purple");
         face.classList.add("card-accent-top");
         face.innerHTML = `
           <div class="card-orb card-orb--purple"></div>
+          <div class="card-watermark">int main() {}</div>
           <p class="card-label">${t('bento.origin.n.label', lang)}</p>
-          <span class="card-year--hero">2018</span>
+          <span class="card-year--hero card-year--glitch" data-text="2018">2018</span>
           <h3 class="card-title card-title--gradient">${t('bento.origin.n.title', lang)}</h3>
           <p class="card-desc">${t('bento.origin.n.desc', lang)}</p>`;
         break;
-      case 1: // E — tall: timeline milestones + bar chart
+      case 1: // E — tall: timeline milestones with animated dots + bar chart
         setGlow(orbitCard, "magenta");
         face.classList.add("card-accent-top", "card-accent-top--magenta");
         face.innerHTML = `
           <p class="card-label">${t('bento.origin.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.origin.e.title', lang)}</h3>
-          <div class="card-timeline">
+          <div class="card-timeline card-timeline--animated">
             <div class="card-timeline-item"><span class="card-timeline-year">2018</span><span class="card-timeline-text">${t('bento.origin.e.t1', lang)}</span></div>
             <div class="card-timeline-item"><span class="card-timeline-year">2021</span><span class="card-timeline-text">${t('bento.origin.e.t2', lang)}</span></div>
             <div class="card-timeline-item"><span class="card-timeline-year">2025</span><span class="card-timeline-text">${t('bento.origin.e.t3', lang)}</span></div>
             <div class="card-timeline-item card-timeline-item--active"><span class="card-timeline-year">2026</span><span class="card-timeline-text">${t('bento.origin.e.t4', lang)}</span></div>
           </div>
-          <div class="card-barchart"><span style="height:20%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:100%"></span></div>`;
+          <div class="card-barchart card-barchart--gradient"><span style="height:20%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:100%"></span></div>`;
         break;
-      case 2: // S — small: hero metric year
+      case 2: // S — small: hero metric with pulsing brand glow
         setGlow(orbitCard, "cyan");
         face.innerHTML = `
           <p class="card-label">${t('bento.origin.s.label', lang)}</p>
-          <div class="card-metric">
-            <span class="card-metric-value card-metric-value--lg">${t('bento.origin.s.title', lang)}</span>
+          <div class="card-metric glow-cyan">
+            <span class="card-metric-value card-metric-value--lg card-metric--pulse">${t('bento.origin.s.title', lang)}</span>
+            <span class="card-metric-label">${t('bento.origin.s.subtitle', lang)}</span>
           </div>`;
         break;
-      case 3: // W — tall: founding story + geometric diamond
+      case 3: // W — tall: founding story + terminal sequence
         setGlow(orbitCard, "purple");
         face.classList.add("card-accent-top");
         face.innerHTML = `
@@ -1687,7 +2017,11 @@ const projectsJSON = JSON.stringify(
           <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.origin.w.badge', lang)}</div>
           <h3 class="card-title">${t('bento.origin.w.title', lang)}</h3>
           <p class="card-desc">${t('bento.origin.w.desc', lang)}</p>
-          <div class="geo-diamond"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><path d="M18 2L34 18L18 34L2 18Z" stroke="rgba(120,60,255,0.4)" stroke-width="1.5"/><path d="M18 8L28 18L18 28L8 18Z" stroke="rgba(0,200,255,0.3)" stroke-width="1"/></svg></div>`;
+          <div class="card-terminal">
+            <span>${t('bento.origin.w.term1', lang)}</span>
+            <span>${t('bento.origin.w.term2', lang)}</span>
+            <span>${t('bento.origin.w.term3', lang)}</span>
+          </div>`;
         break;
     }
   }
@@ -1695,7 +2029,7 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 2: Services ──────────────────────────────── */
   function renderServicesCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: gradient "Fullstack Engineering." + tech pills
+      case 0: // N — wide: gradient "Fullstack Engineering." + 2-row tech grid
         setGlow(orbitCard, "cyan");
         face.classList.add("card-accent-top", "card-accent-top--cyan");
         face.innerHTML = `
@@ -1703,32 +2037,38 @@ const projectsJSON = JSON.stringify(
           <p class="card-label">${t('bento.services.n.label', lang)}</p>
           <h3 class="card-title card-title--gradient card-title--lg">${t('bento.services.n.title', lang)}</h3>
           <p class="card-desc">${t('bento.services.n.desc', lang)}</p>
-          <div class="tech-pills"><span>Astro</span><span>React</span><span>Node</span><span>TS</span></div>`;
+          <div class="tech-pills tech-pills--grid"><span>Astro</span><span>React</span><span>Node</span><span>TS</span><span>GraphQL</span><span>Docker</span></div>`;
         break;
-      case 1: // E — tall: terminal output + tech pills (no desc)
+      case 1: // E — tall: terminal output with blinking cursor + tech pills
         setGlow(orbitCard, "cyan");
         face.classList.add("card-accent-top", "card-accent-top--cyan");
         face.innerHTML = `
           <p class="card-label">${t('bento.services.e.label', lang)}</p>
           <h3 class="card-title">${t('bento.services.e.title', lang)}</h3>
           <div class="tech-pills"><span>PostgreSQL</span><span>GraphQL</span><span>Docker</span><span>AWS</span></div>
-          <div class="card-terminal">
+          <div class="card-terminal card-terminal--live">
             <span>${t('bento.services.e.term1', lang)}</span>
             <span>${t('bento.services.e.term2', lang)}</span>
             <span>${t('bento.services.e.term3', lang)}</span>
             <span>${t('bento.services.e.term4', lang)}</span>
           </div>`;
         break;
-      case 2: // S — small: big 100% metric
+      case 2: // S — small: radial progress ring around 100%
         setGlow(orbitCard, "magenta");
         face.innerHTML = `
           <p class="card-label">${t('bento.services.s.label', lang)}</p>
           <div class="card-metric">
-            <span class="card-metric-value card-metric-value--lg">100%</span>
+            <div class="progress-ring">
+              <svg viewBox="0 0 80 80" class="progress-ring-svg">
+                <circle cx="40" cy="40" r="34" class="progress-ring-bg"/>
+                <circle cx="40" cy="40" r="34" class="progress-ring-fill"/>
+              </svg>
+              <span class="progress-ring-text">100%</span>
+            </div>
             <span class="card-metric-label">${t('bento.services.s.metricLabel', lang)}</span>
           </div>`;
         break;
-      case 3: // W — tall: consulting + geometric diamond
+      case 3: // W — tall: consulting services list + icon
         setGlow(orbitCard, "purple");
         face.classList.add("card-accent-top");
         face.innerHTML = `
@@ -1736,8 +2076,20 @@ const projectsJSON = JSON.stringify(
           <p class="card-label">${t('bento.services.w.label', lang)}</p>
           <h3 class="card-title">${t('bento.services.w.title', lang)}</h3>
           <p class="card-desc">${t('bento.services.w.desc', lang)}</p>
-          <div class="tech-pills"><span>Review</span><span>Audit</span><span>White-Label</span></div>
-          <div class="geo-diamond"><svg width="32" height="32" viewBox="0 0 36 36" fill="none"><path d="M18 2L34 18L18 34L2 18Z" stroke="rgba(0,200,255,0.4)" stroke-width="1.5"/><path d="M18 8L28 18L18 28L8 18Z" stroke="rgba(120,60,255,0.3)" stroke-width="1"/></svg></div>`;
+          <div class="services-list">
+            <div class="services-list-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(120,60,255,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>${t('bento.services.w.li1', lang)}</span>
+            </div>
+            <div class="services-list-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,255,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>${t('bento.services.w.li2', lang)}</span>
+            </div>
+            <div class="services-list-item">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,0,160,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>${t('bento.services.w.li3', lang)}</span>
+            </div>
+          </div>`;
         break;
     }
   }
@@ -1745,7 +2097,7 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 3: Projects ──────────────────────────────── */
   function renderProjectCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     if (pos === 3) {
-      // View All card
+      // View All card — animated mini grid + count
       setGlow(orbitCard, "purple");
       face.classList.add("card-accent-top");
       const countNum = projects.length > 0 ? `${projects.length}+` : "8+";
@@ -1756,7 +2108,7 @@ const projectsJSON = JSON.stringify(
           <span class="bento-viewall-count card-metric-value--lg">${countNum}</span>
           <span class="bento-viewall-count-label">${t('bento.projects.viewall.count', lang)}</span>
         </div>
-        <div class="bento-viewall-grid">
+        <div class="bento-viewall-grid bento-viewall-grid--animated">
           <span></span><span class="viewall-grid--tall"></span>
           <span class="viewall-grid--wide"></span><span></span>
         </div>
@@ -1768,10 +2120,15 @@ const projectsJSON = JSON.stringify(
       return;
     }
 
-    // Project cards (pos 0, 1, 2)
+    // Project cards (pos 0, 1, 2) — with gradient thumbnail + year badge
     const proj = projects[pos];
     const glowColors = ["cyan", "magenta", "purple"] as const;
     const accentVariants = ["card-accent-top--cyan", "card-accent-top--magenta", ""] as const;
+    const gradientBgs = [
+      "linear-gradient(135deg, rgba(0,200,255,0.08) 0%, rgba(0,100,200,0.04) 100%)",
+      "linear-gradient(135deg, rgba(255,0,160,0.08) 0%, rgba(200,0,100,0.04) 100%)",
+      "linear-gradient(135deg, rgba(120,60,255,0.08) 0%, rgba(80,30,200,0.04) 100%)",
+    ] as const;
     setGlow(orbitCard, glowColors[pos]);
     face.classList.add("card-accent-top");
     if (accentVariants[pos]) face.classList.add(accentVariants[pos]);
@@ -1783,6 +2140,9 @@ const projectsJSON = JSON.stringify(
         ? `<div class="tech-pills">${proj.techStack.split(',').slice(0, 4).map((t: string) => `<span>${t.trim()}</span>`).join('')}</div>`
         : '';
       face.innerHTML = `
+        <div class="project-thumb" style="background:${gradientBgs[pos]}">
+          <div class="project-thumb-pattern"></div>
+        </div>
         <p class="card-label">${labelNum} // ${t('bento.projects.label', lang)}</p>
         <div class="bento-project">
           <p class="bento-project-title">${proj.title}</p>
@@ -1794,6 +2154,9 @@ const projectsJSON = JSON.stringify(
         </div>`;
     } else {
       face.innerHTML = `
+        <div class="project-thumb" style="background:${gradientBgs[pos]}">
+          <div class="project-thumb-pattern"></div>
+        </div>
         <p class="card-label">0${pos + 1} // ${t('bento.projects.label', lang)}</p>
         <p class="card-title" style="opacity:0.3">${t('bento.projects.coming', lang)}</p>`;
     }

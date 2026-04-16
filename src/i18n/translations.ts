@@ -98,6 +98,8 @@ export const translations: Record<string, Translations> = {
     'bento.about.w.label': '04 // PROFIL',
     'bento.about.w.role': 'Fullstack-Entwickler',
     'bento.about.w.location': 'München, DE',
+    'bento.about.w.github': 'GitHub',
+    'bento.about.w.email': 'Kontakt',
 
     // Bento — Origin (topic 1)
     'bento.origin.n.label': '01 // DER ANFANG',
@@ -111,10 +113,14 @@ export const translations: Record<string, Translations> = {
     'bento.origin.e.t4': 'Pro-Grammer',
     'bento.origin.s.label': '03 // JETZT',
     'bento.origin.s.title': 'Pro-Grammer',
+    'bento.origin.s.subtitle': 'Gegründet',
     'bento.origin.w.label': '04 // GRÜNDUNG',
     'bento.origin.w.badge': 'Est. 2026',
     'bento.origin.w.title': 'Pro-Grammer',
     'bento.origin.w.desc': 'Mein Unternehmen. Mein Code.',
+    'bento.origin.w.term1': '$ git init pro-grammer',
+    'bento.origin.w.term2': '$ npm create astro@latest',
+    'bento.origin.w.term3': '✓ Bereit für Launch',
 
     // Bento — Services (topic 2)
     'bento.services.n.label': '01 // ENTWICKLUNG',
@@ -132,6 +138,9 @@ export const translations: Record<string, Translations> = {
     'bento.services.w.label': '04 // BERATUNG',
     'bento.services.w.title': 'Consulting',
     'bento.services.w.desc': 'Reviews. Audits. White-Label.',
+    'bento.services.w.li1': 'Code Reviews',
+    'bento.services.w.li2': 'Architektur-Audits',
+    'bento.services.w.li3': 'Tech Migration',
 
     // Bento — Projects (topic 3)
     'bento.projects.label': 'PROJEKT',
@@ -293,6 +302,8 @@ export const translations: Record<string, Translations> = {
     'bento.about.w.label': '04 // PROFILE',
     'bento.about.w.role': 'Fullstack Developer',
     'bento.about.w.location': 'Munich, DE',
+    'bento.about.w.github': 'GitHub',
+    'bento.about.w.email': 'Contact',
 
     // Bento — Origin (topic 1)
     'bento.origin.n.label': '01 // THE GENESIS',
@@ -306,10 +317,14 @@ export const translations: Record<string, Translations> = {
     'bento.origin.e.t4': 'Pro-Grammer',
     'bento.origin.s.label': '03 // NOW',
     'bento.origin.s.title': 'Pro-Grammer',
+    'bento.origin.s.subtitle': 'Founded',
     'bento.origin.w.label': '04 // FOUNDED',
     'bento.origin.w.badge': 'Est. 2026',
     'bento.origin.w.title': 'Pro-Grammer',
     'bento.origin.w.desc': 'My company. My code.',
+    'bento.origin.w.term1': '$ git init pro-grammer',
+    'bento.origin.w.term2': '$ npm create astro@latest',
+    'bento.origin.w.term3': '✓ Ready for launch',
 
     // Bento — Services (topic 2)
     'bento.services.n.label': '01 // DEVELOPMENT',
@@ -327,6 +342,9 @@ export const translations: Record<string, Translations> = {
     'bento.services.w.label': '04 // ADVISORY',
     'bento.services.w.title': 'Consulting',
     'bento.services.w.desc': 'Reviews. Audits. White-Label.',
+    'bento.services.w.li1': 'Code Reviews',
+    'bento.services.w.li2': 'Architecture Audits',
+    'bento.services.w.li3': 'Tech Migration',
 
     // Bento — Projects (topic 3)
     'bento.projects.label': 'PROJECT',
