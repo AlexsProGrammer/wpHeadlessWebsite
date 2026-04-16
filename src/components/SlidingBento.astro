@@ -2410,10 +2410,11 @@ const projectsJSON = JSON.stringify(
     if (!cards) return;
     gsap.from(Array.from(cards), {
       opacity: 0,
-      scale: 0.88,
-      duration: 0.7,
-      ease: "back.out(1.7)",
+      y: 18,
+      duration: 0.65,
+      ease: "power3.out",
       stagger: { from: "center", amount: 0.45 },
+      clearProps: "transform,opacity",
     });
   }
 
