@@ -1,0 +1,245 @@
+/* ──────────────────────────────────────────────────────────────
+   Cosmic Decor — global styles
+   Loaded by MainLayout. All decor is aria-hidden & non-interactive
+   except hover tooltips on the decor nodes themselves.
+   ────────────────────────────────────────────────────────────── */
+
+/* Anchor the decor layer to the scrollable page body. */
+.overscroll-wrapper { position: relative; }
+
+.cosmic-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1; /* above bg (-1), below scroll-edges (95) */
+  overflow: visible;
+}
+
+/* Columns scroll with the page body — anchor to the overscroll wrapper. */
+.decor-col {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: clamp(48px, 8vw, 140px);
+  pointer-events: none;
+}
+.decor-col--left  { left: 0; }
+.decor-col--right { right: 0; }
+
+/* --- individual decoration --- */
+.decor {
+  position: absolute;
+  top: var(--decor-top, 0);
+  width: clamp(26px, 4.5vw, 64px);
+  height: clamp(26px, 4.5vw, 64px);
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0.7;
+  transform:
+    translateY(var(--decor-scroll, 0))
+    rotate(var(--decor-rot, 0deg))
+    scale(var(--decor-scale, 1));
+  transition: opacity 260ms ease, filter 260ms ease, transform 260ms var(--transition-spring, cubic-bezier(0.16,1,0.3,1));
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--decor-accent, #00f0ff) 35%, transparent));
+  pointer-events: auto;
+  will-change: transform, opacity;
+}
+
+.decor-col--left  .decor { left:  var(--decor-offset, 16px); }
+.decor-col--right .decor { right: var(--decor-offset, 16px); }
+
+.decor svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  color: rgba(255, 255, 255, 0.75);
+  overflow: visible;
+}
+
+.decor:hover {
+  opacity: 1;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--decor-accent, #00f0ff) 75%, transparent));
+}
+
+/* tooltip (pure CSS, using data-tip) */
+.decor::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  transform: translateX(-50%) translateY(4px);
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(12, 10, 26, 0.85);
+  border: 1px solid color-mix(in srgb, var(--decor-accent, #00f0ff) 50%, rgba(255,255,255,0.1));
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 220ms var(--transition-spring, ease);
+  backdrop-filter: blur(8px);
+  z-index: 3;
+}
+.decor:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* --- motion primitives --- */
+@keyframes decor-drift {
+  0%, 100% { translate: 0 0; }
+  50%      { translate: 0 -10px; }
+}
+.decor--drift {
+  animation: decor-drift 7s ease-in-out infinite;
+  animation-delay: calc(var(--decor-top, 0) * -0.07s);
+}
+
+@keyframes decor-rotate {
+  to { rotate: 360deg; }
+}
+.decor--rotate svg {
+  animation: decor-rotate 24s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes decor-twinkle {
+  0%, 100% { opacity: 0.4; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--decor-accent, #00f0ff) 25%, transparent)); }
+  50%      { opacity: 0.95; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--decor-accent, #00f0ff) 75%, transparent)); }
+}
+.decor--twinkle { animation: decor-twinkle 4.5s ease-in-out infinite; }
+
+.decor--parallax {
+  /* transform already includes --decor-scroll; JS sets that variable */
+}
+
+/* --- footer companion removed: was causing a visually-pinned icon --- */
+
+/* --- one-shot: shooting star --- */
+.decor-event--shooting {
+  position: fixed;
+  top: var(--ss-top, 15vh);
+  left: -15vw;
+  width: 36vw;
+  height: 4px;
+  pointer-events: none;
+  z-index: 3;
+}
+.decor-event--shooting::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--neon-pink) 80%, transparent) 60%,
+    #fff 100%
+  );
+  border-radius: 999px;
+  filter: drop-shadow(0 0 8px var(--neon-pink)) drop-shadow(0 0 18px var(--neon-blue));
+  opacity: 0;
+}
+@keyframes decor-shooting {
+  0%   { transform: translate(0, 0) rotate(14deg); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translate(140vw, 36vh) rotate(14deg); opacity: 0; }
+}
+.decor-event--shooting.is-firing::before {
+  animation: decor-shooting 1.8s cubic-bezier(0.2, 0.6, 0.2, 1) var(--ss-delay, 0ms) forwards;
+}
+
+/* --- one-shot: UFO fly-by (near footer) --- */
+.decor-event--ufo {
+  position: fixed;
+  bottom: clamp(60px, 8vh, 120px);
+  left: -20vw;
+  width: clamp(80px, 10vw, 140px);
+  height: clamp(50px, 6vw, 90px);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--neon-blue) 70%, transparent));
+  --decor-accent: var(--neon-blue);
+}
+.decor-event--ufo svg { width: 100%; height: 100%; }
+@keyframes decor-ufo-flyby {
+  0%   { transform: translateX(0) translateY(0); opacity: 0; }
+  10%  { opacity: 1; }
+  45%  { transform: translateX(60vw) translateY(-8px); opacity: 1; }
+  55%  { transform: translateX(70vw) translateY(-4px); opacity: 1; }
+  100% { transform: translateX(140vw) translateY(-24px); opacity: 0; }
+}
+.decor-event--ufo.is-firing {
+  animation: decor-ufo-flyby 4.8s cubic-bezier(0.4, 0, 0.3, 1) forwards;
+}
+
+/* --- DecorBreak (scattered, no dividers) --- */
+.decor-break {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  height: clamp(90px, 14vh, 180px);
+  pointer-events: none;
+  overflow: visible;
+}
+.decor--inline {
+  position: absolute;
+  top: auto; left: auto; right: auto;
+  width: clamp(34px, 5vw, 62px);
+  height: clamp(34px, 5vw, 62px);
+  pointer-events: auto;
+  opacity: 0.85;
+}
+/* Quadrant base regions inside the break (safe margins keep them
+   away from content edges). --jx / --jy apply additional jitter within. */
+.decor--q-tl {
+  top: calc(10% + (var(--jy, 50%) * 0.18));
+  left: calc(6% + (var(--jx, 50%) * 0.18));
+}
+.decor--q-tr {
+  top: calc(10% + (var(--jy, 50%) * 0.18));
+  right: calc(6% + (var(--jx, 50%) * 0.18));
+}
+.decor--q-bl {
+  bottom: calc(10% + (var(--jy, 50%) * 0.18));
+  left: calc(6% + (var(--jx, 50%) * 0.18));
+}
+.decor--q-br {
+  bottom: calc(10% + (var(--jy, 50%) * 0.18));
+  right: calc(6% + (var(--jx, 50%) * 0.18));
+}
+.decor--q-center {
+  top: 50%;
+  left: calc(30% + (var(--jx, 50%) * 0.4));
+  transform:
+    translateY(-50%)
+    rotate(var(--decor-rot, 0deg))
+    scale(var(--decor-scale, 1));
+}
+
+/* --- responsive: hide columns on mobile, keep breaks --- */
+@media (max-width: 900px) {
+  .decor-col { display: none; }
+}
+
+/* --- reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  .decor--drift,
+  .decor--rotate svg,
+  .decor--twinkle,
+  .decor-event--shooting.is-firing::before,
+  .decor-event--ufo.is-firing {
+    animation: none !important;
+  }
+  .decor-event--shooting, .decor-event--ufo { display: none; }
+}
+
+/* --- print: hide all decor --- */
+@media print {
+  .cosmic-decor, .decor-break { display: none !important; }
+}

@@ -5,6 +5,7 @@ import SupernovaHero from '../components/SupernovaHero.astro';
 import SlidingBento from '../components/SlidingBento.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import TerminalSection from '../components/TerminalFooter.astro';
+import DecorBreak from '../components/decor/DecorBreak.astro';
 import { getAllProjects, getProjectImage } from '../lib/api';
 
 let projects: any[] = [];
@@ -42,6 +43,8 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   <!-- Sliding Bento (4 topics × 4 orbit sub-cards) -->
   <SlidingBento highlightedProjects={projectsWithImages.slice(0, 3)} />
 
+  <DecorBreak id="hero-to-projects" />
+
   <!-- Featured Projects -->
   <section class="featured-projects" id="projects">
     <h2 class="section-title reveal" data-i18n="projects.title">Ausgewählte Projekte</h2>
@@ -68,6 +71,8 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
     )}
     <a href="/projects" class="view-all reveal" data-i18n="projects.viewAll">Alle Projekte ansehen →</a>
   </section>
+
+  <DecorBreak id="projects-to-terminal" />
 
   <!-- Terminal Easter Egg -->
   <TerminalSection />

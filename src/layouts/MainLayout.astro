@@ -1,14 +1,22 @@
 ---
 import '@fontsource/inter';
 import Footer from '../components/Footer.astro';
+import CosmicDecor from '../components/decor/CosmicDecor.astro';
+import '../components/decor/decor.css';
 
 interface Props {
   title: string;
+  decorTheme?: 'default' | 'legal';
 }
 
-const { title } = Astro.props;
+const { title, decorTheme } = Astro.props;
 const siteName = import.meta.env.PUBLIC_SITE_NAME || 'Pro-Grammer';
 const fullTitle = `${siteName} - ${title}`;
+
+// Auto-select decor theme from pathname when not explicitly overridden.
+const pathname = Astro.url.pathname || '/';
+const isLegalPath = /\/(impressum|datenschutz)\/?$/.test(pathname);
+const resolvedDecorTheme: 'default' | 'legal' = decorTheme ?? (isLegalPath ? 'legal' : 'default');
 ---
 
 <html lang="de">
@@ -24,6 +32,7 @@ const fullTitle = `${siteName} - ${title}`;
     <div class="scroll-edge scroll-edge-top" aria-hidden="true"></div>
     <div class="scroll-edge scroll-edge-bottom" aria-hidden="true"></div>
     <div class="overscroll-wrapper" id="overscroll-wrapper">
+      <CosmicDecor theme={resolvedDecorTheme} />
       <main class="page-content">
         <slot />
       </main>

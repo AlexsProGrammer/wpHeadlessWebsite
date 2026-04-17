@@ -1,6 +1,7 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import TetrisBento from '../../components/TetrisBento.astro';
+import DecorBreak from '../../components/decor/DecorBreak.astro';
 import { getAllProjects, getProjectImage } from '../../lib/api';
 
 let projects: any[] = [];
@@ -28,6 +29,8 @@ const projectsWithImages = await Promise.all(
       <p class="subtitle" data-i18n="projects.page.subtitle">Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.</p>
     </div>
   </section>
+
+  <DecorBreak id="projects-index-header" />
 
   <TetrisBento projectsWithImages={projectsWithImages} />
 </MainLayout>

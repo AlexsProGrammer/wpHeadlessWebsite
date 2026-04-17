@@ -1,10 +1,12 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import DecorBreak from '../components/decor/DecorBreak.astro';
 
 Astro.response.status = 404;
 ---
 
 <MainLayout title="404">
+  <DecorBreak id="404-top" />
   <section class="not-found reveal">
     <div class="glass-card">
       <p class="eyebrow">ERROR</p>

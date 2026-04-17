@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import DecorBreak from '../../components/decor/DecorBreak.astro';
 import { getProjectBySlug, getProjectImage } from '../../lib/api';
 
 const { slug } = Astro.params;
@@ -60,6 +61,7 @@ const technologies = acf.tech_stack
       <div class="content" set:html={project.content.rendered} />
     </div>
   </article>
+  <DecorBreak id="project-detail-end" />
 </MainLayout>
 
 <style>

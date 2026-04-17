@@ -1,0 +1,152 @@
+---
+/**
+ * CosmicDecor — site-wide decoration frame.
+ *
+ * Renders two fixed-positioned columns of floating cosmic icons that scroll
+ * with the page body plus reserved mount points for one-shot animations
+ * (shooting-star on page-load, UFO on footer intersection).
+ *
+ * Placement is deterministic per-pathname via a mulberry32 seeded RNG with a
+ * sliding-window-of-2 no-repeat guarantee. Density adapts to viewport.
+ */
+import CosmicIcons from './CosmicIcons.astro';
+import { factoids, type IconName } from './decor-icons';
+
+interface Props {
+  /** Restrict the pool — legal pages get a calmer subset. */
+  theme?: 'default' | 'legal';
+}
+
+const { theme = 'default' } = Astro.props;
+
+// --- pools ---
+const FULL_POOL: IconName[] = [
+  'astronaut', 'iss', 'satellite', 'asteroid', 'planet', 'saturn',
+  'moon', 'sun', 'galaxy', 'star-system', 'alien', 'alien-ship',
+  'comet', 'rocket', 'telescope', 'blackhole',
+];
+const LEGAL_POOL: IconName[] = [
+  'satellite', 'moon', 'saturn', 'planet', 'star-system', 'galaxy', 'telescope',
+];
+const pool = theme === 'legal' ? LEGAL_POOL : FULL_POOL;
+
+// Neon accent rotation (cycles deterministically)
+const ACCENTS = ['var(--neon-blue)', 'var(--neon-purple)', 'var(--neon-pink)'];
+
+// Motion classes chosen per placement for variety.
+const MOTION = ['decor--drift', 'decor--rotate', 'decor--twinkle', 'decor--parallax'];
+
+// --- seeded RNG (mulberry32) ---
+function hashStr(s: string): number {
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const seed = hashStr(Astro.url.pathname || '/');
+const rng = mulberry32(seed);
+
+// Pick with sliding-window-of-2 no-repeat.
+function makePicker() {
+  const history: IconName[] = [];
+  return (): IconName => {
+    const available = pool.filter((p) => !history.includes(p));
+    const list = available.length ? available : pool;
+    const pick = list[Math.floor(rng() * list.length)];
+    history.push(pick);
+    while (history.length > 2) history.shift();
+    return pick;
+  };
+}
+const pick = makePicker();
+
+// Build a column (left or right) with N items vertically distributed across
+// the FULL page height (% of column, which spans the whole wrapper — not vh).
+interface DecorItem {
+  name: IconName;
+  top: number;      // % of column height (i.e. % of page height)
+  offset: number;   // horizontal px offset from edge
+  scale: number;
+  rotate: number;
+  motion: string;
+  accent: string;
+  variant: 0 | 1 | 2;
+  parallax: number;
+}
+
+function buildColumn(count: number): DecorItem[] {
+  const items: DecorItem[] = [];
+  const band = 100 / count; // percent
+  for (let i = 0; i < count; i++) {
+    // Jitter within the band so icons aren't perfectly evenly spaced.
+    const baseTop = i * band + band * (0.15 + rng() * 0.7);
+    items.push({
+      name: pick(),
+      top: baseTop,
+      offset: 8 + Math.floor(rng() * 34),
+      scale: 0.55 + rng() * 0.5,
+      rotate: Math.floor(rng() * 360) - 180,
+      motion: MOTION[Math.floor(rng() * MOTION.length)],
+      accent: ACCENTS[Math.floor(rng() * ACCENTS.length)],
+      variant: (Math.floor(rng() * 3)) as 0 | 1 | 2,
+      parallax: 0.05 + rng() * 0.18,
+    });
+  }
+  return items;
+}
+
+// Density: base count depends on theme (legal = calmer).
+const perColumn = theme === 'legal' ? 4 : 7;
+const leftColumn = buildColumn(perColumn);
+const rightColumn = buildColumn(perColumn);
+---
+
+<div class="cosmic-decor" aria-hidden="true" data-theme={theme}>
+  <!-- Left column (desktop only) -->
+  <div class="decor-col decor-col--left">
+    {leftColumn.map((it) => (
+      <span
+        class={`decor ${it.motion}`}
+        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
+        data-tip={factoids[it.name]}
+      >
+        <CosmicIcons name={it.name} variant={it.variant} />
+      </span>
+    ))}
+  </div>
+
+  <!-- Right column (desktop only) -->
+  <div class="decor-col decor-col--right">
+    {rightColumn.map((it) => (
+      <span
+        class={`decor ${it.motion}`}
+        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
+        data-tip={factoids[it.name]}
+      >
+        <CosmicIcons name={it.name} variant={it.variant} />
+      </span>
+    ))}
+  </div>
+
+  <!-- One-shot event mounts -->
+  <span class="decor-event decor-event--shooting" aria-hidden="true"></span>
+  <span class="decor-event decor-event--ufo" aria-hidden="true">
+    <CosmicIcons name="ufo" variant={0} />
+  </span>
+</div>
+
+<script>
+  import { initDecorEvents } from './decor-events.ts';
+  initDecorEvents();
+</script>
