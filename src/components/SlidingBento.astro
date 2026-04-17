@@ -2414,39 +2414,6 @@ const projectsJSON = JSON.stringify(
     40%, 60% { stroke-dashoffset: 0; }
   }
 
-  /* ── Waveform bars ──────────────────────────────────── */
-  .waveform {
-    display: flex;
-    align-items: flex-end;
-    gap: 3px;
-    height: 30px;
-    margin: 0.3rem 0 0;
-  }
-  .waveform span {
-    flex: 1;
-    min-width: 3px;
-    background: linear-gradient(180deg, rgba(0, 220, 255, 0.9), rgba(120, 60, 255, 0.55));
-    border-radius: 2px;
-    animation: wave 1.4s ease-in-out infinite;
-    transform-origin: bottom;
-  }
-  .waveform span:nth-child(1)  { animation-delay: 0.00s; }
-  .waveform span:nth-child(2)  { animation-delay: 0.08s; }
-  .waveform span:nth-child(3)  { animation-delay: 0.16s; }
-  .waveform span:nth-child(4)  { animation-delay: 0.24s; }
-  .waveform span:nth-child(5)  { animation-delay: 0.32s; }
-  .waveform span:nth-child(6)  { animation-delay: 0.40s; }
-  .waveform span:nth-child(7)  { animation-delay: 0.48s; }
-  .waveform span:nth-child(8)  { animation-delay: 0.56s; }
-  .waveform span:nth-child(9)  { animation-delay: 0.64s; }
-  .waveform span:nth-child(10) { animation-delay: 0.72s; }
-  .waveform span:nth-child(11) { animation-delay: 0.80s; }
-  .waveform span:nth-child(12) { animation-delay: 0.88s; }
-  @keyframes wave {
-    0%, 100% { transform: scaleY(0.28); }
-    50%      { transform: scaleY(1); }
-  }
-
   /* ── Numbered checklist (Services W) ────────────────── */
   .check-list {
     display: flex;
@@ -2733,7 +2700,7 @@ const projectsJSON = JSON.stringify(
             <p class="hero-sub">${t('bento.about.n.desc', lang)}</p>
           </div>`;
         break;
-      case 1: // E — tall: tech grid + waveform + code line
+      case 1: // E — tall: tech grid + code line
         setGlow(orbitCard, "cyan");
         face.innerHTML = `
           <div class="card-bg card-bg--grid"></div>
@@ -2750,13 +2717,6 @@ const projectsJSON = JSON.stringify(
               <div class="tech-tile tech-tile--orange"><span>Docker</span></div>
               <div class="tech-tile"><span>AWS</span></div>
             </div>
-            <div class="waveform">
-              <span style="height:40%"></span><span style="height:72%"></span><span style="height:88%"></span>
-              <span style="height:55%"></span><span style="height:82%"></span><span style="height:62%"></span>
-              <span style="height:76%"></span><span style="height:48%"></span><span style="height:92%"></span>
-              <span style="height:52%"></span><span style="height:78%"></span><span style="height:36%"></span>
-            </div>
-            <div class="card-code" style="margin-top:0.25rem">${t('bento.about.e.code', lang)}<span class="typing-cursor"></span></div>
           </div>`;
         break;
       case 2: // S — small: radar scope + online tag
@@ -2887,11 +2847,6 @@ const projectsJSON = JSON.stringify(
             <p class="card-label">${t('bento.services.n.label', lang)}</p>
             <h3 class="hero-title hero-title--cyan">${t('bento.services.n.title', lang)}</h3>
             <p class="hero-sub">${t('bento.services.n.desc', lang)}</p>
-            <div class="waveform" style="margin-top:auto">
-              <span style="height:32%"></span><span style="height:62%"></span><span style="height:84%"></span>
-              <span style="height:48%"></span><span style="height:92%"></span><span style="height:58%"></span>
-              <span style="height:78%"></span><span style="height:42%"></span>
-            </div>
           </div>`;
         break;
       case 1: // E — tall: tech grid + live terminal log
