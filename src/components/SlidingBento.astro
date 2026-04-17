@@ -86,6 +86,10 @@ const projectsJSON = JSON.stringify(
 
 </section>
 
+<!--
+  The main scoped block covers static bento elements (shell, grid, center card,
+  toggle). Dynamic renderer content uses the is:global block below.
+-->
 <style>
   /* ── Section shell ───────────────────────────────────── */
   .bento-section {
@@ -2567,9 +2571,302 @@ const projectsJSON = JSON.stringify(
     box-shadow: 0 0 8px rgba(0, 220, 255, 0.7);
   }
   .bento-section .card-center > * { position: relative; z-index: 1; }
-</style>
 
-<style>
+  /* ════════════════════════════════════════════════════════
+     v3 — Refinements: badges, clamping, split, clickable
+  ════════════════════════════════════════════════════════ */
+
+  /* ── Unified gradient project badge (reused everywhere) */
+  .proj-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    padding: 4px 10px 4px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 0.58rem;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(90deg, rgba(0, 220, 255, 0.28) 0%, rgba(120, 60, 255, 0.22) 55%, rgba(255, 0, 160, 0.22) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 2px 10px rgba(0, 0, 0, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+  .proj-badge::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(0, 220, 255, 0.95), rgba(120, 60, 255, 0.85) 55%, rgba(255, 0, 160, 0.9));
+    opacity: 0.75;
+  }
+  .proj-badge--cyan    { background: linear-gradient(90deg, rgba(0, 220, 255, 0.38), rgba(0, 140, 220, 0.22)); }
+  .proj-badge--magenta { background: linear-gradient(90deg, rgba(255, 0, 160, 0.38), rgba(255, 140, 0, 0.22)); }
+  .proj-badge--purple  { background: linear-gradient(90deg, rgba(120, 60, 255, 0.38), rgba(0, 220, 255, 0.22)); }
+  .proj-badge--green   { background: linear-gradient(90deg, rgba(0, 220, 120, 0.38), rgba(0, 220, 255, 0.22)); }
+
+  /* ── Single-line + multi-line ellipsis clamps ───────── */
+  .clamp-1 {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .clamp-2, .clamp-3 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .clamp-2 { -webkit-line-clamp: 2; line-clamp: 2; }
+  .clamp-3 { -webkit-line-clamp: 3; line-clamp: 3; }
+
+  /* ── Project split layout (image | content) ─────────── */
+  .proj-split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 0.7rem;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+  }
+  .proj-split-cover {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    min-height: 120px;
+    height: 100%;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  }
+  .proj-split-cover::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(90deg, transparent 55%, rgba(0, 0, 0, 0.25) 100%),
+      repeating-linear-gradient(-45deg, transparent 0 16px, rgba(255, 255, 255, 0.04) 16px 17px);
+    pointer-events: none;
+  }
+  .proj-split-index {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+    line-height: 1;
+    z-index: 2;
+  }
+  .proj-split-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    min-width: 0;
+    justify-content: flex-start;
+    padding-top: 0.15rem;
+  }
+
+  /* ── Project meta styling (modern) ──────────────────── */
+  .proj-title {
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    margin: 0.1rem 0 0;
+  }
+  .proj-title-sm {
+    font-size: 0.98rem;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    color: #ffffff;
+    margin: 0.1rem 0 0;
+  }
+  .proj-excerpt {
+    font-size: 0.74rem;
+    line-height: 1.45;
+    color: rgba(200, 210, 230, 0.6);
+    margin: 0;
+  }
+  .proj-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6rem;
+    color: rgba(160, 180, 210, 0.55);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    margin-top: auto;
+  }
+  .proj-meta-row .dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: rgba(120, 60, 255, 0.7);
+  }
+  .proj-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+  .proj-tech span {
+    font-size: 0.58rem;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    padding: 2px 7px;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(220, 228, 240, 0.72);
+    letter-spacing: 0.02em;
+  }
+  .proj-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(190, 160, 255, 0.95);
+    margin-top: 0.4rem;
+    transition: color 0.25s, transform 0.25s;
+  }
+  .orbit-card:hover .proj-cta {
+    color: #ffffff;
+    transform: translateX(2px);
+  }
+  .proj-cta svg { transition: transform 0.25s; }
+  .orbit-card:hover .proj-cta svg { transform: translateX(3px); }
+
+  /* ── Clickable card link overlay ────────────────────── */
+  .card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    border-radius: 20px;
+    text-indent: -9999px;
+    overflow: hidden;
+  }
+  .card-link:focus-visible {
+    outline: 2px solid rgba(120, 180, 255, 0.6);
+    outline-offset: 2px;
+  }
+  /* Inner interactive elements stay clickable above overlay */
+  .proj-cta, .bento-viewall-cta, .link-chip {
+    position: relative;
+    z-index: 6;
+  }
+
+  /* ── Center card — rings centered on the toggle ─────── */
+  .bento-section .card-center {
+    position: relative;
+    justify-content: center;
+  }
+  /* Slider-anchor: rings are centered on the toggle thumb row,
+     which sits in the lower half of the card flex column. */
+  .bento-section .center-ambient-ring {
+    top: auto;
+    bottom: 38%;
+    transform: translate(-50%, 50%);
+    width: 160px;
+    height: 160px;
+  }
+  .bento-section .center-ambient-ring--outer {
+    width: 230px;
+    height: 230px;
+  }
+  .toggle-track {
+    z-index: 1;
+  }
+
+  /* ── Center labels spacing tune ─────────────────────── */
+  .bento-section .center-topic {
+    margin-bottom: 0.15rem;
+  }
+
+  /* ── Services S — soft progress ring container ─────── */
+  .progress-ring-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 118px;
+    height: 118px;
+    margin: 0.25rem auto 0.35rem;
+  }
+  .progress-ring-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(255, 0, 160, 0.16) 0%, transparent 70%);
+    filter: blur(4px);
+  }
+  .progress-ring-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(255, 0, 160, 0.18);
+    animation: ring-spin 28s linear infinite;
+  }
+  .progress-ring-wrap svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .progress-ring-wrap .ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.07);
+    stroke-width: 5;
+  }
+  .progress-ring-wrap .ring-fill {
+    fill: none;
+    stroke: rgba(255, 0, 160, 0.85);
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-dasharray: 283;
+    stroke-dashoffset: 0;
+    filter: drop-shadow(0 0 8px rgba(255, 0, 160, 0.55));
+  }
+  .progress-ring-wrap .ring-value {
+    position: absolute;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 1.6rem;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 0, 160, 0.85) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* ── Services N — tighter title so it doesn't clip ── */
+  .orbit-card[id="sb-orbit-0"] .hero-title,
+  .card-face[data-pos="0"] .hero-title {
+    font-size: 1.28rem;
+    line-height: 1.1;
+  }
+
+
   /* ── Responsive ──────────────────────────────────────── */
   @media (max-width: 768px) {
     .bento-container {
@@ -2694,10 +2991,10 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow"></div>
           <span class="card-display-num">01</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.about.n.label', lang)}</p>
+            <span class="proj-badge proj-badge--purple">${t('bento.about.n.label', lang)}</span>
             <span class="status-pill"><span class="status-pill-dot"></span>${t('bento.about.n.badge', lang)}</span>
             <h3 class="hero-title">${t('bento.about.n.title', lang)}<span class="typing-cursor"></span></h3>
-            <p class="hero-sub">${t('bento.about.n.desc', lang)}</p>
+            <p class="hero-sub clamp-2">${t('bento.about.n.desc', lang)}</p>
           </div>`;
         break;
       case 1: // E — tall: tech grid + code line
@@ -2707,7 +3004,7 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow hero-glow--cyan"></div>
           <span class="card-display-num card-display-num--cyan">02</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.about.e.label', lang)}</p>
+            <span class="proj-badge proj-badge--cyan">${t('bento.about.e.label', lang)}</span>
             <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem">${t('bento.about.e.title', lang)}</h3>
             <div class="tech-grid">
               <div class="tech-tile tech-tile--cyan"><span>TS</span></div>
@@ -2724,7 +3021,7 @@ const projectsJSON = JSON.stringify(
         face.innerHTML = `
           <div class="card-bg card-bg--grid"></div>
           <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.15rem">
-            <p class="card-label">${t('bento.about.s.label', lang)}</p>
+            <span class="proj-badge proj-badge--cyan">${t('bento.about.s.label', lang)}</span>
             <div class="radar"><span class="radar-blip"></span></div>
             <span class="pulse-badge-text">${t('bento.about.s.title', lang)}</span>
             <span class="big-metric-sub" style="font-size:0.5rem">${t('bento.about.s.subtitle', lang)}</span>
@@ -2736,7 +3033,7 @@ const projectsJSON = JSON.stringify(
           <div class="card-bg card-bg--diagonal"></div>
           <div class="hero-glow"></div>
           <div class="card-content" style="align-items:center;text-align:center">
-            <p class="card-label" style="align-self:flex-start">${t('bento.about.w.label', lang)}</p>
+            <span class="proj-badge proj-badge--purple" style="align-self:flex-start">${t('bento.about.w.label', lang)}</span>
             <div class="avatar-orbit">
               <div class="avatar-orbit-ring avatar-orbit-ring--outer"></div>
               <div class="avatar-orbit-ring"></div>
@@ -2772,10 +3069,10 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow hero-glow--magenta"></div>
           <span class="card-display-num card-display-num--magenta">01</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.origin.n.label', lang)}</p>
+            <span class="proj-badge proj-badge--magenta">${t('bento.origin.n.label', lang)}</span>
             <span class="hero-year" data-text="2018">2018</span>
             <h3 class="hero-title hero-title--magenta" style="font-size:1.25rem">${t('bento.origin.n.title', lang)}</h3>
-            <p class="hero-sub">${t('bento.origin.n.desc', lang)}</p>
+            <p class="hero-sub clamp-2">${t('bento.origin.n.desc', lang)}</p>
           </div>`;
         break;
       case 1: // E — tall: vertical timeline
@@ -2785,7 +3082,7 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow"></div>
           <span class="card-display-num">02</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.origin.e.label', lang)}</p>
+            <span class="proj-badge proj-badge--purple">${t('bento.origin.e.label', lang)}</span>
             <h3 class="hero-title" style="font-size:1.2rem">${t('bento.origin.e.title', lang)}</h3>
             <div class="v-timeline">
               <div class="v-timeline-node"><span class="v-timeline-year">2018</span><span class="v-timeline-text">${t('bento.origin.e.t1', lang)}</span></div>
@@ -2800,7 +3097,7 @@ const projectsJSON = JSON.stringify(
         face.innerHTML = `
           <div class="card-bg card-bg--grid"></div>
           <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.1rem">
-            <p class="card-label">${t('bento.origin.s.label', lang)}</p>
+            <span class="proj-badge proj-badge--cyan">${t('bento.origin.s.label', lang)}</span>
             <div class="pulse-badge"><span class="pulse-badge-text">NOW</span></div>
             <span class="pulse-badge-text" style="font-size:0.7rem">${t('bento.origin.s.title', lang)}</span>
             <span class="big-metric-sub" style="font-size:0.5rem">${t('bento.origin.s.subtitle', lang)}</span>
@@ -2812,10 +3109,10 @@ const projectsJSON = JSON.stringify(
           <div class="card-bg card-bg--diagonal"></div>
           <div class="hero-glow"></div>
           <div class="card-content">
-            <p class="card-label">${t('bento.origin.w.label', lang)}</p>
+            <span class="proj-badge proj-badge--purple">${t('bento.origin.w.label', lang)}</span>
             <span class="status-pill status-pill--purple"><span class="status-pill-dot"></span>${t('bento.origin.w.badge', lang)}</span>
             <h3 class="hero-title" style="font-size:1.2rem">${t('bento.origin.w.title', lang)}</h3>
-            <p class="hero-sub">${t('bento.origin.w.desc', lang)}</p>
+            <p class="hero-sub clamp-2">${t('bento.origin.w.desc', lang)}</p>
             <div class="mini-term">
               <div class="mini-term-bar"><span></span><span></span><span></span></div>
               <span class="mini-term-line"><span class="mini-term-prompt">$</span>${t('bento.origin.w.term1', lang).replace(/^\$\s*/, '')}</span>
@@ -2844,9 +3141,9 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow hero-glow--cyan"></div>
           <span class="card-display-num card-display-num--cyan">01</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.services.n.label', lang)}</p>
+            <span class="proj-badge proj-badge--cyan">${t('bento.services.n.label', lang)}</span>
             <h3 class="hero-title hero-title--cyan">${t('bento.services.n.title', lang)}</h3>
-            <p class="hero-sub">${t('bento.services.n.desc', lang)}</p>
+            <p class="hero-sub clamp-2">${t('bento.services.n.desc', lang)}</p>
           </div>`;
         break;
       case 1: // E — tall: tech grid + live terminal log
@@ -2856,7 +3153,7 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow hero-glow--cyan"></div>
           <span class="card-display-num card-display-num--cyan">02</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.services.e.label', lang)}</p>
+            <span class="proj-badge proj-badge--cyan">${t('bento.services.e.label', lang)}</span>
             <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem">${t('bento.services.e.title', lang)}</h3>
             <div class="tech-grid tech-grid--cols-2">
               <div class="tech-tile tech-tile--cyan"><span>PostgreSQL</span></div>
@@ -2873,17 +3170,19 @@ const projectsJSON = JSON.stringify(
             </div>
           </div>`;
         break;
-      case 2: // S — small: progress ring 100%
+      case 2: // S — small: 100% progress ring (soft magenta)
         setGlow(orbitCard, "magenta");
         face.innerHTML = `
-          <div class="card-content" style="align-items:center;text-align:center;justify-content:center">
-            <p class="card-label">${t('bento.services.s.label', lang)}</p>
-            <div class="progress-ring" style="margin:0.2rem 0">
-              <svg viewBox="0 0 80 80" class="progress-ring-svg">
-                <circle cx="40" cy="40" r="34" class="progress-ring-bg"/>
-                <circle cx="40" cy="40" r="34" class="progress-ring-fill"/>
+          <div class="card-bg card-bg--dots"></div>
+          <div class="hero-glow hero-glow--magenta"></div>
+          <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.35rem">
+            <span class="proj-badge proj-badge--magenta">${t('bento.services.s.label', lang)}</span>
+            <div class="progress-ring-wrap">
+              <svg viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" class="ring-bg"/>
+                <circle cx="50" cy="50" r="45" class="ring-fill"/>
               </svg>
-              <span class="progress-ring-text">100%</span>
+              <span class="ring-value">100%</span>
             </div>
             <span class="big-metric-sub" style="font-size:0.55rem">${t('bento.services.s.metricLabel', lang)}</span>
           </div>`;
@@ -2895,7 +3194,7 @@ const projectsJSON = JSON.stringify(
           <div class="hero-glow"></div>
           <span class="card-display-num">04</span>
           <div class="card-content">
-            <p class="card-label">${t('bento.services.w.label', lang)}</p>
+            <span class="proj-badge proj-badge--purple">${t('bento.services.w.label', lang)}</span>
             <h3 class="hero-title" style="font-size:1.18rem">${t('bento.services.w.title', lang)}</h3>
             <p class="hero-sub" style="-webkit-line-clamp:2">${t('bento.services.w.desc', lang)}</p>
             <div class="check-list">
@@ -2910,17 +3209,21 @@ const projectsJSON = JSON.stringify(
 
   /* ── Topic 3: Projects ──────────────────────────────── */
   function renderProjectCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
+    const arrowSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`;
+
     if (pos === 3) {
-      // View All — big count + animated mosaic + CTA
+      // View All — big count + animated mosaic + CTA (fully clickable)
       setGlow(orbitCard, "purple");
       const countNum = projects.length > 0 ? `${projects.length}+` : "8+";
+      const viewAllLabel = `${t('bento.projects.viewall.label', lang)}`;
       face.innerHTML = `
+        <a class="card-link" href="/projects" aria-label="${t('bento.projects.viewall.cta', lang)}">${t('bento.projects.viewall.cta', lang)}</a>
         <div class="card-bg card-bg--dots"></div>
         <div class="hero-glow"></div>
         <span class="card-display-num">04</span>
         <div class="card-content">
-          <p class="card-label">${t('bento.projects.viewall.label', lang)}</p>
-          <div class="big-metric">
+          <span class="proj-badge proj-badge--purple">${viewAllLabel}</span>
+          <div class="big-metric" style="margin-top:0.35rem">
             <span class="big-metric-value">${countNum}</span>
             <span class="big-metric-sub">${t('bento.projects.viewall.count', lang)}</span>
           </div>
@@ -2928,17 +3231,18 @@ const projectsJSON = JSON.stringify(
             <span></span><span class="viewall-grid--tall"></span>
             <span class="viewall-grid--wide"></span><span></span>
           </div>
-          <a href="/projects" class="bento-viewall-cta">
+          <a href="/projects" class="proj-cta">
             ${t('bento.projects.viewall.cta', lang)}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            ${arrowSvg}
           </a>
         </div>`;
       return;
     }
 
-    // Project cards (pos 0, 1, 2) — gallery cover + title + tech pills
+    // Project cards (pos 0, 1, 2)
     const proj = projects[pos];
     const glowColors = ["cyan", "magenta", "purple"] as const;
+    const badgeMods  = ["cyan", "magenta", "purple"] as const;
     const covers = [
       "linear-gradient(135deg, rgba(0,220,255,0.55) 0%, rgba(120,60,255,0.35) 50%, rgba(255,0,160,0.25) 100%)",
       "linear-gradient(135deg, rgba(255,0,160,0.55) 0%, rgba(255,140,0,0.35) 50%, rgba(120,60,255,0.25) 100%)",
@@ -2947,39 +3251,72 @@ const projectsJSON = JSON.stringify(
     setGlow(orbitCard, glowColors[pos]);
 
     const labelNum = `0${pos + 1}`;
-    if (proj) {
-      const excerpt = stripHtml(proj.excerpt).slice(0, pos === 2 ? 55 : 110);
-      const techArr = proj.techStack
-        ? proj.techStack.split(',').slice(0, 3).map((s: string) => s.trim()).filter(Boolean)
-        : [];
-      const pillsHtml = techArr.length
-        ? `<div class="tech-pills" style="margin-top:auto">${techArr.map((x: string) => `<span>${x}</span>`).join('')}</div>`
-        : '';
-      const thumbStyle = proj.imageUrl
-        ? `background-image:url('${proj.imageUrl}')`
-        : `background:${covers[pos]}`;
+    const badgeTxt = `${labelNum} // ${t('bento.projects.label', lang)}`;
+    const badgeCls = `proj-badge proj-badge--${badgeMods[pos]}`;
+    const detailsHref = proj ? `/projects/${proj.slug}` : "/projects";
+
+    if (!proj) {
+      // Empty state for missing project
+      const thumbStyle = `background:${covers[pos]}`;
       face.innerHTML = `
-        <div class="card-content" style="gap:0">
-          <div class="cover-thumb" style="${thumbStyle}">
-            <span class="cover-thumb-tag">${labelNum} // ${t('bento.projects.label', lang)}</span>
+        <a class="card-link" href="/projects" aria-label="${t('bento.projects.coming', lang)}">${t('bento.projects.coming', lang)}</a>
+        <div class="card-content" style="gap:0.5rem">
+          <span class="${badgeCls}">${badgeTxt}</span>
+          <div class="cover-thumb" style="${thumbStyle};flex:1">
             <span class="cover-thumb-index">${labelNum}</span>
           </div>
-          <p class="bento-project-title" style="font-size:0.95rem;margin-top:0.1rem">${proj.title}</p>
-          <p class="bento-project-excerpt">${excerpt}</p>
-          ${pillsHtml}
-          <a href="/projects/${proj.slug}" class="bento-project-link" style="margin-top:0.45rem">
-            ${t('bento.projects.details', lang)}
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-          </a>
+          <p class="proj-title-sm clamp-1" style="opacity:0.55">${t('bento.projects.coming', lang)}</p>
+        </div>`;
+      return;
+    }
+
+    const excerpt = stripHtml(proj.excerpt);
+    const techArr = proj.techStack
+      ? proj.techStack.split(',').slice(0, 3).map((s: string) => s.trim()).filter(Boolean)
+      : [];
+    const pillsHtml = techArr.length
+      ? `<div class="proj-tech">${techArr.map((x: string) => `<span>${x}</span>`).join('')}</div>`
+      : '';
+    const thumbStyle = proj.imageUrl
+      ? `background-image:url('${proj.imageUrl}')`
+      : `background:${covers[pos]}`;
+
+    if (pos === 0) {
+      // N — wide top card: vertical split (image left | text right)
+      face.innerHTML = `
+        <a class="card-link" href="${detailsHref}" aria-label="${proj.title}">${proj.title}</a>
+        <div class="proj-split">
+          <div class="proj-split-cover" style="${thumbStyle}">
+            <span class="proj-split-index">${labelNum}</span>
+          </div>
+          <div class="proj-split-body">
+            <span class="${badgeCls}">${badgeTxt}</span>
+            <h3 class="proj-title clamp-2">${proj.title}</h3>
+            <p class="proj-excerpt clamp-3">${excerpt}</p>
+            ${pillsHtml}
+            <span class="proj-cta">
+              ${t('bento.projects.details', lang)}
+              ${arrowSvg}
+            </span>
+          </div>
         </div>`;
     } else {
+      // E (pos 1) tall and S (pos 2) small: stacked cover + text
+      const isSmall = pos === 2;
       face.innerHTML = `
-        <div class="card-content" style="gap:0">
-          <div class="cover-thumb" style="background:${covers[pos]}">
-            <span class="cover-thumb-tag">${labelNum} // ${t('bento.projects.label', lang)}</span>
+        <a class="card-link" href="${detailsHref}" aria-label="${proj.title}">${proj.title}</a>
+        <div class="card-content" style="gap:0.45rem">
+          <div class="cover-thumb" style="${thumbStyle};height:${isSmall ? '40%' : '48%'};min-height:${isSmall ? '72px' : '110px'}">
             <span class="cover-thumb-index">${labelNum}</span>
           </div>
-          <p class="hero-title" style="opacity:0.4;font-size:1rem">${t('bento.projects.coming', lang)}</p>
+          <span class="${badgeCls}">${badgeTxt}</span>
+          <h3 class="${isSmall ? 'proj-title-sm clamp-1' : 'proj-title clamp-2'}">${proj.title}</h3>
+          <p class="proj-excerpt ${isSmall ? 'clamp-2' : 'clamp-3'}">${excerpt}</p>
+          ${isSmall ? '' : pillsHtml}
+          <span class="proj-cta" style="margin-top:auto">
+            ${t('bento.projects.details', lang)}
+            ${arrowSvg}
+          </span>
         </div>`;
     }
   }
