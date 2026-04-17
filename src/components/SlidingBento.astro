@@ -54,6 +54,8 @@ const projectsJSON = JSON.stringify(
 
     <!-- Center glassmorphic toggle -->
     <div class="card-center" id="sb-center-card">
+      <div class="center-ambient-ring center-ambient-ring--outer"></div>
+      <div class="center-ambient-ring"></div>
       <p class="center-topic" id="sb-center-topic">Über Mich</p>
 
       <!-- Step indicator -->
@@ -1789,7 +1791,818 @@ const projectsJSON = JSON.stringify(
     0%, 100% { background: rgba(255, 255, 255, 0.03); border-color: rgba(255, 255, 255, 0.08); }
     50% { background: rgba(120, 60, 255, 0.06); border-color: rgba(120, 60, 255, 0.15); }
   }
+</style>
 
+<!--
+  v2 primitives are applied to HTML injected at runtime via innerHTML.
+  Astro's scoped styles add a data-attribute to each rendered element, but
+  innerHTML children don't inherit it, so single-class selectors like
+  .card-display-num won't match. We keep v2 in a global block, scoping
+  them via the `.bento-section` ancestor (which IS statically rendered
+  and carries Astro's data-attr, so visual bleed is impossible).
+-->
+<style is:global>
+  /* ════════════════════════════════════════════════════════
+     v2 — Unique per-card visual primitives
+     (Mix-and-match decorative layers used by renderers)
+     All rules are gated under .bento-section to avoid global bleed.
+  ════════════════════════════════════════════════════════ */
+
+  /* ── Decorative layered backgrounds ──────────────────── */
+  .card-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+  .card-bg--dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+    background-size: 14px 14px;
+    opacity: 0.5;
+    -webkit-mask-image: radial-gradient(ellipse at 75% 20%, black 25%, transparent 75%);
+    mask-image: radial-gradient(ellipse at 75% 20%, black 25%, transparent 75%);
+  }
+  .card-bg--grid {
+    background-image:
+      linear-gradient(rgba(0, 220, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 220, 255, 0.055) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: 0.7;
+    -webkit-mask-image: linear-gradient(180deg, black 0%, transparent 95%);
+    mask-image: linear-gradient(180deg, black 0%, transparent 95%);
+  }
+  .card-bg--scan {
+    background-image: repeating-linear-gradient(
+      0deg,
+      rgba(255, 0, 160, 0.05) 0px,
+      rgba(255, 0, 160, 0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    opacity: 0.75;
+  }
+  .card-bg--diagonal {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      rgba(120, 60, 255, 0.045) 0px,
+      rgba(120, 60, 255, 0.045) 1px,
+      transparent 1px,
+      transparent 12px
+    );
+    opacity: 0.9;
+  }
+
+  /* ── Ambient hero glow orb ──────────────────────────── */
+  .hero-glow {
+    position: absolute;
+    top: -40%;
+    right: -20%;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(120, 60, 255, 0.28) 0%, transparent 60%);
+    filter: blur(34px);
+    z-index: 0;
+    pointer-events: none;
+    animation: hero-orb 9s ease-in-out infinite;
+  }
+  .hero-glow--cyan {
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.28) 0%, transparent 60%);
+    right: auto;
+    left: -20%;
+  }
+  .hero-glow--magenta {
+    background: radial-gradient(circle, rgba(255, 0, 160, 0.25) 0%, transparent 60%);
+  }
+  @keyframes hero-orb {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50%      { transform: translate(-18px, 22px) scale(1.12); }
+  }
+
+  /* ── Constellation dots (About N) ───────────────────── */
+  .constellation {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  .constellation::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(2px 2px at 18% 28%, rgba(255, 255, 255, 0.85), transparent 55%),
+      radial-gradient(1.5px 1.5px at 45% 68%, rgba(0, 220, 255, 0.7), transparent 55%),
+      radial-gradient(2px 2px at 72% 22%, rgba(120, 60, 255, 0.8), transparent 55%),
+      radial-gradient(1px 1px at 86% 58%, rgba(255, 255, 255, 0.6), transparent 55%),
+      radial-gradient(1.5px 1.5px at 12% 82%, rgba(255, 0, 160, 0.6), transparent 55%),
+      radial-gradient(1px 1px at 60% 50%, rgba(0, 220, 255, 0.8), transparent 55%),
+      radial-gradient(2px 2px at 94% 88%, rgba(255, 255, 255, 0.7), transparent 55%),
+      radial-gradient(1px 1px at 33% 14%, rgba(120, 60, 255, 0.7), transparent 55%);
+    animation: twinkle 4.5s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.55; }
+    50%      { opacity: 1; }
+  }
+
+  /* ── Ghost display number (top-right) ───────────────── */
+  .card-display-num {
+    position: absolute;
+    top: -0.7rem;
+    right: 0.4rem;
+    font-family: 'JetBrains Mono', Menlo, Consolas, monospace;
+    font-size: 6rem;
+    font-weight: 900;
+    line-height: 0.8;
+    letter-spacing: -0.08em;
+    background: linear-gradient(180deg, rgba(120, 60, 255, 0.22) 0%, rgba(120, 60, 255, 0.02) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    pointer-events: none;
+    user-select: none;
+    z-index: 1;
+  }
+  .card-display-num--magenta {
+    background: linear-gradient(180deg, rgba(255, 0, 160, 0.22) 0%, rgba(255, 0, 160, 0.02) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+  .card-display-num--cyan {
+    background: linear-gradient(180deg, rgba(0, 220, 255, 0.22) 0%, rgba(0, 220, 255, 0.02) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* ── Content wrapper (above backgrounds) ────────────── */
+  .card-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: 0.28rem;
+    height: 100%;
+  }
+
+  /* ── Hero gradient title + subtitle ─────────────────── */
+  .hero-title {
+    font-size: 1.42rem;
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    background: linear-gradient(135deg, #ffffff 0%, #d9c7ff 55%, #7ad3ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    margin: 0.15rem 0 0;
+  }
+  .hero-title--cyan {
+    background: linear-gradient(135deg, #ffffff 0%, #a0e8ff 50%, #4fc9ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-title--magenta {
+    background: linear-gradient(135deg, #ffffff 0%, #ffb9e0 50%, #ff5ab5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero-sub {
+    font-size: 0.76rem;
+    color: rgba(200, 210, 230, 0.6);
+    line-height: 1.5;
+    margin-top: 0.1rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+
+  /* ── Status pill (availability / founding badge) ────── */
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: rgba(0, 220, 120, 0.1);
+    border: 1px solid rgba(0, 220, 120, 0.35);
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: rgba(0, 240, 170, 1);
+    letter-spacing: 0.06em;
+    text-shadow: 0 0 6px rgba(0, 220, 120, 0.3);
+    width: fit-content;
+  }
+  .status-pill--purple {
+    background: rgba(120, 60, 255, 0.12);
+    border-color: rgba(120, 60, 255, 0.4);
+    color: rgba(215, 195, 255, 1);
+    text-shadow: 0 0 6px rgba(120, 60, 255, 0.4);
+  }
+  .status-pill-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 255, 160, 1);
+    box-shadow: 0 0 8px rgba(0, 255, 160, 1);
+    animation: status-blink 2s ease-in-out infinite;
+  }
+  .status-pill--purple .status-pill-dot {
+    background: rgba(215, 195, 255, 1);
+    box-shadow: 0 0 8px rgba(180, 140, 255, 0.9);
+  }
+  @keyframes status-blink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+
+  /* ── Tech grid (About E stack) ──────────────────────── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+    margin-top: 0.4rem;
+  }
+  .tech-grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .tech-tile {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 10px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.7);
+    letter-spacing: 0.04em;
+    transition: all 0.3s ease;
+    overflow: hidden;
+  }
+  .tech-tile::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--tile-glow, linear-gradient(135deg, rgba(120, 60, 255, 0.18), transparent 65%));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .tech-tile span {
+    position: relative;
+    z-index: 1;
+  }
+  .orbit-card:hover .tech-tile {
+    border-color: rgba(120, 60, 255, 0.28);
+    color: #fff;
+  }
+  .orbit-card:hover .tech-tile::before { opacity: 0.6; }
+  .tech-tile--cyan    { --tile-glow: linear-gradient(135deg, rgba(0, 220, 255, 0.22), transparent 65%); }
+  .tech-tile--magenta { --tile-glow: linear-gradient(135deg, rgba(255, 0, 160, 0.22), transparent 65%); }
+  .tech-tile--green   { --tile-glow: linear-gradient(135deg, rgba(0, 220, 120, 0.22), transparent 65%); }
+  .tech-tile--orange  { --tile-glow: linear-gradient(135deg, rgba(255, 140, 0, 0.22), transparent 65%); }
+
+  /* ── Avatar orbit (About W) ─────────────────────────── */
+  .avatar-orbit {
+    position: relative;
+    width: 78px;
+    height: 78px;
+    margin: 0.4rem auto 0.25rem;
+  }
+  .avatar-orbit-core {
+    position: absolute;
+    inset: 22%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(120, 60, 255, 0.95), rgba(0, 200, 255, 0.75));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1rem;
+    color: #fff;
+    box-shadow:
+      0 0 26px rgba(120, 60, 255, 0.55),
+      inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    z-index: 3;
+  }
+  .avatar-orbit-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 1px dashed rgba(120, 60, 255, 0.45);
+    animation: ring-spin 12s linear infinite;
+  }
+  .avatar-orbit-ring::before,
+  .avatar-orbit-ring::after {
+    content: '';
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 220, 255, 1);
+    box-shadow: 0 0 10px rgba(0, 220, 255, 0.8);
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .avatar-orbit-ring::after {
+    background: rgba(255, 0, 160, 1);
+    box-shadow: 0 0 10px rgba(255, 0, 160, 0.8);
+    top: auto;
+    bottom: -3px;
+  }
+  .avatar-orbit-ring--outer {
+    inset: -8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    animation-direction: reverse;
+    animation-duration: 22s;
+  }
+
+  /* ── Link chips (About W) ───────────────────────────── */
+  .link-row {
+    display: flex;
+    gap: 0.4rem;
+    margin-top: auto;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  .link-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.66rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: all 0.3s ease;
+  }
+  .link-chip:hover {
+    background: rgba(120, 60, 255, 0.15);
+    border-color: rgba(120, 60, 255, 0.4);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  /* ── Radar scope (About S) ──────────────────────────── */
+  .radar {
+    position: relative;
+    width: 78px;
+    height: 78px;
+    margin: 0.25rem auto 0.3rem;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle, rgba(0, 220, 255, 0.14) 0%, transparent 70%),
+      repeating-radial-gradient(circle, transparent 0 10px, rgba(0, 220, 255, 0.1) 10px 11px);
+    border: 1px solid rgba(0, 220, 255, 0.28);
+    overflow: hidden;
+    box-shadow: inset 0 0 18px rgba(0, 220, 255, 0.1), 0 0 18px rgba(0, 220, 255, 0.08);
+  }
+  .radar::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: conic-gradient(from 0deg, transparent 0deg, rgba(0, 220, 255, 0.45) 40deg, transparent 55deg);
+    animation: radar-spin 3s linear infinite;
+    border-radius: 50%;
+  }
+  .radar-blip {
+    position: absolute;
+    top: 32%;
+    left: 62%;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 255, 200, 1);
+    box-shadow: 0 0 12px rgba(0, 255, 200, 1);
+    animation: blip-pulse 2s ease-in-out infinite;
+    z-index: 2;
+  }
+  @keyframes radar-spin { to { transform: rotate(360deg); } }
+  @keyframes blip-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.35; transform: scale(0.65); }
+  }
+
+  /* ── Glitch hero year (Origin N) ────────────────────── */
+  .hero-year {
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 4.4rem;
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: -0.06em;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.3) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    position: relative;
+    display: inline-block;
+    margin: 0.15rem 0 0.1rem;
+  }
+  .hero-year::before,
+  .hero-year::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    -webkit-text-fill-color: currentColor;
+  }
+  .hero-year::before {
+    left: 2px;
+    color: rgba(0, 220, 255, 0.4);
+    filter: blur(0.3px);
+  }
+  .hero-year::after {
+    left: -2px;
+    color: rgba(255, 0, 160, 0.35);
+  }
+  .orbit-card:hover .hero-year::before { animation: glitch-a 0.6s steps(2) infinite; }
+  .orbit-card:hover .hero-year::after  { animation: glitch-b 0.6s steps(2) infinite; }
+  @keyframes glitch-a { 0% { transform: translate(2px, 0); } 50% { transform: translate(-1px, 1px); } }
+  @keyframes glitch-b { 0% { transform: translate(-2px, 0); } 50% { transform: translate(1px, -1px); } }
+
+  /* ── Vertical timeline (Origin E) ───────────────────── */
+  .v-timeline {
+    position: relative;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-top: 0.4rem;
+  }
+  .v-timeline::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: linear-gradient(180deg,
+      rgba(120, 60, 255, 0.6) 0%,
+      rgba(0, 220, 255, 0.55) 50%,
+      rgba(255, 0, 160, 0.5) 100%);
+  }
+  .v-timeline-node {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .v-timeline-node::before {
+    content: '';
+    position: absolute;
+    left: -1.1rem;
+    top: 4px;
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    background: rgba(12, 10, 22, 1);
+    border: 2px solid rgba(120, 60, 255, 0.75);
+    box-shadow: 0 0 8px rgba(120, 60, 255, 0.35);
+  }
+  .v-timeline-node--active::before {
+    background: rgba(120, 60, 255, 1);
+    border-color: rgba(0, 220, 255, 1);
+    box-shadow: 0 0 0 3px rgba(120, 60, 255, 0.18), 0 0 14px rgba(0, 220, 255, 0.7);
+  }
+  .v-timeline-year {
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: rgba(160, 120, 255, 0.95);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+  .v-timeline-node--active .v-timeline-year {
+    color: rgba(0, 220, 255, 1);
+    text-shadow: 0 0 8px rgba(0, 220, 255, 0.5);
+  }
+  .v-timeline-text {
+    font-size: 0.72rem;
+    color: rgba(220, 225, 240, 0.78);
+    line-height: 1.3;
+  }
+
+  /* ── Pulse badge "NOW" (Origin S) ──────────────────── */
+  .pulse-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    margin: 0.2rem auto 0.3rem;
+    background: radial-gradient(circle, rgba(0, 220, 255, 0.28) 0%, rgba(0, 220, 255, 0.04) 70%);
+    border: 1px solid rgba(0, 220, 255, 0.4);
+    box-shadow: 0 0 22px rgba(0, 220, 255, 0.15), inset 0 0 18px rgba(0, 220, 255, 0.15);
+  }
+  .pulse-badge::before,
+  .pulse-badge::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 220, 255, 0.4);
+    animation: pulse-ring 2.4s ease-out infinite;
+  }
+  .pulse-badge::after { animation-delay: 1.2s; }
+  @keyframes pulse-ring {
+    0%   { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.9); opacity: 0; }
+  }
+  .pulse-badge-text {
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.7rem;
+    font-weight: 900;
+    color: rgba(0, 220, 255, 1);
+    text-shadow: 0 0 10px rgba(0, 220, 255, 0.7);
+    letter-spacing: 0.12em;
+    z-index: 2;
+  }
+
+  /* ── Mini terminal (Origin W / Services E) ──────────── */
+  .mini-term {
+    position: relative;
+    background: rgba(0, 0, 0, 0.48);
+    border: 1px solid rgba(0, 220, 255, 0.14);
+    border-radius: 10px;
+    padding: 0.45rem 0.7rem 0.55rem;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.66rem;
+    line-height: 1.7;
+    color: rgba(180, 230, 255, 0.85);
+    overflow: hidden;
+    margin-top: 0.45rem;
+  }
+  .mini-term-bar {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 0.3rem;
+  }
+  .mini-term-bar span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .mini-term-bar span:nth-child(1) { background: #ff5f57; }
+  .mini-term-bar span:nth-child(2) { background: #febc2e; }
+  .mini-term-bar span:nth-child(3) { background: #28c840; }
+  .mini-term-line {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    animation: term-in 0.5s ease-out backwards;
+  }
+  .mini-term-line:nth-child(2) { animation-delay: 0.2s; }
+  .mini-term-line:nth-child(3) { animation-delay: 0.4s; }
+  .mini-term-line:nth-child(4) { animation-delay: 0.6s; }
+  .mini-term-line:nth-child(5) { animation-delay: 0.8s; }
+  .mini-term-line--ok { color: rgba(0, 255, 130, 0.95); }
+  .mini-term-prompt {
+    color: rgba(180, 140, 255, 0.95);
+    margin-right: 4px;
+    font-weight: 700;
+  }
+  @keyframes term-in {
+    from { opacity: 0; transform: translateX(-4px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ── Circuit SVG (Services N) ──────────────────────── */
+  .circuit-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+  }
+  .circuit-svg path {
+    fill: none;
+    stroke-width: 1;
+    stroke-dasharray: 180;
+    stroke-dashoffset: 180;
+    animation: trace-draw 6s ease-in-out infinite;
+  }
+  .circuit-svg path:nth-child(1) { stroke: rgba(0, 220, 255, 0.45); }
+  .circuit-svg path:nth-child(2) { stroke: rgba(120, 60, 255, 0.4); animation-delay: 1s; }
+  .circuit-svg path:nth-child(3) { stroke: rgba(255, 0, 160, 0.35); animation-delay: 2s; }
+  .circuit-svg circle {
+    fill: rgba(0, 220, 255, 0.85);
+    filter: drop-shadow(0 0 4px rgba(0, 220, 255, 0.8));
+  }
+  @keyframes trace-draw {
+    0%, 100% { stroke-dashoffset: 180; }
+    40%, 60% { stroke-dashoffset: 0; }
+  }
+
+  /* ── Waveform bars ──────────────────────────────────── */
+  .waveform {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 30px;
+    margin: 0.3rem 0 0;
+  }
+  .waveform span {
+    flex: 1;
+    min-width: 3px;
+    background: linear-gradient(180deg, rgba(0, 220, 255, 0.9), rgba(120, 60, 255, 0.55));
+    border-radius: 2px;
+    animation: wave 1.4s ease-in-out infinite;
+    transform-origin: bottom;
+  }
+  .waveform span:nth-child(1)  { animation-delay: 0.00s; }
+  .waveform span:nth-child(2)  { animation-delay: 0.08s; }
+  .waveform span:nth-child(3)  { animation-delay: 0.16s; }
+  .waveform span:nth-child(4)  { animation-delay: 0.24s; }
+  .waveform span:nth-child(5)  { animation-delay: 0.32s; }
+  .waveform span:nth-child(6)  { animation-delay: 0.40s; }
+  .waveform span:nth-child(7)  { animation-delay: 0.48s; }
+  .waveform span:nth-child(8)  { animation-delay: 0.56s; }
+  .waveform span:nth-child(9)  { animation-delay: 0.64s; }
+  .waveform span:nth-child(10) { animation-delay: 0.72s; }
+  .waveform span:nth-child(11) { animation-delay: 0.80s; }
+  .waveform span:nth-child(12) { animation-delay: 0.88s; }
+  @keyframes wave {
+    0%, 100% { transform: scaleY(0.28); }
+    50%      { transform: scaleY(1); }
+  }
+
+  /* ── Numbered checklist (Services W) ────────────────── */
+  .check-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    margin-top: 0.5rem;
+  }
+  .check-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+  .check-list-item-num {
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, rgba(120, 60, 255, 0.3), rgba(0, 200, 255, 0.18));
+    border: 1px solid rgba(120, 60, 255, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.58rem;
+    font-weight: 800;
+    color: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 0 10px rgba(120, 60, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  }
+  .check-list-item-text {
+    font-size: 0.76rem;
+    color: rgba(220, 225, 240, 0.85);
+    line-height: 1.3;
+    padding-top: 4px;
+  }
+
+  /* ── Big metric display (Projects viewall) ──────────── */
+  .big-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.05rem;
+    margin-top: 0.35rem;
+  }
+  .big-metric-value {
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 3.4rem;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 1;
+    background: linear-gradient(180deg, #ffffff 0%, rgba(120, 60, 255, 0.7) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .big-metric-sub {
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.38);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ── Project cover thumb (Projects N/E/S) ───────────── */
+  .cover-thumb {
+    position: relative;
+    height: 52%;
+    min-height: 90px;
+    border-radius: 14px;
+    margin: 0 0 0.55rem;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+    flex-shrink: 0;
+  }
+  .cover-thumb::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, transparent 45%, rgba(0, 0, 0, 0.6) 100%),
+      repeating-linear-gradient(-45deg, transparent 0 16px, rgba(255, 255, 255, 0.035) 16px 17px);
+    pointer-events: none;
+  }
+  .cover-thumb-tag {
+    position: absolute;
+    top: 8px;
+    left: 10px;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: rgba(255, 255, 255, 0.88);
+    z-index: 2;
+    text-transform: uppercase;
+  }
+  .cover-thumb-index {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-family: 'JetBrains Mono', Menlo, monospace;
+    font-size: 2.1rem;
+    font-weight: 900;
+    color: rgba(255, 255, 255, 0.92);
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    line-height: 1;
+    z-index: 2;
+  }
+
+  /* ── Center card ambient rings ──────────────────────── */
+  .center-ambient-ring {
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px dashed rgba(120, 60, 255, 0.18);
+    animation: ring-spin 22s linear infinite;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .center-ambient-ring--outer {
+    width: 190px;
+    height: 190px;
+    border: 1px dashed rgba(0, 220, 255, 0.1);
+    animation-direction: reverse;
+    animation-duration: 34s;
+  }
+  .center-ambient-ring::before {
+    content: '';
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: rgba(120, 60, 255, 0.9);
+    box-shadow: 0 0 8px rgba(120, 60, 255, 0.7);
+    top: -2.5px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .center-ambient-ring--outer::before {
+    background: rgba(0, 220, 255, 0.9);
+    box-shadow: 0 0 8px rgba(0, 220, 255, 0.7);
+  }
+  .bento-section .card-center > * { position: relative; z-index: 1; }
+</style>
+
+<style>
   /* ── Responsive ──────────────────────────────────────── */
   @media (max-width: 768px) {
     .bento-container {
@@ -1906,67 +2719,85 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 0: About Me ──────────────────────────────── */
   function renderAboutMeCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: gradient title hero + availability badge + typing cursor
+      case 0: // N — wide: constellation + gradient hero + availability pill
         setGlow(orbitCard, "purple");
-        face.classList.add("card-accent-top");
         face.innerHTML = `
-          <div class="card-orb card-orb--purple"></div>
-          <p class="card-label">${t('bento.about.n.label', lang)}</p>
-          <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.about.n.badge', lang)}</div>
-          <h3 class="card-title card-title--gradient card-title--lg">${t('bento.about.n.title', lang)}<span class="typing-cursor"></span></h3>
-          <p class="card-desc">${t('bento.about.n.desc', lang)}</p>
-          <div class="card-barchart card-barchart--mini"><span style="height:92%"></span><span style="height:85%"></span><span style="height:70%"></span><span style="height:55%"></span><span style="height:78%"></span></div>`;
-        break;
-      case 1: // E — tall: skill bars (5 rows) + code snippet
-        setGlow(orbitCard);
-        face.classList.add("card-accent-top", "card-accent-top--cyan");
-        face.innerHTML = `
-          <div class="card-orb card-orb--cyan"></div>
-          <p class="card-label">${t('bento.about.e.label', lang)}</p>
-          <h3 class="card-title">${t('bento.about.e.title', lang)}</h3>
-          <div class="skill-bars">
-            <div class="skill-bar"><span class="skill-bar-label">Frontend</span><div class="skill-bar-track"><div class="skill-bar-fill" style="width:92%"></div></div></div>
-            <div class="skill-bar"><span class="skill-bar-label">Backend</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--cyan" style="width:85%"></div></div></div>
-            <div class="skill-bar"><span class="skill-bar-label">DevOps</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--magenta" style="width:70%"></div></div></div>
-            <div class="skill-bar"><span class="skill-bar-label">Design</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--purple" style="width:55%"></div></div></div>
-            <div class="skill-bar"><span class="skill-bar-label">AI/ML</span><div class="skill-bar-track"><div class="skill-bar-fill skill-bar-fill--cyan" style="width:45%"></div></div></div>
-          </div>
-          <div class="card-code">${t('bento.about.e.code', lang)}<span class="typing-cursor"></span></div>`;
-        break;
-      case 2: // S — small: pulsing signal status with enhanced glow ring
-        setGlow(orbitCard, "cyan");
-        face.innerHTML = `
-          <div class="signal-card">
-            <div class="signal-dot signal-dot--enhanced"></div>
-            <span class="signal-title">${t('bento.about.s.title', lang)}</span>
-            <span class="signal-subtitle">${t('bento.about.s.subtitle', lang)}</span>
+          <div class="card-bg card-bg--dots"></div>
+          <div class="constellation"></div>
+          <div class="hero-glow"></div>
+          <span class="card-display-num">01</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.about.n.label', lang)}</p>
+            <span class="status-pill"><span class="status-pill-dot"></span>${t('bento.about.n.badge', lang)}</span>
+            <h3 class="hero-title">${t('bento.about.n.title', lang)}<span class="typing-cursor"></span></h3>
+            <p class="hero-sub">${t('bento.about.n.desc', lang)}</p>
           </div>`;
         break;
-      case 3: // W — tall: profile tile + social links row
+      case 1: // E — tall: tech grid + waveform + code line
+        setGlow(orbitCard, "cyan");
+        face.innerHTML = `
+          <div class="card-bg card-bg--grid"></div>
+          <div class="hero-glow hero-glow--cyan"></div>
+          <span class="card-display-num card-display-num--cyan">02</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.about.e.label', lang)}</p>
+            <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem">${t('bento.about.e.title', lang)}</h3>
+            <div class="tech-grid">
+              <div class="tech-tile tech-tile--cyan"><span>TS</span></div>
+              <div class="tech-tile"><span>Astro</span></div>
+              <div class="tech-tile tech-tile--magenta"><span>Node</span></div>
+              <div class="tech-tile tech-tile--green"><span>SQL</span></div>
+              <div class="tech-tile tech-tile--orange"><span>Docker</span></div>
+              <div class="tech-tile"><span>AWS</span></div>
+            </div>
+            <div class="waveform">
+              <span style="height:40%"></span><span style="height:72%"></span><span style="height:88%"></span>
+              <span style="height:55%"></span><span style="height:82%"></span><span style="height:62%"></span>
+              <span style="height:76%"></span><span style="height:48%"></span><span style="height:92%"></span>
+              <span style="height:52%"></span><span style="height:78%"></span><span style="height:36%"></span>
+            </div>
+            <div class="card-code" style="margin-top:0.25rem">${t('bento.about.e.code', lang)}<span class="typing-cursor"></span></div>
+          </div>`;
+        break;
+      case 2: // S — small: radar scope + online tag
+        setGlow(orbitCard, "cyan");
+        face.innerHTML = `
+          <div class="card-bg card-bg--grid"></div>
+          <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.15rem">
+            <p class="card-label">${t('bento.about.s.label', lang)}</p>
+            <div class="radar"><span class="radar-blip"></span></div>
+            <span class="pulse-badge-text">${t('bento.about.s.title', lang)}</span>
+            <span class="big-metric-sub" style="font-size:0.5rem">${t('bento.about.s.subtitle', lang)}</span>
+          </div>`;
+        break;
+      case 3: // W — tall: orbit avatar + role + link chips
         setGlow(orbitCard, "purple");
-        face.classList.add("card-accent-top");
-        face.innerHTML = `<div class="profile-tile">
-          <div class="card-orb card-orb--magenta"></div>
-          <p class="card-label">${t('bento.about.w.label', lang)}</p>
-          <div class="profile-avatar"><span class="profile-avatar-initials">&lt;/&gt;</span></div>
-          <div class="profile-info">
+        face.innerHTML = `
+          <div class="card-bg card-bg--diagonal"></div>
+          <div class="hero-glow"></div>
+          <div class="card-content" style="align-items:center;text-align:center">
+            <p class="card-label" style="align-self:flex-start">${t('bento.about.w.label', lang)}</p>
+            <div class="avatar-orbit">
+              <div class="avatar-orbit-ring avatar-orbit-ring--outer"></div>
+              <div class="avatar-orbit-ring"></div>
+              <div class="avatar-orbit-core">&lt;/&gt;</div>
+            </div>
             <span class="profile-role">${t('bento.about.w.role', lang)}</span>
             <span class="profile-location">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
               ${t('bento.about.w.location', lang)}
             </span>
-          </div>
-          <div class="profile-links">
-            <a class="profile-link-pill" href="https://github.com/AlexsProGrammer" target="_blank" rel="noopener">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-              ${t('bento.about.w.github', lang)}
-            </a>
-            <a class="profile-link-pill" href="mailto:hello@pro-grammer.dev">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-              ${t('bento.about.w.email', lang)}
-            </a>
-          </div>
-        </div>`;
+            <div class="link-row">
+              <a class="link-chip" href="https://github.com/AlexsProGrammer" target="_blank" rel="noopener">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                ${t('bento.about.w.github', lang)}
+              </a>
+              <a class="link-chip" href="mailto:hello@pro-grammer.dev">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                ${t('bento.about.w.email', lang)}
+              </a>
+            </div>
+          </div>`;
         break;
     }
   }
@@ -1974,53 +2805,63 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 1: The Origin ─────────────────────────────── */
   function renderOriginCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: large gradient year hero with code watermark
-        setGlow(orbitCard, "purple");
-        face.classList.add("card-accent-top");
-        face.innerHTML = `
-          <div class="card-orb card-orb--purple"></div>
-          <div class="card-watermark">int main() {}</div>
-          <p class="card-label">${t('bento.origin.n.label', lang)}</p>
-          <span class="card-year--hero card-year--glitch" data-text="2018">2018</span>
-          <h3 class="card-title card-title--gradient">${t('bento.origin.n.title', lang)}</h3>
-          <p class="card-desc">${t('bento.origin.n.desc', lang)}</p>`;
-        break;
-      case 1: // E — tall: timeline milestones with animated dots + bar chart
+      case 0: // N — wide: glitch hero year with scanlines
         setGlow(orbitCard, "magenta");
-        face.classList.add("card-accent-top", "card-accent-top--magenta");
         face.innerHTML = `
-          <p class="card-label">${t('bento.origin.e.label', lang)}</p>
-          <h3 class="card-title">${t('bento.origin.e.title', lang)}</h3>
-          <div class="card-timeline card-timeline--animated">
-            <div class="card-timeline-item"><span class="card-timeline-year">2018</span><span class="card-timeline-text">${t('bento.origin.e.t1', lang)}</span></div>
-            <div class="card-timeline-item"><span class="card-timeline-year">2021</span><span class="card-timeline-text">${t('bento.origin.e.t2', lang)}</span></div>
-            <div class="card-timeline-item"><span class="card-timeline-year">2025</span><span class="card-timeline-text">${t('bento.origin.e.t3', lang)}</span></div>
-            <div class="card-timeline-item card-timeline-item--active"><span class="card-timeline-year">2026</span><span class="card-timeline-text">${t('bento.origin.e.t4', lang)}</span></div>
-          </div>
-          <div class="card-barchart card-barchart--gradient"><span style="height:20%"></span><span style="height:45%"></span><span style="height:70%"></span><span style="height:100%"></span></div>`;
-        break;
-      case 2: // S — small: hero metric with pulsing brand glow
-        setGlow(orbitCard, "cyan");
-        face.innerHTML = `
-          <p class="card-label">${t('bento.origin.s.label', lang)}</p>
-          <div class="card-metric glow-cyan">
-            <span class="card-metric-value card-metric-value--lg card-metric--pulse">${t('bento.origin.s.title', lang)}</span>
-            <span class="card-metric-label">${t('bento.origin.s.subtitle', lang)}</span>
+          <div class="card-bg card-bg--scan"></div>
+          <div class="hero-glow hero-glow--magenta"></div>
+          <span class="card-display-num card-display-num--magenta">01</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.origin.n.label', lang)}</p>
+            <span class="hero-year" data-text="2018">2018</span>
+            <h3 class="hero-title hero-title--magenta" style="font-size:1.25rem">${t('bento.origin.n.title', lang)}</h3>
+            <p class="hero-sub">${t('bento.origin.n.desc', lang)}</p>
           </div>`;
         break;
-      case 3: // W — tall: founding story + terminal sequence
+      case 1: // E — tall: vertical timeline
         setGlow(orbitCard, "purple");
-        face.classList.add("card-accent-top");
         face.innerHTML = `
-          <div class="card-orb card-orb--cyan"></div>
-          <p class="card-label">${t('bento.origin.w.label', lang)}</p>
-          <div class="card-badge card-badge--purple"><span class="card-badge-dot"></span>${t('bento.origin.w.badge', lang)}</div>
-          <h3 class="card-title">${t('bento.origin.w.title', lang)}</h3>
-          <p class="card-desc">${t('bento.origin.w.desc', lang)}</p>
-          <div class="card-terminal">
-            <span>${t('bento.origin.w.term1', lang)}</span>
-            <span>${t('bento.origin.w.term2', lang)}</span>
-            <span>${t('bento.origin.w.term3', lang)}</span>
+          <div class="card-bg card-bg--dots"></div>
+          <div class="hero-glow"></div>
+          <span class="card-display-num">02</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.origin.e.label', lang)}</p>
+            <h3 class="hero-title" style="font-size:1.2rem">${t('bento.origin.e.title', lang)}</h3>
+            <div class="v-timeline">
+              <div class="v-timeline-node"><span class="v-timeline-year">2018</span><span class="v-timeline-text">${t('bento.origin.e.t1', lang)}</span></div>
+              <div class="v-timeline-node"><span class="v-timeline-year">2021</span><span class="v-timeline-text">${t('bento.origin.e.t2', lang)}</span></div>
+              <div class="v-timeline-node"><span class="v-timeline-year">2025</span><span class="v-timeline-text">${t('bento.origin.e.t3', lang)}</span></div>
+              <div class="v-timeline-node v-timeline-node--active"><span class="v-timeline-year">2026</span><span class="v-timeline-text">${t('bento.origin.e.t4', lang)}</span></div>
+            </div>
+          </div>`;
+        break;
+      case 2: // S — small: "NOW" pulse badge
+        setGlow(orbitCard, "cyan");
+        face.innerHTML = `
+          <div class="card-bg card-bg--grid"></div>
+          <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.1rem">
+            <p class="card-label">${t('bento.origin.s.label', lang)}</p>
+            <div class="pulse-badge"><span class="pulse-badge-text">NOW</span></div>
+            <span class="pulse-badge-text" style="font-size:0.7rem">${t('bento.origin.s.title', lang)}</span>
+            <span class="big-metric-sub" style="font-size:0.5rem">${t('bento.origin.s.subtitle', lang)}</span>
+          </div>`;
+        break;
+      case 3: // W — tall: terminal boot sequence
+        setGlow(orbitCard, "purple");
+        face.innerHTML = `
+          <div class="card-bg card-bg--diagonal"></div>
+          <div class="hero-glow"></div>
+          <div class="card-content">
+            <p class="card-label">${t('bento.origin.w.label', lang)}</p>
+            <span class="status-pill status-pill--purple"><span class="status-pill-dot"></span>${t('bento.origin.w.badge', lang)}</span>
+            <h3 class="hero-title" style="font-size:1.2rem">${t('bento.origin.w.title', lang)}</h3>
+            <p class="hero-sub">${t('bento.origin.w.desc', lang)}</p>
+            <div class="mini-term">
+              <div class="mini-term-bar"><span></span><span></span><span></span></div>
+              <span class="mini-term-line"><span class="mini-term-prompt">$</span>${t('bento.origin.w.term1', lang).replace(/^\$\s*/, '')}</span>
+              <span class="mini-term-line"><span class="mini-term-prompt">$</span>${t('bento.origin.w.term2', lang).replace(/^\$\s*/, '')}</span>
+              <span class="mini-term-line mini-term-line--ok">${t('bento.origin.w.term3', lang)}</span>
+            </div>
           </div>`;
         break;
     }
@@ -2029,65 +2870,83 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 2: Services ──────────────────────────────── */
   function renderServicesCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     switch (pos) {
-      case 0: // N — wide: gradient "Fullstack Engineering." + 2-row tech grid
+      case 0: // N — wide: circuit traces + hero gradient title
         setGlow(orbitCard, "cyan");
-        face.classList.add("card-accent-top", "card-accent-top--cyan");
         face.innerHTML = `
-          <div class="card-orb card-orb--cyan"></div>
-          <p class="card-label">${t('bento.services.n.label', lang)}</p>
-          <h3 class="card-title card-title--gradient card-title--lg">${t('bento.services.n.title', lang)}</h3>
-          <p class="card-desc">${t('bento.services.n.desc', lang)}</p>
-          <div class="tech-pills tech-pills--grid"><span>Astro</span><span>React</span><span>Node</span><span>TS</span><span>GraphQL</span><span>Docker</span></div>`;
-        break;
-      case 1: // E — tall: terminal output with blinking cursor + tech pills
-        setGlow(orbitCard, "cyan");
-        face.classList.add("card-accent-top", "card-accent-top--cyan");
-        face.innerHTML = `
-          <p class="card-label">${t('bento.services.e.label', lang)}</p>
-          <h3 class="card-title">${t('bento.services.e.title', lang)}</h3>
-          <div class="tech-pills"><span>PostgreSQL</span><span>GraphQL</span><span>Docker</span><span>AWS</span></div>
-          <div class="card-terminal card-terminal--live">
-            <span>${t('bento.services.e.term1', lang)}</span>
-            <span>${t('bento.services.e.term2', lang)}</span>
-            <span>${t('bento.services.e.term3', lang)}</span>
-            <span>${t('bento.services.e.term4', lang)}</span>
+          <div class="card-bg card-bg--grid"></div>
+          <svg class="circuit-svg" viewBox="0 0 400 180" preserveAspectRatio="none">
+            <path d="M0,36 L80,36 L100,56 L220,56 L240,36 L400,36"/>
+            <path d="M0,148 L90,148 L110,128 L260,128 L280,148 L400,148"/>
+            <path d="M220,56 L220,128"/>
+            <circle cx="100" cy="56" r="3"/><circle cx="240" cy="36" r="3"/>
+            <circle cx="110" cy="128" r="3"/><circle cx="280" cy="148" r="3"/>
+          </svg>
+          <div class="hero-glow hero-glow--cyan"></div>
+          <span class="card-display-num card-display-num--cyan">01</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.services.n.label', lang)}</p>
+            <h3 class="hero-title hero-title--cyan">${t('bento.services.n.title', lang)}</h3>
+            <p class="hero-sub">${t('bento.services.n.desc', lang)}</p>
+            <div class="waveform" style="margin-top:auto">
+              <span style="height:32%"></span><span style="height:62%"></span><span style="height:84%"></span>
+              <span style="height:48%"></span><span style="height:92%"></span><span style="height:58%"></span>
+              <span style="height:78%"></span><span style="height:42%"></span>
+            </div>
           </div>`;
         break;
-      case 2: // S — small: radial progress ring around 100%
+      case 1: // E — tall: tech grid + live terminal log
+        setGlow(orbitCard, "cyan");
+        face.innerHTML = `
+          <div class="card-bg card-bg--dots"></div>
+          <div class="hero-glow hero-glow--cyan"></div>
+          <span class="card-display-num card-display-num--cyan">02</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.services.e.label', lang)}</p>
+            <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem">${t('bento.services.e.title', lang)}</h3>
+            <div class="tech-grid tech-grid--cols-2">
+              <div class="tech-tile tech-tile--cyan"><span>PostgreSQL</span></div>
+              <div class="tech-tile tech-tile--magenta"><span>GraphQL</span></div>
+              <div class="tech-tile tech-tile--orange"><span>Docker</span></div>
+              <div class="tech-tile"><span>AWS</span></div>
+            </div>
+            <div class="mini-term" style="margin-top:auto">
+              <div class="mini-term-bar"><span></span><span></span><span></span></div>
+              <span class="mini-term-line"><span class="mini-term-prompt">&gt;</span>${t('bento.services.e.term1', lang).replace(/^&gt;\s*|^>\s*/, '')}</span>
+              <span class="mini-term-line"><span class="mini-term-prompt">&gt;</span>${t('bento.services.e.term2', lang).replace(/^&gt;\s*|^>\s*/, '')}</span>
+              <span class="mini-term-line"><span class="mini-term-prompt">&gt;</span>${t('bento.services.e.term3', lang).replace(/^&gt;\s*|^>\s*/, '')}</span>
+              <span class="mini-term-line mini-term-line--ok">${t('bento.services.e.term4', lang)}</span>
+            </div>
+          </div>`;
+        break;
+      case 2: // S — small: progress ring 100%
         setGlow(orbitCard, "magenta");
         face.innerHTML = `
-          <p class="card-label">${t('bento.services.s.label', lang)}</p>
-          <div class="card-metric">
-            <div class="progress-ring">
+          <div class="card-content" style="align-items:center;text-align:center;justify-content:center">
+            <p class="card-label">${t('bento.services.s.label', lang)}</p>
+            <div class="progress-ring" style="margin:0.2rem 0">
               <svg viewBox="0 0 80 80" class="progress-ring-svg">
                 <circle cx="40" cy="40" r="34" class="progress-ring-bg"/>
                 <circle cx="40" cy="40" r="34" class="progress-ring-fill"/>
               </svg>
               <span class="progress-ring-text">100%</span>
             </div>
-            <span class="card-metric-label">${t('bento.services.s.metricLabel', lang)}</span>
+            <span class="big-metric-sub" style="font-size:0.55rem">${t('bento.services.s.metricLabel', lang)}</span>
           </div>`;
         break;
-      case 3: // W — tall: consulting services list + icon
+      case 3: // W — tall: numbered services checklist
         setGlow(orbitCard, "purple");
-        face.classList.add("card-accent-top");
         face.innerHTML = `
-          <div class="card-orb card-orb--purple"></div>
-          <p class="card-label">${t('bento.services.w.label', lang)}</p>
-          <h3 class="card-title">${t('bento.services.w.title', lang)}</h3>
-          <p class="card-desc">${t('bento.services.w.desc', lang)}</p>
-          <div class="services-list">
-            <div class="services-list-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(120,60,255,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>${t('bento.services.w.li1', lang)}</span>
-            </div>
-            <div class="services-list-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(0,200,255,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>${t('bento.services.w.li2', lang)}</span>
-            </div>
-            <div class="services-list-item">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,0,160,0.7)" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-              <span>${t('bento.services.w.li3', lang)}</span>
+          <div class="card-bg card-bg--diagonal"></div>
+          <div class="hero-glow"></div>
+          <span class="card-display-num">04</span>
+          <div class="card-content">
+            <p class="card-label">${t('bento.services.w.label', lang)}</p>
+            <h3 class="hero-title" style="font-size:1.18rem">${t('bento.services.w.title', lang)}</h3>
+            <p class="hero-sub" style="-webkit-line-clamp:2">${t('bento.services.w.desc', lang)}</p>
+            <div class="check-list">
+              <div class="check-list-item"><span class="check-list-item-num">01</span><span class="check-list-item-text">${t('bento.services.w.li1', lang)}</span></div>
+              <div class="check-list-item"><span class="check-list-item-num">02</span><span class="check-list-item-text">${t('bento.services.w.li2', lang)}</span></div>
+              <div class="check-list-item"><span class="check-list-item-num">03</span><span class="check-list-item-text">${t('bento.services.w.li3', lang)}</span></div>
             </div>
           </div>`;
         break;
@@ -2097,68 +2956,76 @@ const projectsJSON = JSON.stringify(
   /* ── Topic 3: Projects ──────────────────────────────── */
   function renderProjectCard(face: HTMLElement, pos: number, lang: "de" | "en", orbitCard: HTMLElement | null) {
     if (pos === 3) {
-      // View All card — animated mini grid + count
+      // View All — big count + animated mosaic + CTA
       setGlow(orbitCard, "purple");
-      face.classList.add("card-accent-top");
       const countNum = projects.length > 0 ? `${projects.length}+` : "8+";
-      face.innerHTML = `<div class="bento-viewall">
-        <div class="card-orb card-orb--purple"></div>
-        <p class="card-label">${t('bento.projects.viewall.label', lang)}</p>
-        <div class="bento-viewall-metric">
-          <span class="bento-viewall-count card-metric-value--lg">${countNum}</span>
-          <span class="bento-viewall-count-label">${t('bento.projects.viewall.count', lang)}</span>
-        </div>
-        <div class="bento-viewall-grid bento-viewall-grid--animated">
-          <span></span><span class="viewall-grid--tall"></span>
-          <span class="viewall-grid--wide"></span><span></span>
-        </div>
-        <a href="/projects" class="bento-viewall-cta">
-          ${t('bento.projects.viewall.cta', lang)}
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </a>
-      </div>`;
+      face.innerHTML = `
+        <div class="card-bg card-bg--dots"></div>
+        <div class="hero-glow"></div>
+        <span class="card-display-num">04</span>
+        <div class="card-content">
+          <p class="card-label">${t('bento.projects.viewall.label', lang)}</p>
+          <div class="big-metric">
+            <span class="big-metric-value">${countNum}</span>
+            <span class="big-metric-sub">${t('bento.projects.viewall.count', lang)}</span>
+          </div>
+          <div class="bento-viewall-grid bento-viewall-grid--animated" style="margin-top:auto;margin-bottom:0.6rem">
+            <span></span><span class="viewall-grid--tall"></span>
+            <span class="viewall-grid--wide"></span><span></span>
+          </div>
+          <a href="/projects" class="bento-viewall-cta">
+            ${t('bento.projects.viewall.cta', lang)}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
+        </div>`;
       return;
     }
 
-    // Project cards (pos 0, 1, 2) — with gradient thumbnail + year badge
+    // Project cards (pos 0, 1, 2) — gallery cover + title + tech pills
     const proj = projects[pos];
     const glowColors = ["cyan", "magenta", "purple"] as const;
-    const accentVariants = ["card-accent-top--cyan", "card-accent-top--magenta", ""] as const;
-    const gradientBgs = [
-      "linear-gradient(135deg, rgba(0,200,255,0.08) 0%, rgba(0,100,200,0.04) 100%)",
-      "linear-gradient(135deg, rgba(255,0,160,0.08) 0%, rgba(200,0,100,0.04) 100%)",
-      "linear-gradient(135deg, rgba(120,60,255,0.08) 0%, rgba(80,30,200,0.04) 100%)",
+    const covers = [
+      "linear-gradient(135deg, rgba(0,220,255,0.55) 0%, rgba(120,60,255,0.35) 50%, rgba(255,0,160,0.25) 100%)",
+      "linear-gradient(135deg, rgba(255,0,160,0.55) 0%, rgba(255,140,0,0.35) 50%, rgba(120,60,255,0.25) 100%)",
+      "linear-gradient(135deg, rgba(120,60,255,0.55) 0%, rgba(0,220,255,0.35) 50%, rgba(0,220,120,0.2) 100%)",
     ] as const;
     setGlow(orbitCard, glowColors[pos]);
-    face.classList.add("card-accent-top");
-    if (accentVariants[pos]) face.classList.add(accentVariants[pos]);
+
+    const labelNum = `0${pos + 1}`;
     if (proj) {
-      const maxLen = pos === 2 ? 60 : pos === 0 ? 120 : 140;
-      const excerpt = stripHtml(proj.excerpt).slice(0, maxLen);
-      const labelNum = `0${pos + 1}`;
-      const techPills = proj.techStack
-        ? `<div class="tech-pills">${proj.techStack.split(',').slice(0, 4).map((t: string) => `<span>${t.trim()}</span>`).join('')}</div>`
+      const excerpt = stripHtml(proj.excerpt).slice(0, pos === 2 ? 55 : 110);
+      const techArr = proj.techStack
+        ? proj.techStack.split(',').slice(0, 3).map((s: string) => s.trim()).filter(Boolean)
+        : [];
+      const pillsHtml = techArr.length
+        ? `<div class="tech-pills" style="margin-top:auto">${techArr.map((x: string) => `<span>${x}</span>`).join('')}</div>`
         : '';
+      const thumbStyle = proj.imageUrl
+        ? `background-image:url('${proj.imageUrl}')`
+        : `background:${covers[pos]}`;
       face.innerHTML = `
-        <div class="project-thumb" style="background:${gradientBgs[pos]}">
-          <div class="project-thumb-pattern"></div>
-        </div>
-        <p class="card-label">${labelNum} // ${t('bento.projects.label', lang)}</p>
-        <div class="bento-project">
-          <p class="bento-project-title">${proj.title}</p>
+        <div class="card-content" style="gap:0">
+          <div class="cover-thumb" style="${thumbStyle}">
+            <span class="cover-thumb-tag">${labelNum} // ${t('bento.projects.label', lang)}</span>
+            <span class="cover-thumb-index">${labelNum}</span>
+          </div>
+          <p class="bento-project-title" style="font-size:0.95rem;margin-top:0.1rem">${proj.title}</p>
           <p class="bento-project-excerpt">${excerpt}</p>
-          ${techPills}
-          <a href="/projects/${proj.slug}" class="bento-project-link">
-            ${t('bento.projects.details', lang)} <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          ${pillsHtml}
+          <a href="/projects/${proj.slug}" class="bento-project-link" style="margin-top:0.45rem">
+            ${t('bento.projects.details', lang)}
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
         </div>`;
     } else {
       face.innerHTML = `
-        <div class="project-thumb" style="background:${gradientBgs[pos]}">
-          <div class="project-thumb-pattern"></div>
-        </div>
-        <p class="card-label">0${pos + 1} // ${t('bento.projects.label', lang)}</p>
-        <p class="card-title" style="opacity:0.3">${t('bento.projects.coming', lang)}</p>`;
+        <div class="card-content" style="gap:0">
+          <div class="cover-thumb" style="background:${covers[pos]}">
+            <span class="cover-thumb-tag">${labelNum} // ${t('bento.projects.label', lang)}</span>
+            <span class="cover-thumb-index">${labelNum}</span>
+          </div>
+          <p class="hero-title" style="opacity:0.4;font-size:1rem">${t('bento.projects.coming', lang)}</p>
+        </div>`;
     }
   }
 
