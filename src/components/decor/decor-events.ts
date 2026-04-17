@@ -18,34 +18,76 @@ export function initDecorEvents(): void {
   setupShootingStar(reduced);
   setupUfo(reduced);
   setupParallax(reduced);
+  excludeHeroZone();
 
-  // Re-fire shooting-star on Astro client-side navigation.
+  // Re-fire shooting-star on Astro client-side navigation (still 1-in-10).
   document.addEventListener('astro:page-load', () => {
-    fireShootingStar();
+    if (Math.random() < 0.1) {
+      setTimeout(fireShootingStar, 400 + Math.random() * 600);
+    }
+    // Re-run exclusion after navigation because page content changes.
+    excludeHeroZone();
   });
 }
 
 function setupShootingStar(reduced: boolean): void {
   if (reduced) return;
-  // Fire once on initial load, shortly after paint.
+  // 1-in-10 chance on initial page load.
   window.requestAnimationFrame(() => {
-    setTimeout(fireShootingStar, 600);
+    if (Math.random() < 0.1) {
+      setTimeout(fireShootingStar, 400 + Math.random() * 600);
+    }
   });
 }
+
+// Possible travel directions for the shooting star.
+// Each entry defines: start (x,y), end (x,y) in vw/vh units and an angle.
+const SS_DIRECTIONS = [
+  // Classic: top-left → bottom-right
+  { x1: -20, y1: 5,  x2: 120, y2: 60,  angle: 30 },
+  // Right → left
+  { x1: 120, y1: 8,  x2: -20, y2: 50,  angle: 150 },
+  // Top-right → bottom-left
+  { x1: 110, y1: 2,  x2: -10, y2: 70,  angle: 160 },
+  // Steep drop: top → bottom-right
+  { x1: 10,  y1: -5, x2: 90,  y2: 80,  angle: 50 },
+  // Shallow: left → far right
+  { x1: -15, y1: 20, x2: 120, y2: 35,  angle: 8 },
+] as const;
+
+const SS_COLORS = [
+  // [trail-color, glow-color]
+  ['var(--neon-blue)',   'var(--neon-blue)'],
+  ['var(--neon-pink)',   'var(--neon-pink)'],
+  ['var(--neon-purple)', 'var(--neon-blue)'],
+  ['#ffffff',            'var(--neon-blue)'],
+  ['var(--neon-pink)',   'var(--neon-purple)'],
+] as const;
 
 function fireShootingStar(): void {
   const host = document.querySelector<HTMLElement>('.decor-event--shooting');
   if (!host) return;
+
+  // Pick random direction + color.
+  const dir = SS_DIRECTIONS[Math.floor(Math.random() * SS_DIRECTIONS.length)];
+  const [trailColor, glowColor] = SS_COLORS[Math.floor(Math.random() * SS_COLORS.length)];
+
+  // Small jitter on starting y so same direction varies each time.
+  const yJitter = (Math.random() - 0.5) * 20;
+
   host.classList.remove('is-firing');
-  // Reflow to restart animation.
-  void host.offsetWidth;
-  // Randomize entry point.
-  const top = 5 + Math.random() * 25;
-  const delay = 200 + Math.random() * 400;
-  host.style.setProperty('--ss-top', `${top}vh`);
-  host.style.setProperty('--ss-delay', `${delay}ms`);
+  void host.offsetWidth; // force reflow to restart animation
+
+  host.style.setProperty('--ss-x1', `${dir.x1}vw`);
+  host.style.setProperty('--ss-y1', `${dir.y1 + yJitter}vh`);
+  host.style.setProperty('--ss-x2', `${dir.x2}vw`);
+  host.style.setProperty('--ss-y2', `${dir.y2 + yJitter}vh`);
+  host.style.setProperty('--ss-angle', `${dir.angle}deg`);
+  host.style.setProperty('--ss-trail', trailColor);
+  host.style.setProperty('--ss-glow', glowColor);
+
   host.classList.add('is-firing');
-  window.setTimeout(() => host.classList.remove('is-firing'), 2400 + delay);
+  window.setTimeout(() => host.classList.remove('is-firing'), 2600);
 }
 
 function setupUfo(reduced: boolean): void {
@@ -110,4 +152,35 @@ function setupParallax(reduced: boolean): void {
     { passive: true }
   );
   update();
+}
+
+/**
+ * Hide column icons that fall inside the SupernovaHero zone so they don't
+ * stack up in the first viewport. Runs after each page paint.
+ */
+function excludeHeroZone(): void {
+  const hero = document.getElementById('hero-scroll-container');
+  if (!hero) return; // not on a page with the hero
+
+  // Wait one frame so layout is complete.
+  requestAnimationFrame(() => {
+    const heroBottom = hero.getBoundingClientRect().bottom + window.scrollY;
+
+    document.querySelectorAll<HTMLElement>('.decor-col .decor').forEach((el) => {
+      const col = el.closest<HTMLElement>('.decor-col');
+      if (!col) return;
+      const colTop = col.getBoundingClientRect().top + window.scrollY;
+      const topPct = parseFloat(el.style.getPropertyValue('--decor-top') || '0');
+      const colHeight = col.offsetHeight;
+      const itemAbsTop = colTop + (topPct / 100) * colHeight;
+
+      if (itemAbsTop < heroBottom + 40) {
+        el.style.setProperty('visibility', 'hidden');
+        el.style.setProperty('pointer-events', 'none');
+      } else {
+        el.style.removeProperty('visibility');
+        el.style.removeProperty('pointer-events');
+      }
+    });
+  });
 }

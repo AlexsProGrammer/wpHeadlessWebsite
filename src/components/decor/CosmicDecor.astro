@@ -13,8 +13,8 @@ import CosmicIcons from './CosmicIcons.astro';
 import { factoids, type IconName } from './decor-icons';
 
 interface Props {
-  /** Restrict the pool — legal pages get a calmer subset. */
-  theme?: 'default' | 'legal';
+  /** Restrict the pool — legal pages get a calmer subset, minimal = no columns. */
+  theme?: 'default' | 'legal' | 'minimal';
 }
 
 const { theme = 'default' } = Astro.props;
@@ -75,8 +75,9 @@ const pick = makePicker();
 // the FULL page height (% of column, which spans the whole wrapper — not vh).
 interface DecorItem {
   name: IconName;
-  top: number;      // % of column height (i.e. % of page height)
-  offset: number;   // horizontal px offset from edge
+  top: number;
+  offset: number;
+  tx: number;       // horizontal x-jitter in px
   scale: number;
   rotate: number;
   motion: string;
@@ -87,15 +88,15 @@ interface DecorItem {
 
 function buildColumn(count: number): DecorItem[] {
   const items: DecorItem[] = [];
-  const band = 100 / count; // percent
+  const band = 100 / count;
   for (let i = 0; i < count; i++) {
-    // Jitter within the band so icons aren't perfectly evenly spaced.
     const baseTop = i * band + band * (0.15 + rng() * 0.7);
     items.push({
       name: pick(),
       top: baseTop,
       offset: 8 + Math.floor(rng() * 34),
-      scale: 0.55 + rng() * 0.5,
+      tx: Math.round((rng() - 0.5) * 54), // -27..+27 px random horizontal scatter
+      scale: 0.5 + rng() * 0.55,
       rotate: Math.floor(rng() * 360) - 180,
       motion: MOTION[Math.floor(rng() * MOTION.length)],
       accent: ACCENTS[Math.floor(rng() * ACCENTS.length)],
@@ -106,8 +107,8 @@ function buildColumn(count: number): DecorItem[] {
   return items;
 }
 
-// Density: base count depends on theme (legal = calmer).
-const perColumn = theme === 'legal' ? 4 : 7;
+// 4 per column (default), 3 for legal, 0 for minimal (project/legal detail pages).
+const perColumn = theme === 'minimal' ? 0 : theme === 'legal' ? 3 : 4;
 const leftColumn = buildColumn(perColumn);
 const rightColumn = buildColumn(perColumn);
 ---
@@ -118,7 +119,7 @@ const rightColumn = buildColumn(perColumn);
     {leftColumn.map((it) => (
       <span
         class={`decor ${it.motion}`}
-        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
+        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-tx:${it.tx}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
         data-tip={factoids[it.name]}
       >
         <CosmicIcons name={it.name} variant={it.variant} />
@@ -131,7 +132,7 @@ const rightColumn = buildColumn(perColumn);
     {rightColumn.map((it) => (
       <span
         class={`decor ${it.motion}`}
-        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
+        style={`--decor-top:${it.top}%; --decor-offset:${it.offset}px; --decor-tx:${it.tx}px; --decor-scale:${it.scale}; --decor-rot:${it.rotate}deg; --decor-accent:${it.accent}; --decor-parallax:${it.parallax};`}
         data-tip={factoids[it.name]}
       >
         <CosmicIcons name={it.name} variant={it.variant} />

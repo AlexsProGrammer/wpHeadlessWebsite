@@ -35,6 +35,7 @@
   color: rgba(255, 255, 255, 0.55);
   opacity: 0.7;
   transform:
+    translateX(var(--decor-tx, 0px))
     translateY(var(--decor-scroll, 0))
     rotate(var(--decor-rot, 0deg))
     scale(var(--decor-scale, 1));
@@ -121,9 +122,10 @@
 /* --- one-shot: shooting star --- */
 .decor-event--shooting {
   position: fixed;
-  top: var(--ss-top, 15vh);
-  left: -15vw;
-  width: 36vw;
+  /* Positioned via JS-set CSS vars: --ss-x1/y1 = start, --ss-x2/y2 = end */
+  top: var(--ss-y1, 15vh);
+  left: var(--ss-x1, -15vw);
+  width: 34vw;
   height: 4px;
   pointer-events: none;
   z-index: 3;
@@ -135,20 +137,30 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in srgb, var(--neon-pink) 80%, transparent) 60%,
+    color-mix(in srgb, var(--ss-trail, var(--neon-pink)) 80%, transparent) 55%,
     #fff 100%
   );
   border-radius: 999px;
-  filter: drop-shadow(0 0 8px var(--neon-pink)) drop-shadow(0 0 18px var(--neon-blue));
+  filter:
+    drop-shadow(0 0 8px var(--ss-glow, var(--neon-pink)))
+    drop-shadow(0 0 20px var(--ss-trail, var(--neon-blue)));
   opacity: 0;
 }
 @keyframes decor-shooting {
-  0%   { transform: translate(0, 0) rotate(14deg); opacity: 0; }
-  8%   { opacity: 1; }
-  100% { transform: translate(140vw, 36vh) rotate(14deg); opacity: 0; }
+  0%   { transform: translate(0, 0) rotate(var(--ss-angle, 14deg)); opacity: 0; }
+  6%   { opacity: 1; }
+  100% {
+    transform:
+      translate(
+        calc(var(--ss-x2, 120vw) - var(--ss-x1, -15vw)),
+        calc(var(--ss-y2, 60vh)  - var(--ss-y1, 15vh))
+      )
+      rotate(var(--ss-angle, 14deg));
+    opacity: 0;
+  }
 }
 .decor-event--shooting.is-firing::before {
-  animation: decor-shooting 1.8s cubic-bezier(0.2, 0.6, 0.2, 1) var(--ss-delay, 0ms) forwards;
+  animation: decor-shooting 1.9s cubic-bezier(0.15, 0.6, 0.2, 1) forwards;
 }
 
 /* --- one-shot: UFO fly-by (near footer) --- */

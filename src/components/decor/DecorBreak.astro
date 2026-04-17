@@ -13,9 +13,11 @@ import { factoids, type IconName } from './decor-icons';
 interface Props {
   id: string;
   theme?: 'default' | 'legal';
+  /** Hard cap on number of icons (1 or 2). Default: up to 2. */
+  max?: 1 | 2;
 }
 
-const { id, theme = 'default' } = Astro.props;
+const { id, theme = 'default', max = 2 } = Astro.props;
 
 const FULL_POOL: IconName[] = [
   'astronaut', 'iss', 'satellite', 'asteroid', 'planet', 'saturn',
@@ -48,8 +50,8 @@ function mulberry32(s: number) {
 
 const rng = mulberry32(hashStr((Astro.url.pathname || '/') + '::' + id));
 
-// 1 or 2 icons — 75% chance of 2.
-const count = rng() < 0.25 ? 1 : 2;
+// 1 or 2 icons — 75% chance of 2, capped by the `max` prop.
+const count = Math.min(max, rng() < 0.25 ? 1 : 2);
 
 const used = new Set<IconName>();
 function pick(): IconName {

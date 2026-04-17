@@ -6,7 +6,7 @@ import '../components/decor/decor.css';
 
 interface Props {
   title: string;
-  decorTheme?: 'default' | 'legal';
+  decorTheme?: 'default' | 'legal' | 'minimal';
 }
 
 const { title, decorTheme } = Astro.props;
@@ -16,7 +16,9 @@ const fullTitle = `${siteName} - ${title}`;
 // Auto-select decor theme from pathname when not explicitly overridden.
 const pathname = Astro.url.pathname || '/';
 const isLegalPath = /\/(impressum|datenschutz)\/?$/.test(pathname);
-const resolvedDecorTheme: 'default' | 'legal' = decorTheme ?? (isLegalPath ? 'legal' : 'default');
+const isProjectPath = /^\/projects(\/|$)/.test(pathname);
+const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
+  decorTheme ?? (isLegalPath || isProjectPath ? 'minimal' : 'default');
 ---
 
 <html lang="de">
