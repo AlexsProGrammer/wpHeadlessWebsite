@@ -54,14 +54,30 @@ export async function getProjectPageImage(projectUrl) {
 }
 
 export async function getAllProjects() {
-  const response = await fetch(`${API_URL}/projects?_embed`);
+  const perPage = 100; // WP REST API maximum
+  const firstUrl = `${API_URL}/projects?_embed&per_page=${perPage}&page=1`;
+  const firstResponse = await fetch(firstUrl);
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch projects: ${response.status}`);
+  if (!firstResponse.ok) {
+    throw new Error(`Failed to fetch projects: ${firstResponse.status}`);
   }
 
-  const data = await response.json();
-  return data;
+  const firstPage = await firstResponse.json();
+  const totalPages = parseInt(firstResponse.headers.get('X-WP-TotalPages') || '1', 10);
+
+  if (totalPages <= 1) {
+    return firstPage;
+  }
+
+  // Fetch remaining pages in parallel
+  const remaining = await Promise.all(
+    Array.from({ length: totalPages - 1 }, (_, i) =>
+      fetch(`${API_URL}/projects?_embed&per_page=${perPage}&page=${i + 2}`)
+        .then((r) => (r.ok ? r.json() : []))
+    )
+  );
+
+  return firstPage.concat(...remaining);
 }
 
 export async function getProjectBySlug(slug) {

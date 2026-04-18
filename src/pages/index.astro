@@ -75,7 +75,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-gramme
   <DecorBreak id="projects-to-terminal" max={1} />
 
   <!-- Terminal Easter Egg -->
-  <TerminalSection />
+  <TerminalSection projects={highlightedProjects.map((p: any) => ({ title: p.title.rendered, slug: p.slug }))} />
 </MainLayout>
 
 <style>

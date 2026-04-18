@@ -1,9 +1,33 @@
 ---
+import { translations } from '../i18n/translations';
+
+interface Props {
+  projects?: Array<{ title: string; slug: string }>;
+}
+
+const { projects = [] } = Astro.props;
+
 const email = import.meta.env.PUBLIC_CONTACT_EMAIL || 'kontakt@pro-grammer.dev';
 const github = import.meta.env.PUBLIC_GITHUB_URL || '';
 const linkedin = import.meta.env.PUBLIC_LINKEDIN_URL || '';
 const twitter = import.meta.env.PUBLIC_TWITTER_URL || '';
 const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
+
+// Extract only terminal.* keys for both languages
+function terminalKeys(lang: string): Record<string, string> {
+  const all = translations[lang] ?? {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(all)) {
+    if (k.startsWith('terminal.')) out[k] = v;
+  }
+  return out;
+}
+
+const termData = {
+  email, github, linkedin, twitter, discord,
+  projects,
+  i18n: { de: terminalKeys('de'), en: terminalKeys('en') },
+};
 ---
 
 <section class="terminal-section reveal" id="terminal">
@@ -34,11 +58,11 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     </div>
   </div>
 
-  <!-- Pass env data to client-side script -->
+  <!-- Pass env data + translations to client-side script -->
   <script
     id="terminal-data"
     type="application/json"
-    set:html={JSON.stringify({ email, github, linkedin, twitter, discord })}
+    set:html={JSON.stringify(termData)}
   />
 </section>
 
@@ -142,6 +166,7 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     padding: 16px;
     max-height: 380px;
     overflow-y: auto;
+    overscroll-behavior: contain;
   }
 
   .terminal-history {
@@ -237,6 +262,20 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
   const history = document.getElementById("terminal-history");
   const body = document.getElementById("terminal-body");
 
+  // ── i18n helper ──
+
+  function getLang(): string {
+    const stored = localStorage.getItem('lang');
+    if (stored === 'de' || stored === 'en') return stored;
+    const nav = navigator.language || (navigator as any).userLanguage || 'de';
+    return nav.startsWith('de') ? 'de' : 'en';
+  }
+
+  function t(key: string): string {
+    const lang = getLang();
+    return data.i18n?.[lang]?.[key] ?? data.i18n?.['en']?.[key] ?? key;
+  }
+
   function escapeHtml(text: string): string {
     const d = document.createElement("div");
     d.appendChild(document.createTextNode(text));
@@ -278,34 +317,46 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
     switch (trimmed) {
       case "help":
         appendOutput(
-          `<strong>Available commands:</strong>\n\n` +
-          `  <em>help</em>      - Show this help message\n` +
-          `  <em>about</em>     - About Pro-Grammer\n` +
-          `  <em>projects</em>  - Browse featured projects\n` +
-          `  <em>contact</em>   - Social links &amp; email\n` +
-          `  <em>skills</em>    - Tech stack overview\n` +
-          `  <em>clear</em>     - Clear terminal`
+          `<strong>${t('terminal.help.heading')}</strong>\n\n` +
+          `  <em>help</em>      - ${t('terminal.help.help')}\n` +
+          `  <em>about</em>     - ${t('terminal.help.about')}\n` +
+          `  <em>projects</em>  - ${t('terminal.help.projects')}\n` +
+          `  <em>contact</em>   - ${t('terminal.help.contact')}\n` +
+          `  <em>skills</em>    - ${t('terminal.help.skills')}\n` +
+          `  <em>clear</em>     - ${t('terminal.help.clear')}`
         );
         break;
 
       case "about":
         appendOutput(
-          `<strong>Pro-Grammer</strong>  -  Software-Entwicklung &amp; Consulting\n\n` +
-          `Maßgeschneiderte Lösungen für Agenturen und Startups.\n` +
-          `<em>Fullstack · Database & APIs · Custom Solutions · Consulting</em>`
+          `<strong>${t('terminal.about.title')}</strong>  —  ${t('terminal.about.tagline')}\n\n` +
+          `${t('terminal.about.p1')}\n` +
+          `${t('terminal.about.p2')}\n\n` +
+          `<em>${t('terminal.about.stack')}</em>`
         );
         break;
 
-      case "projects":
-        appendOutput(
-          `<strong>Projects</strong>\n\n` +
-          `Browse all projects → <a href="/projects" target="_blank" rel="noopener noreferrer">/projects</a>`
-        );
+      case "projects": {
+        const projects: Array<{ title: string; slug: string }> = data.projects ?? [];
+        if (projects.length === 0) {
+          appendOutput(`<strong>${t('terminal.projects.heading')}</strong>\n\n${t('terminal.projects.empty')}`);
+        } else {
+          const lines = [`<strong>${t('terminal.projects.heading')}</strong>\n`];
+          projects.forEach((p, i) => {
+            const num = String(i + 1).padStart(2, '0');
+            lines.push(
+              `  <em>${num}</em>  <a href="/projects/${escapeHtml(p.slug)}">${escapeHtml(p.title)}</a>`
+            );
+          });
+          lines.push(`\n<span class="label">→</span> <a href="/projects">${t('terminal.projects.viewall')}</a>`);
+          appendOutput(lines.join('\n'));
+        }
         break;
+      }
 
       case "contact": {
         const lines: string[] = [
-          `<strong>Get in touch</strong>\n`
+          `<strong>${t('terminal.contact.heading')}</strong>\n`
         ];
 
         if (data.email) {
@@ -324,13 +375,13 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
 
       case "skills":
         appendOutput(
-          `<strong>Tech Stack</strong>\n\n` +
-          `<em>Languages</em>    TypeScript · C++ · Python\n` +
-          `<em>Frontend</em>     React · Next.js · Astro\n` +
-          `<em>Backend</em>      Node.js · Express · REST\n` +
-          `<em>Data</em>         PostgreSQL · MySQL · Redis\n` +
-          `<em>DevOps</em>       Docker · CI/CD\n` +
-          `<em>CMS</em>          WordPress · Headless`
+          `<strong>${t('terminal.skills.heading')}</strong>\n\n` +
+          `<em>${t('terminal.skills.languages')}</em>    TypeScript · C++ · Python\n` +
+          `<em>${t('terminal.skills.frontend')}</em>     React · Next.js · Astro\n` +
+          `<em>${t('terminal.skills.backend')}</em>      Node.js · Express · REST\n` +
+          `<em>${t('terminal.skills.data')}</em>         PostgreSQL · MySQL · Redis\n` +
+          `<em>${t('terminal.skills.devops')}</em>       Docker · CI/CD\n` +
+          `<em>${t('terminal.skills.cms')}</em>          WordPress · Headless`
         );
         break;
 
@@ -340,8 +391,8 @@ const discord = import.meta.env.PUBLIC_DISCORD_URL || '';
 
       default:
         appendOutput(
-          `command not found: <strong>${escapeHtml(trimmed)}</strong>\n` +
-          `Type <em>help</em> for available commands.`
+          `${t('terminal.notfound')} <strong>${escapeHtml(trimmed)}</strong>\n` +
+          t('terminal.notfound.hint')
         );
         break;
     }
