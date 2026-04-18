@@ -1,7 +1,12 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import DecorBreak from '../../components/decor/DecorBreak.astro';
-import { getProjectBySlug, getProjectImage } from '../../lib/api';
+import { getProjectBySlug, getProjectImage, getAllProjects } from '../../lib/api';
+
+export async function getStaticPaths() {
+  const projects = await getAllProjects();
+  return projects.map((p) => ({ params: { slug: p.slug } }));
+}
 
 const { slug } = Astro.params;
 const project = slug ? await getProjectBySlug(slug) : null;
