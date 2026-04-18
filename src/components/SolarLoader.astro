@@ -1,34 +1,50 @@
 ---
 // SolarLoader — fixed fullscreen overlay shown on fresh visit or hard reload.
 // Animates a solar system aligning to syzygy, then collapses into a black hole
-// and fades away to reveal the page beneath.
+// (with accretion disk + event horizon), and fades away to reveal the page.
 ---
 
 <!-- Intro overlay — fixed, covers the full viewport at z-index 9999 -->
-<div id="solar-loader-overlay">
+<div id="solar-loader-overlay" aria-hidden="true">
   <div class="solar-system">
+    <!-- Black-hole layers (hidden until collapse) -->
+    <div class="bh-lensing"></div>
+    <div class="bh-ring"></div>
+
     <!-- Sun -->
     <div class="sun"></div>
 
-    <!-- Orbits with planets -->
-    <div class="orbit orbit-1"><div class="planet"></div></div>
-    <div class="orbit orbit-2"><div class="planet"></div></div>
-    <div class="orbit orbit-3"><div class="planet"></div></div>
-    <div class="orbit orbit-4"><div class="planet"></div></div>
-    <div class="orbit orbit-5"><div class="planet"></div></div>
+    <!-- Orbits with planets (5 inner planets of the solar system) -->
+    <div class="orbit orbit-1"><div class="planet planet-mercury"></div></div>
+    <div class="orbit orbit-2"><div class="planet planet-venus"></div></div>
+    <div class="orbit orbit-3"><div class="planet planet-earth"></div></div>
+    <div class="orbit orbit-4"><div class="planet planet-mars"></div></div>
+    <div class="orbit orbit-5"><div class="planet planet-jupiter"></div></div>
+  </div>
+
+  <!-- Premium watermark -->
+  <div class="loader-watermark" aria-hidden="true">
+    <span class="mark-line"></span>
+    <span class="mark-text">Pro-Grammer</span>
+    <span class="mark-line"></span>
   </div>
 </div>
 
 <style>
   /* ── Keyframes ─────────────────────────────────────────────────── */
   @keyframes sun-pulse {
-    0%, 100% { box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.8); }
-    50%       { box-shadow: 0 0 32px 8px rgba(255, 255, 255, 0.5); }
+    0%, 100% { box-shadow: 0 0 22px 5px rgba(255, 236, 180, 0.9), 0 0 60px 10px rgba(255, 160, 60, 0.35); }
+    50%      { box-shadow: 0 0 34px 9px rgba(255, 236, 180, 0.6), 0 0 80px 16px rgba(255, 160, 60, 0.22); }
   }
 
   @keyframes system-fadein {
-    from { opacity: 0; transform: scale(0.92); }
+    from { opacity: 0; transform: scale(0.94); }
     to   { opacity: 1; transform: scale(1); }
+  }
+
+  @keyframes watermark-in {
+    0%   { opacity: 0; transform: translateY(8px); letter-spacing: 0.35em; }
+    100% { opacity: 0.85; transform: translateY(0); letter-spacing: 0.55em; }
   }
 
   /* ── Intro overlay ─────────────────────────────────────────────── */
@@ -36,9 +52,8 @@
     position: fixed;
     inset: 0;
     z-index: 9999;
-    /* Deep space: subtle radial graduation + scattered star points */
     background:
-      radial-gradient(ellipse at 50% 50%, #0c0a1a 0%, #0c0a1a 70%),
+      radial-gradient(ellipse at 50% 50%, #0c0a1a 0%, #050410 70%, #020108 100%),
       radial-gradient(1px 1px at 15% 22%, rgba(255,255,255,0.55) 0%, transparent 100%),
       radial-gradient(1px 1px at 73% 11%, rgba(255,255,255,0.40) 0%, transparent 100%),
       radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.35) 0%, transparent 100%),
@@ -52,8 +67,10 @@
       radial-gradient(2px 2px at 80% 75%, rgba(255,255,255,0.18) 0%, transparent 100%),
       radial-gradient(2px 2px at 47% 58%, rgba(255,255,255,0.15) 0%, transparent 100%);
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 2.5rem;
     overflow: hidden;
   }
 
@@ -65,20 +82,59 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    visibility: hidden; /* GSAP reveals after orbit positions are set */
+    visibility: hidden;
     animation: system-fadein 0.6s ease both;
   }
 
-  /* Sun — tiny bright core with a slow breathing glow */
+  /* Sun — warm yellow-orange stellar core */
   .sun {
     position: relative;
-    z-index: 2;
-    width: 4px;
-    height: 4px;
-    background: #ffffff;
+    z-index: 3;
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle at 40% 40%, #fff4c0 0%, #ffd070 55%, #ff9030 100%);
     border-radius: 50%;
-    box-shadow: 0 0 20px 4px rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 22px 5px rgba(255, 236, 180, 0.9), 0 0 60px 10px rgba(255, 160, 60, 0.35);
     animation: sun-pulse 2.4s ease-in-out infinite;
+  }
+
+  /* Black-hole layers — initially invisible, revealed during collapse */
+  .bh-ring,
+  .bh-lensing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Outer gravitational-lensing glow */
+  .bh-lensing {
+    width: 160px;
+    height: 160px;
+    background: radial-gradient(
+      circle,
+      transparent 28%,
+      rgba(255, 200, 120, 0.28) 42%,
+      rgba(180, 120, 255, 0.16) 55%,
+      transparent 75%
+    );
+    filter: blur(8px);
+  }
+
+  /* Photon ring — event horizon */
+  .bh-ring {
+    width: 44px;
+    height: 44px;
+    border: 1.5px solid rgba(255, 240, 200, 0.95);
+    background: #000;
+    box-shadow:
+      0 0 18px 4px rgba(255, 220, 160, 0.85),
+      0 0 42px 10px rgba(255, 180, 100, 0.4),
+      inset 0 0 10px rgba(255, 230, 180, 0.6);
   }
 
   /* Orbit rings */
@@ -101,41 +157,109 @@
     top: 0;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 4px;
-    height: 4px;
+    width: 5px;
+    height: 5px;
     border-radius: 50%;
   }
 
-  /* Per-orbit colours for subtle elegant depth */
-  .orbit-1 .planet {
-    width: 5px;
-    height: 5px;
-    background: #00f0ff;
-    box-shadow: 0 0 8px 2px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.35);
+  /* ── Realistic solar-system planet colors ────────────────────── */
+
+  /* Mercury — small grey-tan, cratered */
+  .planet-mercury {
+    width: 4px;
+    height: 4px;
+    background: radial-gradient(circle at 35% 35%, #c8b9a3 0%, #8a7c6a 70%, #5a4f42 100%);
+    box-shadow: 0 0 4px rgba(200, 185, 163, 0.5);
   }
 
-  .orbit-2 .planet {
-    background: #bf80ff;
-    box-shadow: 0 0 8px 2px #bf80ff, 0 0 20px rgba(191, 128, 255, 0.35);
-  }
-
-  .orbit-3 .planet {
+  /* Venus — pale creamy yellow, dense atmosphere */
+  .planet-venus {
     width: 6px;
     height: 6px;
-    background: #ffffff;
-    box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.9), 0 0 24px rgba(255, 255, 255, 0.25);
+    background: radial-gradient(circle at 35% 35%, #fff1c8 0%, #e8c67a 60%, #b88c3a 100%);
+    box-shadow: 0 0 8px 1px rgba(255, 210, 130, 0.55);
   }
 
-  .orbit-4 .planet {
-    background: #00f0ff;
-    box-shadow: 0 0 8px 2px #00f0ff, 0 0 20px rgba(0, 240, 255, 0.35);
+  /* Earth — blue-green with atmospheric glow */
+  .planet-earth {
+    width: 7px;
+    height: 7px;
+    background: radial-gradient(circle at 30% 30%, #a8d8ff 0%, #4a8ed0 40%, #1d4d8c 100%);
+    box-shadow:
+      0 0 8px 2px rgba(100, 180, 255, 0.7),
+      0 0 18px rgba(100, 200, 255, 0.3);
   }
 
-  .orbit-5 .planet {
+  /* Mars — rusty orange-red */
+  .planet-mars {
     width: 5px;
     height: 5px;
-    background: #bf80ff;
-    box-shadow: 0 0 8px 2px #bf80ff, 0 0 20px rgba(191, 128, 255, 0.35);
+    background: radial-gradient(circle at 35% 35%, #ff9866 0%, #d45a2e 55%, #8a2e14 100%);
+    box-shadow: 0 0 8px 1px rgba(220, 90, 45, 0.6);
+  }
+
+  /* Jupiter — banded tan/ochre, largest inner dot */
+  .planet-jupiter {
+    width: 9px;
+    height: 9px;
+    background:
+      linear-gradient(
+        to bottom,
+        #d8b78a 0%,
+        #c89668 20%,
+        #b07a4a 38%,
+        #d8a870 52%,
+        #a86838 68%,
+        #c89868 85%,
+        #906040 100%
+      );
+    box-shadow: 0 0 10px 2px rgba(200, 150, 100, 0.55);
+  }
+
+  /* ── Watermark ────────────────────────────────────────────────── */
+  .loader-watermark {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    opacity: 0;
+    animation: watermark-in 1.4s 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .mark-line {
+    display: block;
+    width: 48px;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255, 255, 255, 0.35),
+      transparent
+    );
+  }
+
+  .mark-text {
+    font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.55em;
+    text-indent: 0.55em;
+    color: rgba(255, 255, 255, 0.78);
+    text-transform: uppercase;
+    text-shadow: 0 0 18px rgba(180, 200, 255, 0.25);
+    user-select: none;
+  }
+
+  /* ── Scroll lock (applied globally via classes on <html>/<body>) ─ */
+  :global(html.solar-loading),
+  :global(body.solar-loading) {
+    overflow: hidden !important;
+    height: 100%;
+    touch-action: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sun { animation: none; }
+    .loader-watermark { animation: none; opacity: 0.85; }
   }
 </style>
 
@@ -153,19 +277,78 @@
   const isFreshVisit = !hasSeenIntro;
   const shouldShow   = isFreshVisit || isHardReload;
 
+  const lockScroll = (): void => {
+    document.documentElement.classList.add("solar-loading");
+    document.body.classList.add("solar-loading");
+  };
+  const unlockScroll = (): void => {
+    document.documentElement.classList.remove("solar-loading");
+    document.body.classList.remove("solar-loading");
+  };
+
+  let tl: gsap.core.Timeline | null = null;
+  let hasFinished = false;
+  let fallbackTimer: number | null = null;
+
+  const onPageHide = (): void => finishLoader("pagehide");
+  const onBeforeUnload = (): void => unlockScroll();
+  const onPageShow = (): void => unlockScroll();
+
+  const finishLoader = (_reason: string = "done"): void => {
+    if (hasFinished) return;
+    hasFinished = true;
+
+    if (fallbackTimer !== null) {
+      window.clearTimeout(fallbackTimer);
+      fallbackTimer = null;
+    }
+
+    if (tl) {
+      tl.kill();
+      tl = null;
+    }
+
+    const overlay = document.getElementById("solar-loader-overlay");
+    if (overlay) {
+      overlay.style.display = "none";
+      overlay.style.opacity = "0";
+      overlay.style.pointerEvents = "none";
+    }
+
+    unlockScroll();
+
+    window.removeEventListener("pagehide", onPageHide);
+    window.removeEventListener("beforeunload", onBeforeUnload);
+    window.removeEventListener("pageshow", onPageShow);
+  };
+
+  window.addEventListener("pagehide", onPageHide);
+  window.addEventListener("beforeunload", onBeforeUnload);
+  window.addEventListener("pageshow", onPageShow);
+
+  // Last-resort unlock in case timeline callbacks never fire.
+  fallbackTimer = window.setTimeout(() => finishLoader("timeout"), 7000);
+
   if (shouldShow) {
     if (isFreshVisit) sessionStorage.setItem("solarIntroPlayed", "true");
 
-    // ── Position orbits before revealing the system (no first-frame jump) ───
+    // Lock page scroll while the loader is visible.
+    lockScroll();
+
+    // ── Position orbits before revealing the system ─────────────────
     gsap.set(".orbit-1", { rotation: 47  });
     gsap.set(".orbit-2", { rotation: 213 });
     gsap.set(".orbit-3", { rotation: 128 });
     gsap.set(".orbit-4", { rotation: 305 });
     gsap.set(".orbit-5", { rotation: 82  });
     gsap.set(".solar-system", { visibility: "visible" });
+    gsap.set([".bh-ring", ".bh-lensing"], { opacity: 0, scale: 0 });
 
     // ── Syzygy timeline ─────────────────────────────────────────────
-    const tl = gsap.timeline();
+    tl = gsap.timeline({
+      onComplete: () => finishLoader("timeline-complete"),
+      onInterrupt: () => finishLoader("timeline-interrupt"),
+    });
 
     // All orbits spin to 720° (two full rotations), landing at 0°.
     tl.to(".orbit", {
@@ -175,57 +358,91 @@
       stagger: 0.08,
     });
 
-    // ── Phase 4: Black-hole collapse & reveal ────────────────────────
+    // ── Phase 4: Black-hole formation ─────────────────────────────
 
-    // Step 1 — Sun grows slightly and turns dark: it becomes a black hole.
+    // Step 1 — Sun flashes bright white-hot as it begins to collapse.
     tl.to(".sun", {
-      scale: 8,
-      backgroundColor: "#000000",
-      boxShadow: "0 0 30px 10px rgba(255,255,255,0.5), 0 0 60px 20px rgba(0,240,255,0.15)",
-      duration: 0.30,
+      scale: 3,
+      background: "radial-gradient(circle, #ffffff 0%, #ffd070 40%, #ff6030 100%)",
+      boxShadow: "0 0 40px 15px rgba(255,255,255,0.9), 0 0 80px 25px rgba(255,160,60,0.5)",
+      duration: 0.25,
       ease: "power2.in",
     }, "+=0.10");
 
-    // Step 2 — Planets get sucked into the black hole.
+    // Step 2 — Gravitational lensing glow appears.
+    tl.to(".bh-lensing", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.4,
+      ease: "power2.out",
+    }, "<");
+
+    // Step 3 — Sun collapses into the event horizon.
+    tl.to(".sun", {
+      scale: 0,
+      opacity: 0,
+      duration: 0.25,
+      ease: "power3.in",
+    }, "+=0.05");
+
+    // Step 4 — Event horizon ring materialises with an overshoot.
+    tl.to(".bh-ring", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.35,
+      ease: "back.out(1.8)",
+    }, "<0.05");
+
+    // Step 5 — Planets get pulled toward the black hole and vanish (staggered).
     tl.to(".planet", {
       scale: 0,
       opacity: 0,
-      duration: 0.4,
+      duration: 0.55,
       ease: "power3.in",
-      stagger: 0.04,
-    }, "-=0.10");
+      stagger: 0.05,
+    }, "<-0.2");
 
-    // Step 3 — Orbit lines collapse.
+    // Step 6 — Orbit lines collapse inward.
     tl.to(".orbit", {
       width: 0,
       height: 0,
       opacity: 0,
-      duration: 0.12,
+      duration: 0.22,
       ease: "power3.in",
       stagger: 0.03,
-    }, "<0.07");
+    }, "<0.1");
 
-    // Step 4 — Black hole shrinks to a point.
-    tl.to(".sun", {
-      scale: 0,
-      boxShadow: "0 0 0px 0px rgba(255,255,255,0)",
-      duration: 0.25,
-      ease: "power2.in",
-    }, "-=0.10");
+    // Step 7 — The whole black-hole assembly briefly swells, then collapses
+    //           to a singular point.
+    tl.to([".bh-ring", ".bh-lensing"], {
+      scale: 1.35,
+      duration: 0.3,
+      ease: "power2.out",
+    }, "+=0.05")
+      .to([".bh-ring", ".bh-lensing"], {
+        scale: 0,
+        opacity: 0,
+        duration: 0.4,
+        ease: "power3.in",
+      }, ">");
 
-    // Step 5 — Fade the empty overlay out to reveal the page.
-    tl.to("#solar-loader-overlay", {
+    // Step 8 — Watermark gently fades out with the overlay.
+    tl.to(".loader-watermark", {
       opacity: 0,
+      y: -4,
       duration: 0.35,
       ease: "power1.out",
-      onComplete: () => {
-        const overlay = document.getElementById("solar-loader-overlay");
-        if (overlay) overlay.style.display = "none";
-      },
+    }, "<0.05");
+
+    // Step 9 — Fade the empty overlay out.
+    tl.to("#solar-loader-overlay", {
+      opacity: 0,
+      duration: 0.4,
+      ease: "power1.out",
     }, "-=0.10");
 
   } else {
     // Skip immediately — hide overlay without any animation.
-    gsap.set("#solar-loader-overlay", { display: "none" });
+    finishLoader("skip");
   }
 </script>
