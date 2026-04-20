@@ -34,7 +34,7 @@ const projectsJSON = JSON.stringify(
   <script type="application/json" id="sb-projects-data" set:html={projectsJSON}></script>
 
   <!-- ── Category labels ────────────────────────────────── -->
-  <div class="category-row" id="sb-category-row">
+  <div class="category-row reveal" id="sb-category-row">
     <span class="cat-label cat-label--active" id="sb-cat-0" data-de="Über Mich" data-en="About Me">Über Mich</span>
     <span class="cat-divider">↻</span>
     <span class="cat-label" id="sb-cat-1" data-de="Die Geschichte" data-en="The Origin">Die Geschichte</span>
@@ -45,7 +45,7 @@ const projectsJSON = JSON.stringify(
   </div>
 
   <!-- ── Bento Grid ──────────────────────────────────────── -->
-  <div class="bento-container layout-0" id="sb-bento-container">
+  <div class="bento-container layout-0 reveal" id="sb-bento-container" style="transition-delay: 180ms">
 
     <div class="bento-card orbit-card" id="sb-orbit-0"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
     <div class="bento-card orbit-card" id="sb-orbit-1"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
