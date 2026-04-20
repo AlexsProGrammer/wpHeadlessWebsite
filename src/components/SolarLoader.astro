@@ -397,7 +397,7 @@
     tl.to(".planet", {
       scale: 0,
       opacity: 0,
-      duration: 0.55,
+      duration: 0.50,
       ease: "power3.in",
       stagger: 0.05,
     }, "<-0.2");
@@ -407,7 +407,7 @@
       width: 0,
       height: 0,
       opacity: 0,
-      duration: 0.22,
+      duration: 0.18,
       ease: "power3.in",
       stagger: 0.03,
     }, "<0.1");
@@ -416,13 +416,13 @@
     //           to a singular point.
     tl.to([".bh-ring", ".bh-lensing"], {
       scale: 1.35,
-      duration: 0.3,
+      duration: 0.2,
       ease: "power2.out",
     }, "+=0.05")
       .to([".bh-ring", ".bh-lensing"], {
         scale: 0,
         opacity: 0,
-        duration: 0.4,
+        duration: 0.10,
         ease: "power3.in",
       }, ">");
 
