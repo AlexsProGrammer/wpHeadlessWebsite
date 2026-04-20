@@ -42,18 +42,30 @@ const termData = {
       <span class="terminal-title">user@portfolio - bash</span>
     </div>
 
-    <div class="terminal-body" id="terminal-body">
-      <div class="terminal-history" id="terminal-history"></div>
+    <!-- .terminal-viewport clips; edges & scrollbar live here so they never scroll -->
+    <div class="terminal-viewport">
+      <div class="terminal-body" id="terminal-body">
+        <div id="terminal-content">
+          <div class="terminal-history" id="terminal-history"></div>
 
-      <div class="terminal-input-line">
-        <span class="prompt">user@portfolio:~$</span>
-        <input
-          type="text"
-          id="terminal-input"
-          autocomplete="off"
-          spellcheck="false"
-          aria-label="Terminal input"
-        />
+          <div class="terminal-input-line">
+            <span class="prompt">user@portfolio:~$</span>
+            <input
+              type="text"
+              id="terminal-input"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Terminal input"
+            />
+          </div>
+        </div>
+      </div>
+      <!-- Overlay: scroll-edge fades -->
+      <div class="term-edge term-edge--top" aria-hidden="true"></div>
+      <div class="term-edge term-edge--bottom" aria-hidden="true"></div>
+      <!-- Overlay: custom scrollbar -->
+      <div class="term-scrollbar" id="term-scrollbar" aria-hidden="true">
+        <div class="term-scrollbar-thumb" id="term-scrollbar-thumb"></div>
       </div>
     </div>
   </div>
@@ -119,6 +131,7 @@ const termData = {
     font-family: 'Menlo', 'Consolas', 'Courier New', monospace;
     font-size: 0.85rem;
     line-height: 1.65;
+    overscroll-behavior: none;
     box-shadow: var(--glass-shadow);
     transition: border-color 0.4s ease, box-shadow 0.4s ease;
   }
@@ -160,13 +173,82 @@ const termData = {
     color: var(--text-muted);
   }
 
-  /* ── Terminal body ── */
+  /* ── Terminal viewport + body ── */
+
+  /* Clips the scroll area; edges & scrollbar are anchored to this, not terminal-body */
+  .terminal-viewport {
+    position: relative;
+    max-height: 380px;
+    overflow: hidden;
+  }
 
   .terminal-body {
-    padding: 16px;
     max-height: 380px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow: hidden;
+  }
+
+  #terminal-content {
+    padding: 16px 20px 16px 16px; /* extra right padding keeps text clear of scrollbar */
+  }
+
+  /* ── Scroll edge fades ── */
+
+  .term-edge {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 36px;
+    z-index: 4;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+
+  .term-edge--top {
+    top: 0;
+    background: linear-gradient(to bottom, rgba(12, 10, 26, 0.88) 0%, transparent 100%);
+  }
+
+  .term-edge--bottom {
+    bottom: 0;
+    background: linear-gradient(to top, rgba(12, 10, 26, 0.88) 0%, transparent 100%);
+  }
+
+  /* ── Custom scrollbar ── */
+
+  .term-scrollbar {
+    position: absolute;
+    right: 4px;
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 3px;
+    z-index: 5;
+    opacity: 0;
+    display: none; /* shown by JS when there is scrollable content */
+    transition: opacity 0.3s ease, width 0.2s ease;
+    pointer-events: none;
+  }
+
+  .terminal-viewport:hover .term-scrollbar {
+    opacity: 1;
+    width: 3px;
+  }
+
+  .term-scrollbar-thumb {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    min-height: 24px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.18);
+    transition: background 0.2s ease;
+  }
+
+  .terminal-viewport:hover .term-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
   }
 
   .terminal-history {
@@ -255,12 +337,25 @@ const termData = {
 </style>
 
 <script>
+  import Lenis from "@studio-freight/lenis";
+
   const dataEl = document.getElementById("terminal-data");
   const data = dataEl ? JSON.parse(dataEl.textContent || "{}") : {};
 
   const input = document.getElementById("terminal-input") as HTMLInputElement | null;
   const history = document.getElementById("terminal-history");
-  const body = document.getElementById("terminal-body");
+  const body = document.getElementById("terminal-body") as HTMLElement | null;
+  const content = document.getElementById("terminal-content") as HTMLElement | null;
+  const edgeTop = document.querySelector(".term-edge--top") as HTMLElement | null;
+  const edgeBottom = document.querySelector(".term-edge--bottom") as HTMLElement | null;
+  const scrollbarEl = document.getElementById("term-scrollbar") as HTMLElement | null;
+  const thumbEl = document.getElementById("term-scrollbar-thumb") as HTMLElement | null;
+
+  let terminalLenis: InstanceType<typeof Lenis> | null = null;
+
+  function resizeMainLenis(): void {
+    (window as any).__lenis?.resize();
+  }
 
   // ── i18n helper ──
 
@@ -283,7 +378,29 @@ const termData = {
   }
 
   function scrollToBottom(): void {
-    if (body) body.scrollTop = body.scrollHeight;
+    terminalLenis?.scrollTo(Number.MAX_SAFE_INTEGER, { immediate: true });
+  }
+
+  function updateScrollUI(progress: number, scroll: number, limit: number): void {
+    const hasScroll = limit > 2;
+
+    // Edge fades
+    if (edgeTop)    edgeTop.style.opacity    = (hasScroll && scroll > 2)           ? '1' : '0';
+    if (edgeBottom) edgeBottom.style.opacity = (hasScroll && (limit - scroll) > 2) ? '1' : '0';
+
+    // Scrollbar visibility
+    if (scrollbarEl) scrollbarEl.style.display = hasScroll ? 'block' : 'none';
+
+    // Scrollbar thumb dimensions & position
+    // scrollbarEl is inside .terminal-viewport (never scrolls), so its clientHeight is reliable.
+    if (scrollbarEl && thumbEl && hasScroll) {
+      const trackH   = scrollbarEl.clientHeight;
+      const viewH    = body?.clientHeight ?? trackH;
+      const thumbH   = Math.max(24, (viewH / (viewH + limit)) * trackH);
+      const thumbTop = progress * Math.max(0, trackH - thumbH);
+      thumbEl.style.height = `${thumbH}px`;
+      thumbEl.style.top    = `${thumbTop}px`;
+    }
   }
 
   function appendCmd(cmd: string): void {
@@ -300,6 +417,9 @@ const termData = {
     out.className = "cmd-output";
     out.innerHTML = html;
     history.appendChild(out);
+    // Recalculate Lenis scroll limits after new content is added, then scroll into view.
+    terminalLenis?.resize();
+    resizeMainLenis();
     scrollToBottom();
   }
 
@@ -386,7 +506,13 @@ const termData = {
         break;
 
       case "clear":
-        if (history) history.innerHTML = "";
+        if (history) {
+          history.innerHTML = "";
+          terminalLenis?.resize();
+          resizeMainLenis();
+          terminalLenis?.scrollTo(0, { immediate: true });
+          updateScrollUI(0, 0, 0);
+        }
         return;
 
       default:
@@ -400,8 +526,45 @@ const termData = {
 
   // ── Event listeners ──
 
-  if (input && history) {
-    body?.addEventListener("click", () => input.focus());
+  if (input && history && body && content) {
+    // Create a Lenis instance scoped to the terminal — same lerp as the main page.
+    terminalLenis = new Lenis({
+      wrapper: body,
+      content,
+      lerp: 0.1,
+      smoothWheel: true,
+      smoothTouch: false,
+    });
+
+    // Drive terminal Lenis with its own RAF loop (independent of GSAP ticker).
+    function terminalRaf(time: number): void {
+      terminalLenis!.raf(time);
+      requestAnimationFrame(terminalRaf);
+    }
+    requestAnimationFrame(terminalRaf);
+
+    // Update scrollbar + edges on every Lenis scroll tick.
+    terminalLenis.on('scroll', (e: any) => {
+      const progress: number = typeof e.progress === 'number' ? e.progress : 0;
+      const scroll: number   = typeof e.scroll   === 'number' ? e.scroll   : 0;
+      const rawLimit         = e.limit;
+      const limit: number    = typeof rawLimit === 'number'
+        ? rawLimit
+        : (rawLimit?.y ?? 0);
+      updateScrollUI(progress, scroll, limit);
+    });
+
+    // Tell main-page Lenis to recalculate its scroll limit after terminal setup.
+    resizeMainLenis();
+
+    // Pause/resume main page Lenis while the cursor is inside the terminal.
+    const terminalWindow = document.querySelector(".terminal-window") as HTMLElement | null;
+    if (terminalWindow) {
+      terminalWindow.addEventListener("mouseenter", () => (window as any).__lenis?.stop());
+      terminalWindow.addEventListener("mouseleave", () => (window as any).__lenis?.start());
+    }
+
+    body.addEventListener("click", () => input.focus());
 
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
