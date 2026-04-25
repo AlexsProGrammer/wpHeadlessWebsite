@@ -1,0 +1,453 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes, isHighlighted } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+const highlighted = isHighlighted(acf);
+---
+
+<article class={`bp-detail ${highlighted ? 'is-highlighted' : ''}`}>
+
+  <a href="/#projects" class="bp-back" data-i18n="project.back">&larr; ../index</a>
+
+  <!-- ── Drawing Header ── -->
+  <header class="bp-frame bp-header">
+
+    <div class="bp-stamp">
+      <span class="bp-stamp__row"><b>PROJECT</b><span>{project.slug}</span></span>
+      <span class="bp-stamp__row"><b>OWNER</b><span>{owner}</span></span>
+      {year && <span class="bp-stamp__row"><b>YEAR</b><span>{year}</span></span>}
+      <span class="bp-stamp__row"><b>STATUS</b><span class="bp-ok">APPROVED</span></span>
+    </div>
+
+    <h1 class="bp-title">{project.title.rendered}</h1>
+    {descShort && <p class="bp-desc">{descShort}</p>}
+
+    <div class="bp-scale">
+      <span>0</span>
+      <span class="bp-scale-line"></span>
+      <span>50</span>
+      <span class="bp-scale-line"></span>
+      <span>100</span>
+    </div>
+  </header>
+
+  <!-- ── Image as wireframe ── -->
+  {image?.url && (
+    <figure class="bp-frame bp-figure">
+      <span class="bp-frame-label">FIG. 01 — RENDERING</span>
+      <img src={image.url} alt={image.alt || project.title.rendered} />
+    </figure>
+  )}
+
+  <!-- ── Tech nodes as labelled outlines ── -->
+  {techNodes.length > 0 && (
+    <section class="bp-frame bp-block">
+      <span class="bp-frame-label">FIG. 02 — TECHNOLOGY SCHEMA</span>
+      <ul class="bp-tech">
+        {techNodes.map((t: string, i: number) => (
+          <li>
+            <span class="bp-tech__num">N{String(i + 1).padStart(2, '0')}</span>
+            <span class="bp-tech__line"></span>
+            <span class="bp-tech__label">{t}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  <!-- ── Features as schematic boxes ── -->
+  {features.length > 0 && (
+    <section class="bp-frame bp-block">
+      <span class="bp-frame-label">FIG. 03 — FUNCTIONAL UNITS</span>
+      <div class="bp-feat-grid">
+        {features.map((f, i) => (
+          <article class="bp-feat">
+            <span class="bp-feat__id">U-{String(i + 1).padStart(3, '0')}</span>
+            <h3>{f.title}</h3>
+            {f.description && <p>{f.description}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ── Actions ── -->
+  {(acf.github_url || acf.download_url) && (
+    <section class="bp-frame bp-block bp-actions">
+      <span class="bp-frame-label">DELIVERABLES</span>
+      <div class="bp-action-row">
+        {acf.github_url && (
+          <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="bp-link">
+            <span>[ SOURCE.GIT ]</span>
+            <span class="bp-link-arrow">&rarr;</span>
+          </a>
+        )}
+        {acf.download_url && (
+          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="bp-link">
+            <span>[ BUILD.EXEC ]</span>
+            <span class="bp-link-arrow">&rarr;</span>
+          </a>
+        )}
+      </div>
+    </section>
+  )}
+
+  <!-- ── Long form ── -->
+  <section class="bp-frame bp-block">
+    <span class="bp-frame-label">SPECIFICATIONS</span>
+    <div class="bp-content content" set:html={project.content.rendered} />
+  </section>
+
+</article>
+
+<!-- Crosshair corner helper -->
+<script>
+  // Empty: no JS needed.
+</script>
+
+<!-- Local component: corner crosshairs -->
+<!-- We define it inline as a tiny snippet via a custom astro component-ish pattern. -->
+
+<style>
+  /* Background blueprint grid */
+  .bp-detail {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    color: rgba(180, 220, 255, 0.85);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background:
+      linear-gradient(rgba(0, 30, 70, 0.85), rgba(0, 30, 70, 0.85)),
+      repeating-linear-gradient(0deg, rgba(120, 180, 255, 0.07) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(90deg, rgba(120, 180, 255, 0.07) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(0deg, rgba(120, 180, 255, 0.04) 0 1px, transparent 1px 8px),
+      repeating-linear-gradient(90deg, rgba(120, 180, 255, 0.04) 0 1px, transparent 1px 8px),
+      #061427;
+    background-blend-mode: normal;
+    border: 1px solid rgba(120, 180, 255, 0.15);
+  }
+
+  .bp-back {
+    display: inline-block;
+    color: rgba(180, 220, 255, 0.55);
+    text-decoration: none;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s ease;
+  }
+  .bp-back:hover { color: #fff; }
+
+  /* ── Frame with corners ── */
+  .bp-frame {
+    position: relative;
+    border: 1px solid rgba(120, 180, 255, 0.2);
+    padding: 1.75rem;
+    margin-bottom: 1.5rem;
+    background: transparent;
+  }
+
+  .bp-frame-label {
+    position: absolute;
+    top: -0.55rem;
+    left: 1rem;
+    background: #061427;
+    padding: 0 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    color: rgba(120, 220, 255, 0.7);
+    text-transform: uppercase;
+  }
+
+  /* Crosshair corners (rendered via :before/:after on the frame itself + inner spans for 4 corners) */
+  .bp-frame::before,
+  .bp-frame::after,
+  .bp-frame > .bp-corner-tr,
+  .bp-frame > .bp-corner-bl {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border: 1px solid rgba(120, 220, 255, 0.6);
+  }
+  .bp-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .bp-frame::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .bp-frame > .bp-corner-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .bp-frame > .bp-corner-bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+
+  /* ── Header / Stamp ── */
+  .bp-header { padding-top: 2rem; }
+
+  .bp-stamp {
+    border: 1px solid rgba(120, 180, 255, 0.2);
+    padding: 0.65rem 0.9rem;
+    margin-bottom: 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.25rem 1rem;
+    font-size: 0.72rem;
+    max-width: 480px;
+  }
+
+  .bp-stamp__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    color: rgba(180, 220, 255, 0.85);
+  }
+  .bp-stamp__row b { color: rgba(120, 220, 255, 0.6); font-weight: 600; letter-spacing: 0.1em; }
+  .bp-ok { color: #6effaf; }
+
+  .bp-title {
+    margin: 0 0 0.85rem;
+    font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+    font-weight: 700;
+    color: #e0f2ff;
+    letter-spacing: 0;
+    line-height: 1.15;
+  }
+
+  .bp-desc {
+    margin: 0;
+    color: rgba(180, 220, 255, 0.7);
+    line-height: 1.7;
+    max-width: 60ch;
+    font-size: 0.95rem;
+  }
+
+  .bp-scale {
+    margin-top: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.65rem;
+    color: rgba(120, 220, 255, 0.5);
+    letter-spacing: 0.1em;
+  }
+  .bp-scale-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(120, 220, 255, 0.5), rgba(120, 220, 255, 0.1));
+  }
+
+  /* ── Figure ── */
+  .bp-figure { padding: 1.5rem 1.5rem 1rem; }
+
+  .bp-figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: brightness(0.6) contrast(1.15) hue-rotate(190deg) saturate(0.4);
+    border: 1px dashed rgba(120, 180, 255, 0.25);
+    transition: filter 0.4s ease;
+  }
+  .bp-figure:hover img { filter: brightness(0.85) contrast(1.05) hue-rotate(190deg) saturate(0.7); }
+
+  /* ── Tech list ── */
+  .bp-block { padding-top: 1.5rem; }
+
+  .bp-tech {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.65rem 1.25rem;
+  }
+
+  .bp-tech li {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: rgba(220, 240, 255, 0.85);
+  }
+
+  .bp-tech__num {
+    color: rgba(120, 220, 255, 0.6);
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .bp-tech__line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(120, 180, 255, 0.4), rgba(120, 180, 255, 0));
+  }
+
+  .bp-tech__label { font-weight: 600; }
+
+  /* ── Features ── */
+  .bp-feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+
+  .bp-feat {
+    position: relative;
+    border: 1px solid rgba(120, 180, 255, 0.2);
+    padding: 1.25rem;
+  }
+
+  .bp-feat::before,
+  .bp-feat::after,
+  .bp-feat > .bp-corner-tr,
+  .bp-feat > .bp-corner-bl {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border: 1px solid rgba(120, 220, 255, 0.5);
+  }
+  .bp-feat::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+  .bp-feat::after  { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+  .bp-feat > .bp-corner-tr { top: -1px; right: -1px; border-left: none; border-bottom: none; }
+  .bp-feat > .bp-corner-bl { bottom: -1px; left: -1px; border-right: none; border-top: none; }
+
+  .bp-feat__id {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: rgba(120, 220, 255, 0.6);
+  }
+
+  .bp-feat h3 {
+    margin: 0.4rem 0 0.4rem;
+    font-size: 0.95rem;
+    color: #e0f2ff;
+    font-weight: 700;
+  }
+
+  .bp-feat p {
+    margin: 0;
+    color: rgba(180, 220, 255, 0.65);
+    font-size: 0.82rem;
+    line-height: 1.6;
+  }
+
+  /* ── Actions ── */
+  .bp-action-row { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+  .bp-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(120, 220, 255, 0.4);
+    color: #cdf2ff;
+    text-decoration: none;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .bp-link:hover {
+    background: rgba(120, 220, 255, 0.08);
+    color: #fff;
+  }
+  .bp-link-arrow { transition: transform 0.2s ease; }
+  .bp-link:hover .bp-link-arrow { transform: translateX(4px); }
+
+  /* ── Content ── */
+  .bp-content {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    line-height: 1.85;
+    color: rgba(220, 240, 255, 0.7);
+    font-size: 0.98rem;
+  }
+  .bp-content :global(h2),
+  .bp-content :global(h3),
+  .bp-content :global(h4) { color: #e0f2ff; font-weight: 700; }
+  .bp-content :global(a) { color: #6effff; text-decoration: none; }
+  .bp-content :global(a:hover) { text-shadow: 0 0 8px rgba(110, 255, 255, 0.4); }
+  .bp-content :global(code) {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(120, 180, 255, 0.06);
+    border: 1px solid rgba(120, 180, 255, 0.15);
+    padding: 0.15rem 0.45rem;
+  }
+  .bp-content :global(img) {
+    border: 1px solid rgba(120, 180, 255, 0.2);
+    max-width: 100%;
+  }
+
+  /* ── Highlighted (scan line) ── */
+  .is-highlighted .bp-frame {
+    box-shadow: 0 0 0 1px rgba(110, 255, 255, 0.4), 0 0 24px rgba(110, 255, 255, 0.1);
+    overflow: hidden;
+  }
+
+  .is-highlighted .bp-frame::before,
+  .is-highlighted .bp-frame::after,
+  .is-highlighted .bp-frame > .bp-corner-tr,
+  .is-highlighted .bp-frame > .bp-corner-bl {
+    border-color: #6effff;
+    box-shadow: 0 0 8px rgba(110, 255, 255, 0.6);
+  }
+
+  .is-highlighted .bp-frame {
+    position: relative;
+  }
+
+  .is-highlighted .bp-frame > .bp-scan {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(110, 255, 255, 0.85), transparent);
+    box-shadow: 0 0 12px rgba(110, 255, 255, 0.8);
+    pointer-events: none;
+    animation: bpScan 4s linear infinite;
+  }
+
+  @keyframes bpScan {
+    0%   { top: 0; opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .bp-detail { padding: 2rem 1rem 4rem; }
+    .bp-frame  { padding: 1.25rem; }
+    .bp-stamp  { grid-template-columns: 1fr; }
+  }
+</style>
+
+<!-- Inject crosshair corner spans + scan-line spans into every .bp-frame block via a tiny client script -->
+<script>
+  (function () {
+    const frames = document.querySelectorAll<HTMLElement>('.bp-frame, .bp-feat');
+    frames.forEach((frame) => {
+      if (!frame.querySelector('.bp-corner-tr')) {
+        const tr = document.createElement('span');
+        tr.className = 'bp-corner-tr';
+        const bl = document.createElement('span');
+        bl.className = 'bp-corner-bl';
+        frame.appendChild(tr);
+        frame.appendChild(bl);
+      }
+    });
+
+    if (document.querySelector('.bp-detail.is-highlighted')) {
+      document.querySelectorAll<HTMLElement>('.bp-detail.is-highlighted .bp-frame').forEach((f) => {
+        if (!f.querySelector('.bp-scan')) {
+          const scan = document.createElement('span');
+          scan.className = 'bp-scan';
+          f.appendChild(scan);
+        }
+      });
+    }
+  })();
+</script>
+
+<!-- Tiny inline 'Corners' replacement: this Astro file does not import a sub-component;
+     The corner squares are added at runtime via the script above to keep the markup clean. -->

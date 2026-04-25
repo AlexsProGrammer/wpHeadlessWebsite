@@ -1,156 +1,67 @@
 
-# IMPLEMENTATION PLAN: Dynamic Theme Dispatcher & Project Themes
-**Context:** We are upgrading the headless WordPress Astro portfolio. Currently, `src/pages/projects/[slug].astro` is a monolithic template. We need to convert it into a "Dispatcher" that dynamically injects different UI themes per project.
-**Goal:** Implement a session-aware theme dispatcher that prevents FOUC (Flash of Unstyled Content) and create 5 initial theme components. 
-**Themes:** `theme_apple_spatial` (current design), `theme_terminal_dark`, `theme_minimal_grid`, `theme_split_screen`, and `custom_memorysnatcher`.
 
-## Phase 1: Directory & Interface Setup
-- [x] **Step 1.1:** Create a new directory: `src/components/themes/`.
-- [x] **Step 1.2:** Create a TypeScript interface file (optional but recommended) or just ensure all new theme components in `src/components/themes/` accept the following Astro props:
-  ```typescript
-  export interface Props {
-    project: any;
-    acf: any;
-    image: any;
-    technologies: string[];
-  }
-  ```
+### Die 4 Basis-Ideen (Von dir verfeinert)
 
-## Phase 2: Extracting the Current Design (ThemeAppleSpatial)
-- [x] **Step 2.1:** Create `src/components/themes/ThemeAppleSpatial.astro`.
-- [x] **Step 2.2:** Move the entire `<article class="project-detail">` DOM structure, including the `.project-hero` and `.content-panel`, from `src/pages/projects/[slug].astro` into `ThemeAppleSpatial.astro`.
-- [x] **Step 2.3:** Move all `<style>` rules currently inside `[slug].astro` (e.g., `.project-detail`, `.project-hero`, `.hero-image`, etc.) into `ThemeAppleSpatial.astro`.
-- [x] **Step 2.4:** At the top of `ThemeAppleSpatial.astro`, add the prop extraction:
-  ```astro
-  ---
-  const { project, acf, image, technologies } = Astro.props;
-  ---
-  ```
+#### 1. `theme_apple_spatial` (Der Premium-Standard)
+* **Vibe:** Teuer, ruhig, fokussiert auf das Endprodukt. Wie eine Apple-Produktseite.
+* **Layout:** Riesiges, formatfüllendes Hero-Bild im oberen Bereich. Beim Scrollen schiebt sich der Text sanft in großen, runden Glassmorphism-Pillen (`padding: 4rem`) über das Bild.
+* **ACF-Nutzung:** `project_features` werden als massives, wunderschönes Bento-Grid unter dem Hero-Bereich gerendert. Keine Linien, nur viel Blur und White-Space.
 
-## Phase 3: Creating the New Theme Scaffolds
-Create the following files in `src/components/themes/`. Add basic placeholder markup utilizing the passed props (`project.title.rendered`, `project.content.rendered`, etc.).
-- [x] **Step 3.1:** Create `ThemeTerminalDark.astro`. (Styling concept: Black background, monospace font, neon green/blue borders, `acf.github_url` styled as a CLI execution command).
-- [x] **Step 3.2:** Create `ThemeMinimalGrid.astro`. (Styling concept: Strict CSS grid, 1px solid white/gray borders `rgba(255,255,255,0.1)`, black-and-white image filters on hover).
-- [x] **Step 3.3:** Create `ThemeSplitScreen.astro`. (Styling concept: 50vw left side `position: sticky` containing title and tags, 50vw right side scrolling content).
-- [x] **Step 3.4:** Create `CustomMemorySnatcher.astro`. (Styling concept: Highly specific to the memorysnatcher game, maybe pixel art fonts or red/dark gradients).
+#### 2. `theme_terminal_dark` (Der System-Engineer)
+* **Vibe:** Hacker, Backend-Magie, Raw Data.
+* **Layout:** Pechschwarzer Hintergrund ohne Blur-Effekte. Ränder sind harte 1px Linien (wie in der Kommandozeile). Die Headline wird mit einem `_` Cursor per Typewriter-Effekt "eingetippt".
+* **ACF-Nutzung:** `tech_nodes` werden als JSON-ähnliche Struktur oder ASCII-Baum gerendert. `owner` und `year` stehen oben links wie System-Metriken (`[USER: Werbeagentur Gerer] [UPTIME: 2024]`).
 
-## Phase 4: Refactoring `[slug].astro` into a Dispatcher
-Modify `src/pages/projects/[slug].astro` to act as the Theme Dispatcher.
-- [x] **Step 4.1:** Keep the existing data fetching logic (`getStaticPaths`, `getProjectBySlug`, `getProjectImage`, `acf`, `technologies`).
-- [x] **Step 4.2:** Import all 5 theme components at the top of the file.
-- [x] **Step 4.3:** Replace the DOM with the Dispatcher logic. Insert the `<script is:inline>` to handle the `sessionStorage` seed generation.
-- [x] **Step 4.4:** Render all components but wrap them in `.theme-wrapper` divs with corresponding `data-theme-id` attributes.
-- [x] **Step 4.5:** Implement the CSS to toggle visibility based on the `<html>` attribute.
+#### 3. `theme_minimal_grid` (Der Architekt)
+* **Vibe:** Bauhaus, Web3, strukturiert.
+* **Layout:** Der gesamte Bildschirm ist in ein strenges, sichtbares Raster unterteilt (CSS Grid mit `border: 1px solid rgba(255,255,255,0.1)`). Nichts schwebt, alles hat exakte Kanten.
+* **ACF-Nutzung:** Die `tech_stack` Tags sind harte, eckige Boxen. Das Projektbild ist schwarz-weiß und bekommt erst bei Hover seine Farbe zurück.
 
-**Target Code Structure for `[slug].astro`:**
-```astro
----
-import MainLayout from '../../layouts/MainLayout.astro';
-import DecorBreak from '../../components/decor/DecorBreak.astro';
-import { getProjectBySlug, getProjectImage, getAllProjects } from '../../lib/api';
+#### 4. `theme_split_screen` (Die Case Study)
+* **Vibe:** Analytisch, redaktionell, tiefgehend.
+* **Layout:** Linke Bildschirmhälfte ist `position: sticky` und zeigt den Titel, `desc_short`, `owner` und die Action-Buttons. Die rechte Hälfte scrollt und zeigt eine Galerie von Bildern und die `project_features` als fließenden Text.
+* **ACF-Nutzung:** Perfekt für Projekte mit sehr viel Text und Features, da der Nutzer beim Lesen den Kontext (links) nie verliert.
 
-import ThemeAppleSpatial from '../../components/themes/ThemeAppleSpatial.astro';
-import ThemeTerminalDark from '../../components/themes/ThemeTerminalDark.astro';
-import ThemeMinimalGrid from '../../components/themes/ThemeMinimalGrid.astro';
-import ThemeSplitScreen from '../../components/themes/ThemeSplitScreen.astro';
-import CustomMemorySnatcher from '../../components/themes/CustomMemorySnatcher.astro';
-
-export async function getStaticPaths() { ... } // Keep existing
-
-const { slug } = Astro.params;
-const project = slug ? await getProjectBySlug(slug) : null;
-if (!project) return Astro.redirect('/404');
-
-const image = await getProjectImage(project);
-const acf = Array.isArray(project.acf) ? {} : (project.acf ?? {});
-const technologies = acf.tech_stack ? acf.tech_stack.split(',').map((t: string) => t.trim()).filter(Boolean) : [];
-
-// Check if WP ACF field enforces a specific theme
-const forceTheme = acf.theme_layout && acf.theme_layout !== 'random' ? acf.theme_layout : null;
 ---
 
-<MainLayout title={project.title.rendered}>
-  
-  <script is:inline define:vars={{ slug, forceTheme }}>
-    (function() {
-      // 1. If ACF mandates a theme, use it.
-      if (forceTheme) {
-        document.documentElement.setAttribute('data-project-theme', forceTheme);
-        return;
-      }
+### Die 8 neuen, hochkreativen Konzepte
 
-      // 2. Define available random themes (excluding custom ones)
-      const availableThemes = ['theme_apple_spatial', 'theme_terminal_dark', 'theme_minimal_grid', 'theme_split_screen'];
-      
-      // 3. Check SessionStorage to maintain theme consistency per project during the visit
-      const storageKey = `theme_seed_${slug}`;
-      let selectedTheme = sessionStorage.getItem(storageKey);
+#### 5. `theme_orbital_flow` (Das Astronomie-Theme)
+* **Vibe:** Fließend, kosmisch, vernetzt.
+* **Layout:** Das Projektbild ist kreisrund in der Mitte. Anstatt einer einfachen Liste werden die `tech_nodes` (z. B. Node.js, React) als kleine Planeten/Satelliten an hauchdünnen SVG-Orbit-Linien um das Projektbild animiert.
+* **ACF-Nutzung:** `project_features` erscheinen erst, wenn man auf die Satelliten klickt. Ein sehr interaktives Theme für komplexe Full-Stack-Projekte.
 
-      // 4. Generate new theme if none exists in session
-      if (!selectedTheme) {
-        const randomIndex = Math.floor(Math.random() * availableThemes.length);
-        selectedTheme = availableThemes[randomIndex];
-        sessionStorage.setItem(storageKey, selectedTheme);
-      }
+#### 6. `theme_blueprint_schematic` (Der CAD-Plan)
+* **Vibe:** Ingenieurskunst, Planung vor dem Coden.
+* **Layout:** Der Hintergrund hat ein extrem feines, dunkelblaues Raster (wie Blaupausen-Papier). Alle Container haben kleine Fadenkreuze `⌜ ⌟` in den Ecken. Es gibt keine "gefüllten" Flächen, alles ist als Outline/Wireframe gestylt.
+* **ACF-Nutzung:** Wenn `highlighted_b` true ist, werden die Kanten mit einer Neon-Cyan "Scan-Linie" (CSS Keyframe) permanent beleuchtet.
 
-      // 5. Apply to HTML tag instantly (prevents FOUC)
-      document.documentElement.setAttribute('data-project-theme', selectedTheme);
-    })();
-  </script>
+#### 7. `theme_hud_telemetry` (Das Command Center)
+* **Vibe:** Mission Control, Daten-Dashboard, Überwachung.
+* **Layout:** Wie das Interface in einem Raumschiff. Viel winziger, scheinbar unwichtiger Text am Rand (Koordinaten, Zeitstempel). Die Kern-Daten (Titel, Bild) sitzen im Zentrum.
+* **ACF-Nutzung:** `github_url` und `download_url` sind gigantische Warn-Buttons (`[ INITIATE DOWNLOAD SECUENCE ]`).
 
-  <div class="project-theme-dispatcher">
-    <div class="theme-wrapper" data-theme-id="theme_apple_spatial">
-      <ThemeAppleSpatial project={project} acf={acf} image={image} technologies={technologies} />
-    </div>
-    
-    <div class="theme-wrapper" data-theme-id="theme_terminal_dark">
-      <ThemeTerminalDark project={project} acf={acf} image={image} technologies={technologies} />
-    </div>
+#### 8. `theme_glass_cascade` (Die Spatial Depth)
+* **Vibe:** Unendliche Tiefe, 3D, Z-Achsen-Fokus.
+* **Layout:** Es gibt kein traditionelles Scrollen. Die Inhalte (`desc_short`, `tech_nodes`, `project_features`) liegen als riesige, stark weichgezeichnete Glass-Karten *hintereinander* in der Z-Achse. Beim Scrollen zoomt man in den Bildschirm hinein und durchstößt die Karten nacheinander.
+* **ACF-Nutzung:** Braucht sehr wenig Text, wirkt aber durch den Parallax-Tiefen-Effekt unglaublich teuer.
 
-    <div class="theme-wrapper" data-theme-id="theme_minimal_grid">
-      <ThemeMinimalGrid project={project} acf={acf} image={image} technologies={technologies} />
-    </div>
+#### 9. `theme_data_pipeline` (Das Backend-Flow-Theme)
+* **Vibe:** Prozesse, Automatisierung, CI/CD.
+* **Layout:** Ein stark vertikales Layout. Die Seite wird von einer leuchtenden Linie von oben nach unten durchzogen (wie unser Git-Timeline-Prototyp). Die `project_features` docken links und rechts wie Stationen an diese Pipeline an.
+* **ACF-Nutzung:** Die `tech_nodes` werden als Server-Racks oder Filterstationen an dieser Linie dargestellt.
 
-    <div class="theme-wrapper" data-theme-id="theme_split_screen">
-      <ThemeSplitScreen project={project} acf={acf} image={image} technologies={technologies} />
-    </div>
+#### 10. `theme_neon_cyber` (Der Aggressive Flex)
+* **Vibe:** Cyberpunk, High-Performance, Gaming/Web3.
+* **Layout:** Viel aggressiver als die anderen. Hoher Kontrast. Texte haben einen leichten CSS-Glitch-Effekt beim Hovern. Das Projektbild hat einen chromatischen Aberrations-Filter (Farbverschiebung an den Rändern).
+* **ACF-Nutzung:** `highlighted_b` schaltet einen harten, flackernden Neon-Glow um die gesamten Projekt-Informationen an.
 
-    <div class="theme-wrapper" data-theme-id="custom_memorysnatcher">
-      <CustomMemorySnatcher project={project} acf={acf} image={image} technologies={technologies} />
-    </div>
-  </div>
+#### 11. `theme_editorial_zine` (Das Design-Fokus-Theme)
+* **Vibe:** Awwwards-Gewinner, Magazin, Typografie-Fokus.
+* **Layout:** Bricht bewusst Regeln. Der Titel des Projekts ist gigantisch groß (teilweise über den Rand hinaus). Das Projektbild überlappt die Typografie. Keine Glass-Boxen, sondern harter Kontrast von massiver weißer Schrift auf schwarzem Grund.
+* **ACF-Nutzung:** Eignet sich perfekt für Projekte, bei denen du "Werbeagentur" bei `owner` eingetragen hast, da es starke visuelle Kompetenz beweist.
 
-  <DecorBreak id="project-detail-end" />
-</MainLayout>
-
-<style>
-  /* Global Dispatcher CSS */
-  .theme-wrapper {
-    display: none; /* Hide all by default */
-  }
-
-  /* Reveal the selected theme based on the HTML attribute set by the inline script */
-  :global(html[data-project-theme="theme_apple_spatial"]) .theme-wrapper[data-theme-id="theme_apple_spatial"],
-  :global(html[data-project-theme="theme_terminal_dark"]) .theme-wrapper[data-theme-id="theme_terminal_dark"],
-  :global(html[data-project-theme="theme_minimal_grid"]) .theme-wrapper[data-theme-id="theme_minimal_grid"],
-  :global(html[data-project-theme="theme_split_screen"]) .theme-wrapper[data-theme-id="theme_split_screen"],
-  :global(html[data-project-theme="custom_memorysnatcher"]) .theme-wrapper[data-theme-id="custom_memorysnatcher"] {
-    display: block;
-    animation: themeFadeIn 0.5s ease-out forwards;
-  }
-
-  @keyframes themeFadeIn {
-    from { opacity: 0; transform: translateY(15px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-</style>
-```
-
-## Phase 5: Verification & Testing
-- [ ] Run `npm run dev`.
-- [ ] Navigate to a project detail page.
-- [ ] Inspect the `<html>` tag in DevTools. Verify `data-project-theme` is injected immediately.
-- [ ] Check `Application > Session Storage` in DevTools. Verify `theme_seed_[slug]` is stored.
-- [ ] Refresh the page (F5). Ensure the theme does NOT change (reads from session).
-- [ ] Open a new project. Verify it might roll a different theme.
-- [ ] Close the browser tab entirely and reopen. Verify a new theme might be rolled since `sessionStorage` is cleared.
+#### 12. `theme_void` (Der "Supernova"-Nachhall)
+* **Vibe:** Mysteriös, gigantischer Leerraum, maximaler Fokus.
+* **Layout:** 80% des Bildschirms sind reines, schwarzes Nichts. In der absoluten Mitte ist nur der `desc_short` Text und der Titel – winzig klein, gestochen scharf. Erst wenn man scrollt, faden das Projektbild und die `project_features` extrem langsam aus dem Schwarz heraus.
+* **ACF-Nutzung:** Eine perfekte Bühne, um ein absolutes Masterpiece (Highlight) in absoluter Stille und Eleganz zu präsentieren.

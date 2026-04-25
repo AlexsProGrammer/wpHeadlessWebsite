@@ -1,318 +1,372 @@
 ---
 import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
+
 const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+const titleText = project.title?.rendered ? project.title.rendered.replace(/<[^>]*>/g, '') : '';
+
+// Pre-render the ASCII tree as a plain string to avoid JSX-in-<pre> parsing issues.
+const treeText = techNodes.length
+  ? 'tech_stack/\n' + techNodes
+      .map((t: string, i: number) => (i === techNodes.length - 1 ? '└── ' : '├── ') + t)
+      .join('\n')
+  : '';
+
+// Pre-render features as a JSON-ish string.
+const escapeJson = (s: string): string => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+const featuresJson = features.length
+  ? '{\n  "features": [\n' +
+    features
+      .map((f, i) => {
+        const parts = [`"title": "${escapeJson(f.title)}"`];
+        if (f.description) parts.push(`"desc": "${escapeJson(f.description)}"`);
+        const comma = i < features.length - 1 ? ',' : '';
+        return `    { ${parts.join(', ')} }${comma}`;
+      })
+      .join('\n') +
+    '\n  ]\n}'
+  : '';
 ---
 
-<article class="terminal-detail">
-  <a href="/#projects" class="back-link" data-i18n="project.back">
-    <span class="prompt">$</span> cd ..
-  </a>
+<article class="td-detail">
 
-  <header class="terminal-header">
-    <div class="terminal-bar">
-      <span class="dot dot-red"></span>
-      <span class="dot dot-yellow"></span>
-      <span class="dot dot-green"></span>
-      <span class="terminal-title">~/projects/{project.slug}</span>
-    </div>
-
-    <div class="terminal-body">
-      <p class="line"><span class="prompt">$</span> <span class="cmd">whoami</span></p>
-      <h1 class="output">{project.title.rendered}</h1>
-
-      {technologies.length > 0 && (
-        <div class="line-group">
-          <p class="line"><span class="prompt">$</span> <span class="cmd">cat tech_stack.txt</span></p>
-          <ul class="tech-list output">
-            {technologies.map((tech: string) => (
-              <li><span class="arrow">›</span> {tech}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {acf.github_url && (
-        <div class="line-group">
-          <p class="line"><span class="prompt">$</span> <span class="cmd">git remote -v</span></p>
-          <p class="output">
-            <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="repo-link">
-              origin &nbsp;&nbsp;{acf.github_url} (fetch)
-            </a>
-          </p>
-          <p class="line"><span class="prompt">$</span> <span class="cursor-blink">_</span></p>
-        </div>
-      )}
-
-      {acf.download_url && (
-        <p class="line">
-          <span class="prompt">$</span>
-          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="cmd exec-cmd">
-            ./install.sh
-          </a>
-        </p>
-      )}
-    </div>
+  <!-- ── System metrics bar ── -->
+  <header class="td-statusbar">
+    <span class="td-stat">[USER: <em>{owner}</em>]</span>
+    {year && <span class="td-stat">[UPTIME: <em>{year}</em>]</span>}
+    <span class="td-stat td-stat--ok">[STATUS: <em>ONLINE</em>]</span>
+    <span class="td-stat td-stat--right">~/projects/{project.slug}</span>
   </header>
 
-  {image?.url && (
-    <div class="terminal-image-frame">
-      <span class="frame-label">// screenshot.png</span>
-      <img src={image.url} alt={image.alt || project.title.rendered} />
-    </div>
+  <a href="/#projects" class="td-back" data-i18n="project.back">$ cd ..</a>
+
+  <!-- ── Headline (typewriter) ── -->
+  <section class="td-block td-hero">
+    <p class="td-line"><span class="td-prompt">$</span> <span class="td-cmd">echo $PROJECT_NAME</span></p>
+    <h1 class="td-title">
+      <span class="td-typewriter" data-text={titleText}>{titleText}</span><span class="td-cursor">_</span>
+    </h1>
+    {descShort && (
+      <>
+        <p class="td-line td-line--space"><span class="td-prompt">$</span> <span class="td-cmd">cat about.txt</span></p>
+        <p class="td-output">{descShort}</p>
+      </>
+    )}
+  </section>
+
+  <!-- ── Tech tree ── -->
+  {techNodes.length > 0 && (
+    <section class="td-block">
+      <p class="td-line"><span class="td-prompt">$</span> <span class="td-cmd">tree tech_stack/</span></p>
+      <pre class="td-tree">{treeText}</pre>
+    </section>
   )}
 
-  <section class="terminal-content">
-    <p class="line"><span class="prompt">$</span> <span class="cmd">cat README.md</span></p>
-    <div class="content output" set:html={project.content.rendered} />
+  <!-- ── Screenshot ── -->
+  {image?.url && (
+    <section class="td-block">
+      <p class="td-line"><span class="td-prompt">$</span> <span class="td-cmd">open ./screenshot.png</span></p>
+      <figure class="td-figure">
+        <span class="td-frame-label">screenshot.png</span>
+        <img src={image.url} alt={image.alt || titleText} />
+      </figure>
+    </section>
+  )}
+
+  <!-- ── Features ── -->
+  {features.length > 0 && (
+    <section class="td-block">
+      <p class="td-line"><span class="td-prompt">$</span> <span class="td-cmd">cat features.json</span></p>
+      <pre class="td-json">{featuresJson}</pre>
+    </section>
+  )}
+
+  <!-- ── Actions ── -->
+  {(acf.github_url || acf.download_url) && (
+    <section class="td-block">
+      {acf.github_url && (
+        <p class="td-line">
+          <span class="td-prompt">$</span>
+          <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="td-cmd td-exec">git clone {acf.github_url}</a>
+        </p>
+      )}
+      {acf.download_url && (
+        <p class="td-line">
+          <span class="td-prompt">$</span>
+          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="td-cmd td-exec">./install.sh</a>
+        </p>
+      )}
+    </section>
+  )}
+
+  <!-- ── Long form ── -->
+  <section class="td-block">
+    <p class="td-line"><span class="td-prompt">$</span> <span class="td-cmd">cat README.md</span></p>
+    <div class="td-readme content" set:html={project.content.rendered} />
   </section>
+
+  <p class="td-line td-line--end">
+    <span class="td-prompt">$</span> <span class="td-cursor td-cursor--solo">_</span>
+  </p>
+
 </article>
 
 <style>
-  .terminal-detail {
-    max-width: 900px;
+  .td-detail {
+    max-width: 980px;
     margin: 0 auto;
-    padding: 3rem 2rem;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    padding: 2rem 2rem 4rem;
     color: #c8ffc8;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+    background: #000;
+    min-height: 100vh;
+    box-sizing: border-box;
   }
 
-  .back-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    color: #7fff7f;
-    text-decoration: none;
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
-    transition: color 0.2s ease;
-  }
-
-  .back-link:hover {
-    color: #00fff0;
-  }
-
-  /* ── Terminal Window ── */
-  .terminal-header {
-    border: 1px solid #00ff9044;
-    border-radius: 8px;
-    overflow: hidden;
-    margin-bottom: 2rem;
-    box-shadow: 0 0 30px rgba(0, 255, 144, 0.07), 0 0 60px rgba(0, 240, 255, 0.04);
-  }
-
-  .terminal-bar {
+  /* ── Status Bar ── */
+  .td-statusbar {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
     align-items: center;
-    gap: 0.5rem;
-    background: #111;
-    border-bottom: 1px solid #00ff9033;
+    border: 1px solid #00ff9033;
     padding: 0.6rem 1rem;
-  }
-
-  .dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-  }
-
-  .dot-red    { background: #ff5f56; }
-  .dot-yellow { background: #ffbd2e; }
-  .dot-green  { background: #27c93f; }
-
-  .terminal-title {
-    margin-left: auto;
+    margin-bottom: 1.5rem;
     font-size: 0.75rem;
-    color: #4a4a4a;
+    color: rgba(0, 255, 144, 0.7);
+    letter-spacing: 0.04em;
   }
 
-  .terminal-body {
-    background: #050505;
-    padding: 1.5rem;
+  .td-stat em { color: #00ff90; font-style: normal; font-weight: 700; }
+  .td-stat--ok em { color: #00ff90; }
+  .td-stat--right { margin-left: auto; color: rgba(0, 255, 144, 0.45); }
+
+  /* ── Back link ── */
+  .td-back {
+    display: inline-block;
+    color: #00e5ff;
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 1.75rem;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+  }
+  .td-back:hover {
+    color: #fff;
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.5);
   }
 
-  /* ── Lines ── */
-  .line {
+  /* ── Block ── */
+  .td-block {
+    border: 1px solid #00ff9022;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+    background: #000;
+  }
+
+  .td-hero {
+    border-color: #00ff9044;
+    box-shadow: 0 0 24px rgba(0, 255, 144, 0.05);
+  }
+
+  /* ── Lines / prompt ── */
+  .td-line {
     margin: 0.25rem 0;
-    font-size: 0.9rem;
-    white-space: pre-wrap;
+    font-size: 0.88rem;
+    color: #b0ffb0;
   }
+  .td-line--space { margin-top: 1.25rem; }
+  .td-line--end   { margin-top: 2rem; }
 
-  .line-group {
-    margin: 1rem 0;
-  }
-
-  .prompt {
+  .td-prompt {
     color: #00ff90;
     font-weight: 700;
     margin-right: 0.5rem;
     user-select: none;
   }
 
-  .cmd {
-    color: #00e5ff;
-  }
+  .td-cmd { color: #00e5ff; }
 
-  .exec-cmd {
-    color: #00ff90;
+  .td-exec {
     text-decoration: none;
     transition: color 0.2s ease, text-shadow 0.2s ease;
   }
-
-  .exec-cmd:hover {
+  .td-exec:hover {
     color: #fff;
-    text-shadow: 0 0 10px rgba(0, 255, 144, 0.6);
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.6);
   }
 
-  .output {
-    color: #b0ffb0;
-    padding-left: 1.5rem;
-    margin: 0.25rem 0 0.75rem;
-    font-size: 0.9rem;
-  }
-
-  .cursor-blink {
-    display: inline-block;
-    animation: blink 1s step-end infinite;
+  /* ── Title typewriter ── */
+  .td-title {
+    margin: 0.85rem 0 0;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: #00ff90;
+    line-height: 1.15;
+    white-space: pre-wrap;
   }
 
-  @keyframes blink {
+  .td-typewriter {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 100%;
+    vertical-align: bottom;
+    animation: tdType 2.6s steps(40, end) 0.15s both;
+  }
+
+  @keyframes tdType {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+
+  .td-cursor {
+    display: inline-block;
+    color: #00ff90;
+    animation: tdBlink 1s step-end infinite;
+    margin-left: 2px;
+  }
+
+  .td-cursor--solo { font-size: 1rem; }
+
+  @keyframes tdBlink {
     0%, 100% { opacity: 1; }
     50%       { opacity: 0; }
   }
 
-  /* ── Tech List ── */
-  .tech-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+  /* ── Output paragraph ── */
+  .td-output {
+    margin: 0.4rem 0 0 1.5rem;
+    color: #a0d8a0;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    max-width: 70ch;
   }
 
-  .tech-list li {
+  /* ── ASCII tree ── */
+  .td-tree {
+    margin: 0.5rem 0 0;
+    padding: 0.85rem 1rem;
+    background: #050505;
+    border: 1px solid #00ff9022;
+    color: #b0ffb0;
     font-size: 0.85rem;
-    color: #90ffc8;
-    line-height: 1.8;
+    line-height: 1.7;
+    white-space: pre-wrap;
+    overflow-x: auto;
   }
 
-  .arrow {
-    color: #00ff90;
-    margin-right: 0.4rem;
-  }
-
-  /* ── Repo link ── */
-  .repo-link {
+  .td-tree em {
     color: #00e5ff;
-    text-decoration: none;
-    transition: text-shadow 0.2s ease;
+    font-style: normal;
   }
 
-  .repo-link:hover {
-    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  /* ── JSON features ── */
+  .td-json {
+    margin: 0.5rem 0 0;
+    padding: 1rem;
+    background: #050505;
+    border: 1px solid #00ff9022;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: #b0ffb0;
+    overflow-x: auto;
+    white-space: pre-wrap;
   }
 
-  /* ── Screenshot ── */
-  .terminal-image-frame {
-    margin-bottom: 2rem;
-    border: 1px solid #00ff9033;
-    border-radius: 6px;
-    overflow: hidden;
+  .td-bracket { color: #00ff90; }
+  .td-key     { color: #ffaa00; }
+  .td-string  { color: #c8ffc8; }
+
+  /* ── Figure ── */
+  .td-figure {
+    margin: 0.5rem 0 0;
+    border: 1px solid #00ff9022;
+    background: #050505;
   }
 
-  .frame-label {
+  .td-frame-label {
     display: block;
-    background: #0a0a0a;
-    color: #3a6a3a;
-    font-size: 0.75rem;
-    padding: 0.35rem 1rem;
+    font-size: 0.72rem;
+    color: rgba(0, 255, 144, 0.45);
+    padding: 0.35rem 0.85rem;
     border-bottom: 1px solid #00ff9022;
   }
 
-  .terminal-image-frame img {
+  .td-figure img {
     width: 100%;
     height: auto;
     display: block;
-    filter: saturate(0.7) contrast(1.05);
+    filter: saturate(0.75) contrast(1.05);
     transition: filter 0.4s ease;
   }
 
-  .terminal-image-frame:hover img {
-    filter: saturate(1) contrast(1);
-  }
+  .td-figure:hover img { filter: none; }
 
-  /* ── Content ── */
-  .terminal-content {
-    border: 1px solid #00ff9022;
-    border-radius: 6px;
+  /* ── README content ── */
+  .td-readme {
+    margin: 0.5rem 0 0;
+    padding: 1rem 1.25rem;
     background: #050505;
-    padding: 1.5rem;
-  }
-
-  .content {
-    margin-top: 0.5rem;
+    border: 1px solid #00ff9022;
     font-size: 0.92rem;
-    line-height: 1.9;
+    line-height: 1.85;
     color: #a8d8a8;
   }
 
-  .content :global(h2),
-  .content :global(h3),
-  .content :global(h4) {
+  .td-readme :global(h2),
+  .td-readme :global(h3),
+  .td-readme :global(h4) {
     color: #00ff90;
     font-weight: 700;
     margin-top: 1.5rem;
   }
 
-  .content :global(p) {
-    color: #a8d8a8;
-  }
-
-  .content :global(a) {
+  .td-readme :global(a) {
     color: #00e5ff;
     text-decoration: none;
   }
+  .td-readme :global(a:hover) { text-shadow: 0 0 8px rgba(0, 229, 255, 0.4); }
 
-  .content :global(a:hover) {
-    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
-  }
+  .td-readme :global(strong) { color: #c8ffc8; }
 
-  .content :global(strong) {
-    color: #c8ffc8;
-  }
-
-  .content :global(code) {
+  .td-readme :global(code) {
     background: rgba(0, 255, 144, 0.06);
     border: 1px solid rgba(0, 255, 144, 0.12);
     padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    font-size: 0.88em;
     color: #7fff7f;
   }
 
-  .content :global(pre) {
-    background: #0a0a0a;
+  .td-readme :global(pre) {
+    background: #000;
     border: 1px solid #00ff9022;
-    border-radius: 6px;
-    padding: 1.25rem;
+    padding: 1rem;
     overflow-x: auto;
   }
 
-  .content :global(blockquote) {
-    border-left: 3px solid #00ff90;
-    padding: 0.75rem 1.25rem;
+  .td-readme :global(blockquote) {
+    border-left: 2px solid #00ff90;
+    padding: 0.5rem 1rem;
     margin-left: 0;
     color: #7fff7f;
-    background: rgba(0, 255, 144, 0.03);
   }
 
-  .content :global(img) {
-    border-radius: 4px;
+  .td-readme :global(img) {
     border: 1px solid #00ff9022;
     max-width: 100%;
   }
 
+  /* ── Responsive ── */
   @media (max-width: 768px) {
-    .terminal-detail {
-      padding: 2rem 1rem;
-    }
+    .td-detail { padding: 1.25rem 1rem 3rem; }
+    .td-statusbar { gap: 0.6rem; font-size: 0.7rem; }
+    .td-stat--right { display: none; }
+    .td-block { padding: 1rem; }
   }
 </style>

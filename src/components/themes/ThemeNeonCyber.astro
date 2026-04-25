@@ -1,0 +1,478 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes, isHighlighted } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+const highlighted = isHighlighted(acf);
+const titleText = project.title?.rendered ? project.title.rendered.replace(/<[^>]*>/g, '') : '';
+---
+
+<article class={`nc-detail ${highlighted ? 'is-highlighted' : ''}`}>
+
+  <a href="/#projects" class="nc-back" data-i18n="project.back">&lt;&lt; ESCAPE</a>
+
+  <header class="nc-header">
+    <div class="nc-meta">
+      <span class="nc-meta-tag">SYS_OWNER</span>
+      <span class="nc-meta-val">{owner}</span>
+      {year && (
+        <>
+          <span class="nc-meta-tag">YEAR</span>
+          <span class="nc-meta-val">{year}</span>
+        </>
+      )}
+    </div>
+
+    <h1 class="nc-title" data-text={titleText}>
+      <span class="nc-title-text">{titleText}</span>
+    </h1>
+
+    {descShort && <p class="nc-desc" data-glitch={descShort}>{descShort}</p>}
+  </header>
+
+  {image?.url && (
+    <figure class="nc-figure">
+      <img src={image.url} alt={image.alt || titleText} class="nc-img-base" />
+      <img src={image.url} alt="" aria-hidden="true" class="nc-img-r" />
+      <img src={image.url} alt="" aria-hidden="true" class="nc-img-b" />
+      <span class="nc-figure-tag">// VISUAL_FEED.RAW</span>
+    </figure>
+  )}
+
+  {techNodes.length > 0 && (
+    <section class="nc-block">
+      <span class="nc-block-tag">[ STACK ]</span>
+      <ul class="nc-tech">
+        {techNodes.map((t: string) => (
+          <li data-text={t}><span>{t}</span></li>
+        ))}
+      </ul>
+    </section>
+  )}
+
+  {features.length > 0 && (
+    <section class="nc-block">
+      <span class="nc-block-tag">[ MODULES ]</span>
+      <div class="nc-features">
+        {features.map((f, i) => (
+          <article class="nc-feature">
+            <span class="nc-feat-id">M.{String(i + 1).padStart(2, '0')}</span>
+            <h3 data-text={f.title}>{f.title}</h3>
+            {f.description && <p>{f.description}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  {(acf.github_url || acf.download_url) && (
+    <section class="nc-actions">
+      {acf.github_url && (
+        <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="nc-btn" data-text="JACK_IN >>">
+          <span>JACK_IN &gt;&gt;</span>
+        </a>
+      )}
+      {acf.download_url && (
+        <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="nc-btn nc-btn--primary" data-text="EXEC.PAYLOAD">
+          <span>EXEC.PAYLOAD</span>
+        </a>
+      )}
+    </section>
+  )}
+
+  <section class="nc-content content" set:html={project.content.rendered} />
+
+</article>
+
+<style>
+  .nc-detail {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    color: #f0f0ff;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background:
+      linear-gradient(180deg, #0a0014 0%, #110028 50%, #050010 100%);
+    overflow: hidden;
+    border: 1px solid rgba(255, 0, 200, 0.2);
+  }
+
+  /* Aggressive scanlines overlay */
+  .nc-detail::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.025) 0 1px,
+      transparent 1px 3px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .nc-detail > * { position: relative; z-index: 2; }
+
+  /* Highlighted: flickering neon frame */
+  .nc-detail.is-highlighted {
+    border-color: #ff00c8;
+    box-shadow:
+      0 0 0 1px #ff00c8,
+      0 0 30px rgba(255, 0, 200, 0.55),
+      inset 0 0 60px rgba(255, 0, 200, 0.1);
+    animation: ncFlicker 4s steps(2) infinite;
+  }
+
+  @keyframes ncFlicker {
+    0%, 100% { box-shadow: 0 0 0 1px #ff00c8, 0 0 30px rgba(255, 0, 200, 0.55), inset 0 0 60px rgba(255, 0, 200, 0.1); }
+    97%      { box-shadow: 0 0 0 1px #ff00c8, 0 0 30px rgba(255, 0, 200, 0.55), inset 0 0 60px rgba(255, 0, 200, 0.1); }
+    98%      { box-shadow: 0 0 0 1px transparent, 0 0 4px rgba(255, 0, 200, 0.2), inset 0 0 0 rgba(255, 0, 200, 0); }
+    99%      { box-shadow: 0 0 0 1px #ff00c8, 0 0 50px rgba(255, 0, 200, 0.85), inset 0 0 80px rgba(0, 255, 255, 0.18); }
+  }
+
+  .nc-back {
+    display: inline-block;
+    color: #00fff0;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 2rem;
+    text-shadow: 0 0 8px rgba(0, 255, 240, 0.6);
+    transition: color 0.15s ease;
+  }
+  .nc-back:hover { color: #ff00c8; text-shadow: 0 0 12px rgba(255, 0, 200, 0.8); }
+
+  /* ── Meta ── */
+  .nc-header { margin-bottom: 2.5rem; }
+
+  .nc-meta {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 0.4rem 1.25rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    margin-bottom: 1rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid rgba(0, 255, 240, 0.3);
+  }
+
+  .nc-meta-tag { color: rgba(0, 255, 240, 0.7); }
+  .nc-meta-val { color: #ff00c8; font-weight: 700; }
+
+  /* ── Title with chromatic glitch ── */
+  .nc-title {
+    position: relative;
+    margin: 0 0 1rem;
+    font-size: clamp(2.5rem, 7vw, 5rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    color: #fff;
+    text-transform: uppercase;
+    cursor: default;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .nc-title::before,
+  .nc-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .nc-title::before { color: #00fff0; transform: translate(-3px, 0); mix-blend-mode: screen; }
+  .nc-title::after  { color: #ff00c8; transform: translate(3px, 0);  mix-blend-mode: screen; }
+
+  .nc-title:hover::before { opacity: 1; animation: ncGlitchA 0.6s steps(8) infinite; }
+  .nc-title:hover::after  { opacity: 1; animation: ncGlitchB 0.6s steps(8) infinite; }
+
+  @keyframes ncGlitchA {
+    0%   { transform: translate(-3px, 0); }
+    20%  { transform: translate(-5px, 1px); }
+    40%  { transform: translate(-2px, -2px); }
+    60%  { transform: translate(-4px, 2px); }
+    80%  { transform: translate(-1px, 0); }
+    100% { transform: translate(-3px, 0); }
+  }
+  @keyframes ncGlitchB {
+    0%   { transform: translate(3px, 0); }
+    20%  { transform: translate(5px, -1px); }
+    40%  { transform: translate(2px, 2px); }
+    60%  { transform: translate(4px, -2px); }
+    80%  { transform: translate(1px, 0); }
+    100% { transform: translate(3px, 0); }
+  }
+
+  .nc-desc {
+    margin: 0;
+    color: rgba(240, 240, 255, 0.75);
+    font-size: 1rem;
+    line-height: 1.6;
+    max-width: 60ch;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  /* ── Figure with chromatic aberration ── */
+  .nc-figure {
+    position: relative;
+    margin: 2.5rem 0;
+    border: 1px solid rgba(255, 0, 200, 0.3);
+    overflow: hidden;
+  }
+
+  .nc-figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .nc-img-base {
+    position: relative;
+    filter: contrast(1.05) saturate(1.2);
+    z-index: 2;
+  }
+
+  .nc-img-r,
+  .nc-img-b {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+  }
+
+  .nc-img-r {
+    filter: hue-rotate(-20deg) saturate(2) drop-shadow(2px 0 0 #ff00c8);
+    transform: translate(-3px, 0);
+    z-index: 3;
+  }
+
+  .nc-img-b {
+    filter: hue-rotate(140deg) saturate(2) drop-shadow(-2px 0 0 #00fff0);
+    transform: translate(3px, 0);
+    z-index: 3;
+  }
+
+  .nc-figure:hover .nc-img-r { transform: translate(-7px, 0); opacity: 0.75; }
+  .nc-figure:hover .nc-img-b { transform: translate(7px, 0);  opacity: 0.75; }
+
+  .nc-figure-tag {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.75rem;
+    z-index: 4;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: #00fff0;
+    text-shadow: 0 0 8px rgba(0, 255, 240, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    padding: 0.2rem 0.5rem;
+  }
+
+  /* ── Block ── */
+  .nc-block { margin: 2.5rem 0; }
+
+  .nc-block-tag {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.22em;
+    color: #00fff0;
+    margin-bottom: 0.85rem;
+    text-shadow: 0 0 8px rgba(0, 255, 240, 0.4);
+  }
+
+  /* ── Tech list (glitch tags) ── */
+  .nc-tech {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .nc-tech li {
+    position: relative;
+    border: 1px solid rgba(255, 0, 200, 0.4);
+    padding: 0.4rem 0.85rem;
+    font-size: 0.78rem;
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    background: rgba(255, 0, 200, 0.06);
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    cursor: default;
+  }
+
+  .nc-tech li::before,
+  .nc-tech li::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0.4rem;
+    left: 0.85rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .nc-tech li::before { color: #00fff0; }
+  .nc-tech li::after  { color: #ff00c8; }
+
+  .nc-tech li:hover {
+    background: rgba(0, 255, 240, 0.1);
+    box-shadow: 0 0 16px rgba(0, 255, 240, 0.3);
+  }
+  .nc-tech li:hover::before { opacity: 1; transform: translate(-2px, 0); }
+  .nc-tech li:hover::after  { opacity: 1; transform: translate(2px, 0); }
+
+  /* ── Features ── */
+  .nc-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .nc-feature {
+    border: 1px solid rgba(0, 255, 240, 0.2);
+    padding: 1.25rem;
+    background: rgba(0, 0, 0, 0.4);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .nc-feature:hover {
+    border-color: #ff00c8;
+    box-shadow: 0 0 24px rgba(255, 0, 200, 0.25), inset 0 0 24px rgba(255, 0, 200, 0.05);
+  }
+
+  .nc-feat-id {
+    display: block;
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    color: #ff00c8;
+    margin-bottom: 0.5rem;
+  }
+
+  .nc-feature h3 {
+    position: relative;
+    margin: 0 0 0.4rem;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .nc-feature h3::before,
+  .nc-feature h3::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    opacity: 0;
+  }
+  .nc-feature h3::before { color: #00fff0; transform: translate(-2px, 0); }
+  .nc-feature h3::after  { color: #ff00c8; transform: translate(2px, 0); }
+  .nc-feature:hover h3::before,
+  .nc-feature:hover h3::after { opacity: 0.8; }
+
+  .nc-feature p {
+    margin: 0;
+    color: rgba(240, 240, 255, 0.6);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  /* ── Buttons ── */
+  .nc-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin: 2.5rem 0;
+  }
+
+  .nc-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.85rem 1.6rem;
+    border: 2px solid #00fff0;
+    background: transparent;
+    color: #00fff0;
+    text-decoration: none;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    font-size: 0.88rem;
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .nc-btn:hover {
+    background: #00fff0;
+    color: #0a0014;
+    box-shadow: 0 0 0 4px rgba(0, 255, 240, 0.18), 0 0 30px rgba(0, 255, 240, 0.55);
+  }
+
+  .nc-btn--primary {
+    border-color: #ff00c8;
+    color: #ff00c8;
+  }
+  .nc-btn--primary:hover {
+    background: #ff00c8;
+    color: #0a0014;
+    box-shadow: 0 0 0 4px rgba(255, 0, 200, 0.18), 0 0 30px rgba(255, 0, 200, 0.55);
+  }
+
+  /* ── Content ── */
+  .nc-content {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 255, 240, 0.15);
+    background: rgba(0, 0, 0, 0.4);
+    line-height: 1.85;
+    color: rgba(240, 240, 255, 0.7);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .nc-content :global(h2),
+  .nc-content :global(h3),
+  .nc-content :global(h4) {
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    border-left: 3px solid #ff00c8;
+    padding-left: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .nc-content :global(a) { color: #00fff0; text-decoration: none; }
+  .nc-content :global(a:hover) { color: #ff00c8; text-shadow: 0 0 8px rgba(255, 0, 200, 0.5); }
+  .nc-content :global(code) {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255, 0, 200, 0.08);
+    border: 1px solid rgba(255, 0, 200, 0.18);
+    padding: 0.15rem 0.45rem;
+    color: #ff00c8;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .nc-detail { padding: 2rem 1.25rem 4rem; }
+    .nc-meta { grid-template-columns: auto auto; }
+  }
+</style>

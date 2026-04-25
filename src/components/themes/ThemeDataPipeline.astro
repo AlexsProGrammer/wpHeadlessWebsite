@@ -1,0 +1,480 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+---
+
+<article class="dp-detail">
+
+  <a href="/#projects" class="dp-back" data-i18n="project.back">&larr; ../pipeline</a>
+
+  <!-- ── Header ── -->
+  <header class="dp-header">
+    <span class="dp-eyebrow">// PIPELINE :: {project.slug}</span>
+    <h1 class="dp-title">{project.title.rendered}</h1>
+    {descShort && <p class="dp-desc">{descShort}</p>}
+    <div class="dp-meta">
+      {owner && <span><b>OWNER</b> {owner}</span>}
+      {year && <span><b>BUILD</b> {year}</span>}
+      <span><b>STATUS</b> <em>RUNNING</em></span>
+    </div>
+  </header>
+
+  <!-- ── Pipeline ── -->
+  <section class="dp-pipeline">
+    <div class="dp-line" aria-hidden="true">
+      <span class="dp-pulse"></span>
+    </div>
+
+    <!-- Trigger node -->
+    <div class="dp-station dp-station--center dp-station--trigger">
+      <span class="dp-node"></span>
+      <div class="dp-card">
+        <span class="dp-card-tag">TRIGGER</span>
+        <strong>git push origin main</strong>
+        <p>Pipeline initiated</p>
+      </div>
+    </div>
+
+    <!-- Project image as artifact -->
+    {image?.url && (
+      <div class="dp-station dp-station--right">
+        <span class="dp-node"></span>
+        <div class="dp-card dp-card--image">
+          <span class="dp-card-tag">ARTIFACT</span>
+          <img src={image.url} alt={image.alt || project.title.rendered} />
+        </div>
+      </div>
+    )}
+
+    <!-- Tech rack -->
+    {techNodes.length > 0 && (
+      <div class="dp-station dp-station--left">
+        <span class="dp-node"></span>
+        <div class="dp-rack">
+          <span class="dp-card-tag">SERVER RACK</span>
+          <ul>
+            {techNodes.map((t: string, i: number) => (
+              <li>
+                <span class="dp-rack-led"></span>
+                <span class="dp-rack-id">U{String(i + 1).padStart(2, '0')}</span>
+                <span class="dp-rack-name">{t}</span>
+                <span class="dp-rack-status">ONLINE</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    )}
+
+    <!-- Features as alternating stations -->
+    {features.map((f, i) => (
+      <div class={`dp-station ${i % 2 === 0 ? 'dp-station--right' : 'dp-station--left'}`}>
+        <span class="dp-node"></span>
+        <div class="dp-card">
+          <span class="dp-card-tag">STAGE {String(i + 1).padStart(2, '0')}</span>
+          <strong>{f.title}</strong>
+          {f.description && <p>{f.description}</p>}
+        </div>
+      </div>
+    ))}
+
+    <!-- Deploy -->
+    {(acf.github_url || acf.download_url) && (
+      <div class="dp-station dp-station--center dp-station--deploy">
+        <span class="dp-node dp-node--deploy"></span>
+        <div class="dp-card dp-card--deploy">
+          <span class="dp-card-tag">DEPLOY</span>
+          <div class="dp-action-row">
+            {acf.github_url && (
+              <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="dp-btn">$ git pull</a>
+            )}
+            {acf.download_url && (
+              <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="dp-btn dp-btn--primary">$ ./deploy.sh</a>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <!-- Terminator -->
+    <div class="dp-station dp-station--center dp-station--end">
+      <span class="dp-node dp-node--end"></span>
+      <span class="dp-end-label">EXIT 0 :: PIPELINE COMPLETE</span>
+    </div>
+  </section>
+
+  <!-- ── Long-form ── -->
+  <section class="dp-readme">
+    <span class="dp-eyebrow">// README.md</span>
+    <div class="dp-content content" set:html={project.content.rendered} />
+  </section>
+
+</article>
+
+<style>
+  .dp-detail {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    color: rgba(220, 245, 230, 0.85);
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    background:
+      radial-gradient(ellipse at top, rgba(0, 60, 40, 0.25), transparent 60%),
+      #050a0a;
+  }
+
+  .dp-back {
+    display: inline-block;
+    color: rgba(110, 255, 175, 0.6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s ease;
+  }
+  .dp-back:hover { color: #fff; }
+
+  .dp-eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    color: rgba(110, 255, 175, 0.7);
+    margin-bottom: 0.85rem;
+  }
+
+  .dp-header { text-align: center; margin-bottom: 2.5rem; }
+
+  .dp-title {
+    margin: 0 0 1rem;
+    font-size: clamp(2rem, 4vw, 3rem);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .dp-desc {
+    margin: 0 auto 1.5rem;
+    color: rgba(220, 245, 230, 0.65);
+    line-height: 1.6;
+    max-width: 60ch;
+    font-size: 0.98rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .dp-meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    font-size: 0.72rem;
+    color: rgba(220, 245, 230, 0.7);
+    border: 1px solid rgba(110, 255, 175, 0.18);
+    padding: 0.45rem 1rem;
+  }
+  .dp-meta b { color: rgba(110, 255, 175, 0.6); font-weight: 600; letter-spacing: 0.1em; margin-right: 0.4rem; }
+  .dp-meta em { color: #6effaf; font-style: normal; font-weight: 700; }
+
+  /* ── Pipeline ── */
+  .dp-pipeline {
+    position: relative;
+    padding: 3rem 0 4rem;
+  }
+
+  .dp-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-50%);
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(0, 255, 144, 0.5) 8%,
+      rgba(0, 255, 144, 0.7) 50%,
+      rgba(0, 255, 144, 0.5) 92%,
+      transparent
+    );
+    box-shadow: 0 0 12px rgba(0, 255, 144, 0.35);
+  }
+
+  .dp-pulse {
+    position: absolute;
+    top: 0;
+    left: -3px;
+    width: 8px;
+    height: 80px;
+    background: linear-gradient(to bottom, transparent, #6effaf, transparent);
+    border-radius: 4px;
+    filter: blur(2px);
+    animation: dpPulse 5s linear infinite;
+  }
+
+  @keyframes dpPulse {
+    0%   { top: -10%; opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { top: 100%; opacity: 0; }
+  }
+
+  /* ── Stations ── */
+  .dp-station {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 60px 1fr;
+    align-items: center;
+    margin: 2rem 0;
+    min-height: 80px;
+  }
+
+  .dp-station--right .dp-card,
+  .dp-station--right .dp-rack {
+    grid-column: 3;
+    margin-left: 1.25rem;
+  }
+
+  .dp-station--left .dp-card,
+  .dp-station--left .dp-rack {
+    grid-column: 1;
+    margin-right: 1.25rem;
+    text-align: right;
+  }
+
+  .dp-station--center {
+    text-align: center;
+  }
+
+  .dp-station--center .dp-card {
+    grid-column: 1 / -1;
+    max-width: 380px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .dp-node {
+    grid-column: 2;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #050a0a;
+    border: 2px solid #6effaf;
+    box-shadow: 0 0 0 4px rgba(110, 255, 175, 0.1), 0 0 18px rgba(110, 255, 175, 0.5);
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+  }
+
+  .dp-node--deploy {
+    background: #6effaf;
+    box-shadow: 0 0 0 6px rgba(110, 255, 175, 0.18), 0 0 32px rgba(110, 255, 175, 0.7);
+  }
+
+  .dp-node--end {
+    width: 22px;
+    height: 22px;
+    background: #ff4d6d;
+    border-color: #ff4d6d;
+    box-shadow: 0 0 0 4px rgba(255, 77, 109, 0.2), 0 0 22px rgba(255, 77, 109, 0.6);
+  }
+
+  /* ── Cards ── */
+  .dp-card {
+    background: rgba(10, 22, 18, 0.7);
+    border: 1px solid rgba(110, 255, 175, 0.2);
+    padding: 1rem 1.25rem;
+    color: rgba(220, 245, 230, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dp-card:hover {
+    border-color: rgba(110, 255, 175, 0.45);
+    box-shadow: 0 0 24px rgba(110, 255, 175, 0.12);
+  }
+
+  .dp-card-tag {
+    display: block;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: rgba(110, 255, 175, 0.6);
+    margin-bottom: 0.4rem;
+  }
+
+  .dp-card strong {
+    display: block;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .dp-card p {
+    margin: 0;
+    color: rgba(220, 245, 230, 0.6);
+    font-size: 0.82rem;
+    line-height: 1.55;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+
+  .dp-card--image { padding: 0.6rem; }
+  .dp-card--image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    margin-top: 0.4rem;
+    filter: hue-rotate(40deg) saturate(0.8);
+    border: 1px solid rgba(110, 255, 175, 0.15);
+  }
+
+  .dp-card--deploy {
+    background: rgba(20, 40, 30, 0.75);
+    border-color: rgba(110, 255, 175, 0.4);
+  }
+
+  /* ── Server rack ── */
+  .dp-rack {
+    background: rgba(10, 22, 18, 0.75);
+    border: 1px solid rgba(110, 255, 175, 0.25);
+    padding: 0.85rem 1rem;
+    text-align: left;
+  }
+  .dp-station--left .dp-rack { text-align: left; }
+
+  .dp-rack ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .dp-rack li {
+    display: grid;
+    grid-template-columns: 12px 38px 1fr auto;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0.6rem;
+    font-size: 0.78rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(110, 255, 175, 0.1);
+  }
+
+  .dp-rack-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6effaf;
+    box-shadow: 0 0 8px #6effaf;
+    animation: dpBlink 2s ease-in-out infinite;
+  }
+
+  @keyframes dpBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+
+  .dp-rack-id { color: rgba(110, 255, 175, 0.6); letter-spacing: 0.06em; }
+  .dp-rack-name { color: #fff; font-weight: 600; }
+  .dp-rack-status { color: #6effaf; font-size: 0.62rem; letter-spacing: 0.1em; }
+
+  /* ── Action buttons ── */
+  .dp-action-row {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dp-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid rgba(110, 255, 175, 0.4);
+    color: #c8ffd8;
+    text-decoration: none;
+    font-size: 0.85rem;
+    background: rgba(0, 0, 0, 0.3);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .dp-btn:hover { background: rgba(110, 255, 175, 0.1); color: #fff; }
+
+  .dp-btn--primary {
+    background: #6effaf;
+    color: #050a0a;
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .dp-btn--primary:hover {
+    background: #fff;
+    box-shadow: 0 0 28px rgba(110, 255, 175, 0.4);
+  }
+
+  /* ── End node ── */
+  .dp-station--end .dp-end-label {
+    grid-column: 1 / -1;
+    margin-top: 0.85rem;
+    font-size: 0.75rem;
+    letter-spacing: 0.18em;
+    color: #ff4d6d;
+  }
+
+  /* ── README ── */
+  .dp-readme {
+    max-width: 720px;
+    margin: 3rem auto 0;
+    padding: 1.5rem;
+    border: 1px dashed rgba(110, 255, 175, 0.18);
+  }
+
+  .dp-content {
+    line-height: 1.85;
+    color: rgba(220, 245, 230, 0.7);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  }
+  .dp-content :global(h2),
+  .dp-content :global(h3),
+  .dp-content :global(h4) { color: #fff; margin-top: 1.5rem; }
+  .dp-content :global(a) { color: #6effaf; text-decoration: none; }
+  .dp-content :global(a:hover) { text-shadow: 0 0 8px rgba(110, 255, 175, 0.4); }
+  .dp-content :global(code) {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(110, 255, 175, 0.06);
+    border: 1px solid rgba(110, 255, 175, 0.12);
+    padding: 0.15rem 0.45rem;
+  }
+  .dp-content :global(img) { border: 1px solid rgba(110, 255, 175, 0.18); max-width: 100%; }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .dp-station {
+      grid-template-columns: 60px 1fr;
+    }
+    .dp-line { left: 30px; }
+    .dp-station--right .dp-card,
+    .dp-station--right .dp-rack,
+    .dp-station--left .dp-card,
+    .dp-station--left .dp-rack {
+      grid-column: 2;
+      margin-left: 1rem;
+      margin-right: 0;
+      text-align: left;
+    }
+    .dp-station--center .dp-card,
+    .dp-station--center .dp-end-label {
+      grid-column: 2;
+      margin: 0;
+      text-align: left;
+    }
+    .dp-node { grid-column: 1; }
+  }
+</style>

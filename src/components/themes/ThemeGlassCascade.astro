@@ -1,0 +1,425 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+
+// Build the cascade: an array of cards that the user "flies through" along Z.
+type Card =
+  | { kind: 'title' }
+  | { kind: 'desc' }
+  | { kind: 'image' }
+  | { kind: 'tech' }
+  | { kind: 'feature'; index: number }
+  | { kind: 'actions' };
+
+const cards: Card[] = [{ kind: 'title' }];
+if (descShort) cards.push({ kind: 'desc' });
+if (image?.url) cards.push({ kind: 'image' });
+if (techNodes.length) cards.push({ kind: 'tech' });
+features.forEach((_, i) => cards.push({ kind: 'feature', index: i }));
+if (acf.github_url || acf.download_url) cards.push({ kind: 'actions' });
+
+const SCROLL_PER_CARD_VH = 90; // each card occupies 90vh of scroll
+const totalScrollVh = cards.length * SCROLL_PER_CARD_VH + 100;
+---
+
+<article class="gc-detail">
+
+  <a href="/#projects" class="gc-back" data-i18n="project.back">&larr; Zurück</a>
+
+  <!-- Subtle starfield ambient -->
+  <div class="gc-stars" aria-hidden="true">
+    <span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <!-- Scroll container drives card depth -->
+  <section class="gc-cascade" style={`--card-count: ${cards.length}; --total-scroll: ${totalScrollVh}vh;`}>
+
+    <div class="gc-stage">
+      {cards.map((card, i) => (
+        <div class="gc-card" data-card-index={i} style={`--idx: ${i};`}>
+          {card.kind === 'title' && (
+            <div class="gc-card-inner gc-card-title">
+              <span class="gc-eyebrow">{owner}{year && <> &middot; {year}</>}</span>
+              <h1>{project.title.rendered}</h1>
+              <span class="gc-scroll-hint">scroll &darr;</span>
+            </div>
+          )}
+
+          {card.kind === 'desc' && (
+            <div class="gc-card-inner gc-card-desc">
+              <span class="gc-eyebrow">Vision</span>
+              <p>{descShort}</p>
+            </div>
+          )}
+
+          {card.kind === 'image' && image?.url && (
+            <div class="gc-card-inner gc-card-image">
+              <img src={image.url} alt={image.alt || project.title.rendered} />
+            </div>
+          )}
+
+          {card.kind === 'tech' && (
+            <div class="gc-card-inner gc-card-tech">
+              <span class="gc-eyebrow">Stack</span>
+              <ul>
+                {techNodes.map((t: string) => <li>{t}</li>)}
+              </ul>
+            </div>
+          )}
+
+          {card.kind === 'feature' && (
+            <div class="gc-card-inner gc-card-feature">
+              <span class="gc-eyebrow">0{card.index + 1}</span>
+              <h3>{features[card.index].title}</h3>
+              {features[card.index].description && <p>{features[card.index].description}</p>}
+            </div>
+          )}
+
+          {card.kind === 'actions' && (
+            <div class="gc-card-inner gc-card-actions">
+              <span class="gc-eyebrow">Take it home</span>
+              <div class="gc-action-row">
+                {acf.github_url && (
+                  <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="gc-btn">View Source</a>
+                )}
+                {acf.download_url && (
+                  <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="gc-btn gc-btn--primary">Download</a>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+  </section>
+
+  <!-- Long-form (after the cascade journey) -->
+  <section class="gc-aftermath">
+    <span class="gc-eyebrow">Notes</span>
+    <div class="gc-content content" set:html={project.content.rendered} />
+  </section>
+
+</article>
+
+<script>
+  (function () {
+    const cascade = document.querySelector<HTMLElement>('.gc-cascade');
+    const stage = document.querySelector<HTMLElement>('.gc-stage');
+    if (!cascade || !stage) return;
+
+    const cards = Array.from(stage.querySelectorAll<HTMLElement>('.gc-card'));
+    const cardCount = cards.length;
+
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const rect = cascade.getBoundingClientRect();
+      const total = cascade.offsetHeight - window.innerHeight;
+      const raw = -rect.top;
+      const progress = total > 0 ? Math.max(0, Math.min(1, raw / total)) : 0;
+      // Continuous progress maps to "current card index" as a float.
+      const cur = progress * (cardCount - 1);
+
+      cards.forEach((card, i) => {
+        const delta = i - cur; // negative = behind us (fly-through), positive = ahead in depth
+        // Translate Z so distant cards are far in the back.
+        const tz = delta * -800; // px (negative pushes back, positive comes forward then past)
+        // Scale follows depth.
+        const scale = 1 + Math.max(-0.6, Math.min(0.4, -delta * 0.18));
+        // Opacity peaks near 0, fades when far ahead/behind.
+        let opacity = 1 - Math.min(1, Math.abs(delta) * 0.55);
+        if (delta < -0.5) opacity = Math.max(0, 1 + delta * 1.2); // fade as we pass through
+        // Blur intensifies for distant ones.
+        const blur = Math.min(24, Math.abs(delta) * 12);
+
+        card.style.transform = `translate3d(-50%, -50%, ${tz}px) scale(${scale})`;
+        card.style.opacity = String(opacity);
+        card.style.filter = `blur(${blur}px)`;
+        card.style.zIndex = String(1000 - Math.round(Math.abs(delta) * 10));
+        card.style.pointerEvents = Math.abs(delta) < 0.5 ? 'auto' : 'none';
+      });
+    };
+
+    window.addEventListener('scroll', () => {
+      if (!frame) frame = window.requestAnimationFrame(update);
+    }, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    update();
+  })();
+</script>
+
+<style>
+  .gc-detail {
+    color: rgba(255, 255, 255, 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    background:
+      radial-gradient(ellipse at 50% 30%, rgba(120, 70, 220, 0.18), transparent 60%),
+      radial-gradient(ellipse at 50% 80%, rgba(0, 240, 255, 0.1), transparent 50%),
+      #04030a;
+    overflow-x: hidden;
+  }
+
+  .gc-back {
+    position: fixed;
+    top: 5.5rem;
+    left: 1.5rem;
+    z-index: 30;
+    color: rgba(255, 255, 255, 0.55);
+    text-decoration: none;
+    font-size: 0.85rem;
+    background: rgba(8, 8, 14, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 0.85rem;
+    border-radius: 999px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    transition: color 0.2s ease;
+  }
+  .gc-back:hover { color: #fff; }
+
+  /* Stars */
+  .gc-stars {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .gc-stars span {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: #fff;
+    opacity: 0.6;
+    animation: gcTwinkle 4s ease-in-out infinite;
+  }
+  .gc-stars span:nth-child(1) { top: 12%; left: 18%; animation-delay: 0s; }
+  .gc-stars span:nth-child(2) { top: 28%; left: 78%; animation-delay: 1s; }
+  .gc-stars span:nth-child(3) { top: 55%; left: 35%; animation-delay: 2s; }
+  .gc-stars span:nth-child(4) { top: 72%; left: 62%; animation-delay: 0.5s; }
+  .gc-stars span:nth-child(5) { top: 18%; left: 50%; animation-delay: 1.5s; }
+  .gc-stars span:nth-child(6) { top: 88%; left: 22%; animation-delay: 2.5s; }
+  @keyframes gcTwinkle {
+    0%, 100% { opacity: 0.2; transform: scale(0.8); }
+    50%      { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* Cascade scroll driver */
+  .gc-cascade {
+    position: relative;
+    height: var(--total-scroll);
+    width: 100%;
+  }
+
+  .gc-stage {
+    position: sticky;
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
+    overflow: hidden;
+  }
+
+  /* Cards */
+  .gc-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(90vw, 720px);
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform, opacity, filter;
+    transition: filter 0.05s linear;
+    transform-style: preserve-3d;
+  }
+
+  .gc-card-inner {
+    background: rgba(20, 18, 35, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 28px;
+    padding: 3rem 3rem;
+    box-shadow:
+      0 40px 100px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(40px) saturate(1.4);
+    -webkit-backdrop-filter: blur(40px) saturate(1.4);
+    color: #fff;
+    text-align: center;
+  }
+
+  .gc-eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(0, 240, 255, 0.7);
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* Title card */
+  .gc-card-title h1 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    background: linear-gradient(135deg, #fff, rgba(0, 240, 255, 0.8));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .gc-scroll-hint {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: uppercase;
+    animation: gcBob 2s ease-in-out infinite;
+  }
+
+  @keyframes gcBob {
+    0%, 100% { transform: translateY(0); opacity: 0.6; }
+    50%      { transform: translateY(6px); opacity: 1; }
+  }
+
+  /* Desc card */
+  .gc-card-desc p {
+    margin: 0;
+    font-size: clamp(1.2rem, 2vw, 1.6rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 300;
+  }
+
+  /* Image card */
+  .gc-card-image {
+    padding: 0;
+    overflow: hidden;
+  }
+  .gc-card-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 28px;
+  }
+
+  /* Tech card */
+  .gc-card-tech ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+  .gc-card-tech li {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.5rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  /* Feature card */
+  .gc-card-feature h3 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .gc-card-feature p {
+    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.65;
+    font-size: 1.05rem;
+    max-width: 56ch;
+  }
+
+  /* Action card */
+  .gc-action-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .gc-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.85rem 1.6rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+  .gc-btn:hover { background: rgba(255, 255, 255, 0.12); }
+
+  .gc-btn--primary {
+    background: #fff;
+    color: #04030a;
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .gc-btn--primary:hover {
+    box-shadow: 0 0 32px rgba(255, 255, 255, 0.2);
+  }
+
+  /* Aftermath (post-cascade) */
+  .gc-aftermath {
+    position: relative;
+    z-index: 5;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4rem 2rem 6rem;
+    text-align: left;
+  }
+
+  .gc-content {
+    line-height: 1.85;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  .gc-content :global(h2),
+  .gc-content :global(h3),
+  .gc-content :global(h4) { color: #fff; margin-top: 1.5rem; }
+  .gc-content :global(a) { color: #00f0ff; text-decoration: none; }
+  .gc-content :global(a:hover) { text-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
+  .gc-content :global(img) { border-radius: 12px; max-width: 100%; }
+
+  /* Reduce motion */
+  @media (prefers-reduced-motion: reduce) {
+    .gc-cascade { height: auto; }
+    .gc-stage   { position: static; height: auto; perspective: none; overflow: visible; padding: 2rem 0; }
+    .gc-card {
+      position: relative;
+      top: auto; left: auto;
+      transform: none !important;
+      opacity: 1 !important;
+      filter: none !important;
+      margin: 1rem auto;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .gc-card-inner { padding: 2rem 1.5rem; border-radius: 22px; }
+  }
+</style>

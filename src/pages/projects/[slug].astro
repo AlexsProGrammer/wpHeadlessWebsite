@@ -7,6 +7,14 @@ import ThemeAppleSpatial from '../../components/themes/ThemeAppleSpatial.astro';
 import ThemeTerminalDark from '../../components/themes/ThemeTerminalDark.astro';
 import ThemeMinimalGrid from '../../components/themes/ThemeMinimalGrid.astro';
 import ThemeSplitScreen from '../../components/themes/ThemeSplitScreen.astro';
+import ThemeOrbitalFlow from '../../components/themes/ThemeOrbitalFlow.astro';
+import ThemeBlueprintSchematic from '../../components/themes/ThemeBlueprintSchematic.astro';
+import ThemeHudTelemetry from '../../components/themes/ThemeHudTelemetry.astro';
+import ThemeGlassCascade from '../../components/themes/ThemeGlassCascade.astro';
+import ThemeDataPipeline from '../../components/themes/ThemeDataPipeline.astro';
+import ThemeNeonCyber from '../../components/themes/ThemeNeonCyber.astro';
+import ThemeEditorialZine from '../../components/themes/ThemeEditorialZine.astro';
+import ThemeVoid from '../../components/themes/ThemeVoid.astro';
 import CustomMemorySnatcher from '../../components/themes/CustomMemorySnatcher.astro';
 
 export async function getStaticPaths() {
@@ -42,7 +50,20 @@ const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'rand
       }
 
       // 2. Define available random themes (excluding custom ones)
-      const availableThemes = ['theme_apple_spatial', 'theme_terminal_dark', 'theme_minimal_grid', 'theme_split_screen'];
+      const availableThemes = [
+        'theme_apple_spatial',
+        'theme_terminal_dark',
+        'theme_minimal_grid',
+        'theme_split_screen',
+        'theme_orbital_flow',
+        'theme_blueprint_schematic',
+        'theme_hud_telemetry',
+        'theme_glass_cascade',
+        'theme_data_pipeline',
+        'theme_neon_cyber',
+        'theme_editorial_zine',
+        'theme_void'
+      ];
 
       // 3. Check SessionStorage to maintain theme consistency per project during the visit
       const storageKey = `theme_seed_${slug}`;
@@ -77,6 +98,38 @@ const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'rand
       <ThemeSplitScreen project={project} acf={acf} image={image} technologies={technologies} />
     </div>
 
+    <div class="theme-wrapper" data-theme-id="theme_orbital_flow">
+      <ThemeOrbitalFlow project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_blueprint_schematic">
+      <ThemeBlueprintSchematic project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_hud_telemetry">
+      <ThemeHudTelemetry project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_glass_cascade">
+      <ThemeGlassCascade project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_data_pipeline">
+      <ThemeDataPipeline project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_neon_cyber">
+      <ThemeNeonCyber project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_editorial_zine">
+      <ThemeEditorialZine project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
+    <div class="theme-wrapper" data-theme-id="theme_void">
+      <ThemeVoid project={project} acf={acf} image={image} technologies={technologies} />
+    </div>
+
     <div class="theme-wrapper" data-theme-id="custom_memorysnatcher">
       <CustomMemorySnatcher project={project} acf={acf} image={image} technologies={technologies} />
     </div>
@@ -96,6 +149,14 @@ const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'rand
   :global(html[data-project-theme="theme_terminal_dark"]) .theme-wrapper[data-theme-id="theme_terminal_dark"],
   :global(html[data-project-theme="theme_minimal_grid"]) .theme-wrapper[data-theme-id="theme_minimal_grid"],
   :global(html[data-project-theme="theme_split_screen"]) .theme-wrapper[data-theme-id="theme_split_screen"],
+  :global(html[data-project-theme="theme_orbital_flow"]) .theme-wrapper[data-theme-id="theme_orbital_flow"],
+  :global(html[data-project-theme="theme_blueprint_schematic"]) .theme-wrapper[data-theme-id="theme_blueprint_schematic"],
+  :global(html[data-project-theme="theme_hud_telemetry"]) .theme-wrapper[data-theme-id="theme_hud_telemetry"],
+  :global(html[data-project-theme="theme_glass_cascade"]) .theme-wrapper[data-theme-id="theme_glass_cascade"],
+  :global(html[data-project-theme="theme_data_pipeline"]) .theme-wrapper[data-theme-id="theme_data_pipeline"],
+  :global(html[data-project-theme="theme_neon_cyber"]) .theme-wrapper[data-theme-id="theme_neon_cyber"],
+  :global(html[data-project-theme="theme_editorial_zine"]) .theme-wrapper[data-theme-id="theme_editorial_zine"],
+  :global(html[data-project-theme="theme_void"]) .theme-wrapper[data-theme-id="theme_void"],
   :global(html[data-project-theme="custom_memorysnatcher"]) .theme-wrapper[data-theme-id="custom_memorysnatcher"] {
     display: block;
     animation: themeFadeIn 0.5s ease-out forwards;

@@ -1,0 +1,406 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+const titleText = project.title?.rendered ? project.title.rendered.replace(/<[^>]*>/g, '') : '';
+---
+
+<article class="ez-detail">
+
+  <a href="/#projects" class="ez-back" data-i18n="project.back">← Index</a>
+
+  <!-- ── Issue header ── -->
+  <header class="ez-masthead">
+    <span class="ez-issue">Issue Nº {year || '—'}</span>
+    <span class="ez-rule"></span>
+    <span class="ez-byline">By {owner}</span>
+  </header>
+
+  <!-- ── Oversized title that bleeds off-canvas ── -->
+  <section class="ez-titlewrap">
+    <h1 class="ez-title">{titleText}</h1>
+
+    {image?.url && (
+      <figure class="ez-figure">
+        <img src={image.url} alt={image.alt || titleText} />
+      </figure>
+    )}
+
+    {descShort && (
+      <p class="ez-lede">
+        <span class="ez-dropcap">{descShort.charAt(0)}</span>{descShort.slice(1)}
+      </p>
+    )}
+  </section>
+
+  <!-- ── Features as editorial columns ── -->
+  {features.length > 0 && (
+    <section class="ez-features">
+      {features.map((f, i) => (
+        <article class={`ez-feature ez-feature--${i % 3}`}>
+          <span class="ez-feat-num">N° {String(i + 1).padStart(2, '0')}</span>
+          <h2>{f.title}</h2>
+          {f.description && <p>{f.description}</p>}
+        </article>
+      ))}
+    </section>
+  )}
+
+  <!-- ── Tech as editorial credits row ── -->
+  {techNodes.length > 0 && (
+    <section class="ez-credits">
+      <span class="ez-credits-label">Materials</span>
+      <span class="ez-credits-rule"></span>
+      <ul>
+        {techNodes.map((t: string) => <li>{t}</li>)}
+      </ul>
+    </section>
+  )}
+
+  <!-- ── Long-form ── -->
+  <section class="ez-content content" set:html={project.content.rendered} />
+
+  <!-- ── Footer with actions ── -->
+  {(acf.github_url || acf.download_url) && (
+    <footer class="ez-footer">
+      <span class="ez-foot-label">— End of Article —</span>
+      <div class="ez-actions">
+        {acf.github_url && (
+          <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="ez-link">View Source ↗</a>
+        )}
+        {acf.download_url && (
+          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="ez-link ez-link--bold">Download ↓</a>
+        )}
+      </div>
+    </footer>
+  )}
+
+</article>
+
+<style>
+  .ez-detail {
+    background: #0a0a0a;
+    color: #fff;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    padding: 0;
+    overflow: hidden;
+    max-width: 100%;
+  }
+
+  .ez-back {
+    display: inline-block;
+    margin: 2rem 0 0 2rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    text-decoration: none;
+    font-size: 0.85rem;
+    letter-spacing: 0.04em;
+    transition: color 0.2s ease;
+  }
+  .ez-back:hover { color: #fff; }
+
+  /* ── Masthead ── */
+  .ez-masthead {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem 4vw 1.5rem;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ez-issue { font-weight: 700; color: #fff; }
+  .ez-rule { flex: 1; height: 1px; background: rgba(255, 255, 255, 0.18); }
+  .ez-byline { color: rgba(255, 255, 255, 0.6); }
+
+  /* ── Title wrap (oversized & bleeding) ── */
+  .ez-titlewrap {
+    position: relative;
+    padding: 4rem 4vw 4rem;
+    overflow: visible;
+  }
+
+  .ez-title {
+    margin: 0;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: 900;
+    font-size: clamp(4rem, 16vw, 18rem);
+    line-height: 0.85;
+    letter-spacing: -0.04em;
+    color: #fff;
+    text-transform: none;
+    /* Allow it to bleed off the right edge for that magazine feel */
+    white-space: nowrap;
+    overflow: visible;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Image overlapping the title ── */
+  .ez-figure {
+    position: relative;
+    margin: -3rem 0 0;
+    width: 65%;
+    max-width: 720px;
+    z-index: 2;
+    margin-left: auto;
+    border: 4px solid #fff;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+  }
+
+  .ez-figure img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: contrast(1.05);
+  }
+
+  /* ── Lede with drop cap ── */
+  .ez-lede {
+    margin: 3rem auto 0;
+    max-width: 56ch;
+    font-size: clamp(1.2rem, 1.6vw, 1.5rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.92);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .ez-dropcap {
+    float: left;
+    font-size: 5.5rem;
+    line-height: 0.9;
+    font-weight: 900;
+    margin: 0.2rem 0.5rem 0 0;
+    color: #fff;
+    font-style: normal;
+  }
+
+  /* ── Features (editorial columns) ── */
+  .ez-features {
+    padding: 3rem 4vw;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 2.5rem 1.5rem;
+  }
+
+  .ez-feature {
+    grid-column: span 4;
+  }
+
+  /* Asymmetric break for variety */
+  .ez-feature--0 { grid-column: span 6; }
+  .ez-feature--1 { grid-column: span 3; padding-top: 4rem; }
+  .ez-feature--2 { grid-column: span 3; }
+
+  .ez-feat-num {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 0.85rem;
+  }
+
+  .ez-feature h2 {
+    margin: 0 0 0.85rem;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: #fff;
+  }
+
+  .ez-feature p {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.7);
+  }
+
+  /* ── Credits row ── */
+  .ez-credits {
+    padding: 2.5rem 4vw;
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .ez-credits-label {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #fff;
+  }
+
+  .ez-credits-rule {
+    flex: 0 0 60px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  .ez-credits ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .ez-credits li::after {
+    content: ' /';
+    color: rgba(255, 255, 255, 0.3);
+    margin-left: 0.4rem;
+  }
+  .ez-credits li:last-child::after { content: ''; }
+
+  /* ── Content ── */
+  .ez-content {
+    padding: 3rem 4vw;
+    max-width: 700px;
+    margin: 0 auto;
+    columns: 2;
+    column-gap: 3rem;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(255, 255, 255, 0.85);
+  }
+
+  .ez-content :global(h2),
+  .ez-content :global(h3),
+  .ez-content :global(h4) {
+    color: #fff;
+    column-span: all;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-weight: 800;
+    font-size: 2rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-top: 2rem;
+  }
+  .ez-content :global(p) { margin: 0 0 1rem; }
+  .ez-content :global(strong) { color: #fff; font-weight: 700; }
+  .ez-content :global(a) {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    text-decoration-thickness: 1px;
+  }
+  .ez-content :global(blockquote) {
+    column-span: all;
+    border: none;
+    margin: 2rem 0;
+    padding: 0;
+    font-size: clamp(1.5rem, 2.5vw, 2.5rem);
+    font-style: italic;
+    line-height: 1.25;
+    color: #fff;
+    text-align: center;
+    quotes: '"' '"';
+  }
+  .ez-content :global(blockquote::before),
+  .ez-content :global(blockquote::after) {
+    content: open-quote;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, 0.35);
+    line-height: 0;
+    vertical-align: -0.5rem;
+  }
+  .ez-content :global(blockquote::after) { content: close-quote; }
+  .ez-content :global(img) {
+    column-span: all;
+    width: 100%;
+    height: auto;
+    border: 4px solid #fff;
+    margin: 1.5rem 0;
+  }
+  .ez-content :global(code) {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 0.1rem 0.4rem;
+    font-size: 0.9em;
+  }
+
+  /* ── Footer ── */
+  .ez-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 3rem 4vw 4rem;
+    text-align: center;
+  }
+
+  .ez-foot-label {
+    display: block;
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 1.5rem;
+  }
+
+  .ez-actions {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    flex-wrap: wrap;
+  }
+
+  .ez-link {
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Times New Roman', 'Georgia', serif;
+    font-style: italic;
+    font-size: 1.5rem;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    padding-bottom: 0.2rem;
+    transition: border-color 0.2s ease;
+  }
+  .ez-link:hover { border-bottom-color: #fff; }
+  .ez-link--bold { font-style: normal; font-weight: 800; }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .ez-feature--0,
+    .ez-feature--1,
+    .ez-feature--2 { grid-column: span 6; padding-top: 0; }
+    .ez-figure { width: 90%; }
+    .ez-content { columns: 1; }
+  }
+
+  @media (max-width: 560px) {
+    .ez-feature,
+    .ez-feature--0,
+    .ez-feature--1,
+    .ez-feature--2 { grid-column: span 12; }
+    .ez-masthead, .ez-credits { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .ez-titlewrap { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .ez-features { padding: 2rem 1.5rem; gap: 2rem 1rem; }
+    .ez-content { padding: 2rem 1.5rem; }
+    .ez-figure { width: 100%; margin-top: -2rem; }
+  }
+</style>

@@ -1,0 +1,471 @@
+---
+import type { ThemeProps } from './types';
+import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
+
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+
+const year = getYear(project, acf);
+const owner = getOwner(acf);
+const descShort = getDescShort(project, acf);
+const features = getFeatures(acf);
+const techNodes = getTechNodes(acf, technologies);
+
+// Pre-compute satellite positions on two orbits (alternating).
+const ORBIT_INNER = 220;
+const ORBIT_OUTER = 320;
+const satellites = techNodes.map((label: string, i: number) => {
+  const onInner = i % 2 === 0;
+  const radius = onInner ? ORBIT_INNER : ORBIT_OUTER;
+  const ringCount = onInner
+    ? Math.ceil(techNodes.length / 2)
+    : Math.floor(techNodes.length / 2);
+  const ringIndex = onInner ? Math.floor(i / 2) : Math.floor(i / 2);
+  const baseAngle = (360 / Math.max(ringCount, 1)) * ringIndex + (onInner ? 0 : 30);
+  return { label, radius, baseAngle, ring: onInner ? 'inner' : 'outer', idx: i };
+});
+---
+
+<article class="of-detail">
+  <a href="/#projects" class="of-back" data-i18n="project.back">&larr; Zurück</a>
+
+  <header class="of-header">
+    <span class="of-eyebrow">{owner}{year && <> &middot; {year}</>}</span>
+    <h1 class="of-title">{project.title.rendered}</h1>
+    {descShort && <p class="of-tagline">{descShort}</p>}
+  </header>
+
+  <!-- ── Orbital Stage ── -->
+  <section class="of-stage" aria-label="Tech orbit">
+    <!-- Orbit rings (SVG) -->
+    <svg class="of-orbits" viewBox="-400 -400 800 800" aria-hidden="true">
+      <defs>
+        <radialGradient id="ofGlow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(0, 240, 255, 0.5)" />
+          <stop offset="100%" stop-color="rgba(0, 240, 255, 0)" />
+        </radialGradient>
+      </defs>
+      <circle cx="0" cy="0" r="160" fill="url(#ofGlow)" opacity="0.35" />
+      <circle class="of-orbit-ring" cx="0" cy="0" r={ORBIT_INNER} />
+      <circle class="of-orbit-ring" cx="0" cy="0" r={ORBIT_OUTER} />
+    </svg>
+
+    <!-- Center disc -->
+    <div class="of-core">
+      {image?.url ? (
+        <img src={image.url} alt={image.alt || project.title.rendered} />
+      ) : (
+        <span class="of-core-fallback">{project.title.rendered}</span>
+      )}
+      <span class="of-core-ring"></span>
+    </div>
+
+    <!-- Satellites -->
+    <div class="of-satellites" data-feature-count={features.length}>
+      {satellites.map((s) => (
+        <button
+          type="button"
+          class={`of-sat of-sat--${s.ring}`}
+          style={`--orbit-radius: ${s.radius}px; --base-angle: ${s.baseAngle}deg;`}
+          data-feature-index={s.idx % Math.max(features.length, 1)}
+          aria-label={`Tech: ${s.label}`}
+        >
+          <span class="of-sat-dot"></span>
+          <span class="of-sat-label">{s.label}</span>
+        </button>
+      ))}
+    </div>
+  </section>
+
+  <!-- ── Feature reveal panel ── -->
+  {features.length > 0 && (
+    <section class="of-features" aria-live="polite">
+      <span class="of-eyebrow of-eyebrow--center">Click a satellite to explore features</span>
+      <div class="of-feature-stack">
+        {features.map((f, i) => (
+          <article class="of-feature" data-feature-id={i}>
+            <span class="of-feature-num">0{i + 1}</span>
+            <h3>{f.title}</h3>
+            {f.description && <p>{f.description}</p>}
+          </article>
+        ))}
+      </div>
+    </section>
+  )}
+
+  <!-- ── Actions ── -->
+  {(acf.github_url || acf.download_url) && (
+    <div class="of-actions">
+      {acf.github_url && (
+        <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="of-btn">View Source</a>
+      )}
+      {acf.download_url && (
+        <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="of-btn of-btn--primary">Download</a>
+      )}
+    </div>
+  )}
+
+  <!-- ── Long form ── -->
+  <section class="of-content content" set:html={project.content.rendered} />
+
+</article>
+
+<script>
+  // Activate clicked satellite + show matching feature card.
+  (function () {
+    const sats = document.querySelectorAll<HTMLButtonElement>('.of-sat');
+    const features = document.querySelectorAll<HTMLElement>('.of-feature');
+    if (!sats.length) return;
+
+    const activate = (idx: number) => {
+      sats.forEach((s) =>
+        s.classList.toggle('is-active', Number(s.dataset.featureIndex) === idx)
+      );
+      features.forEach((f) =>
+        f.classList.toggle('is-active', Number(f.dataset.featureId) === idx)
+      );
+    };
+
+    if (features.length) activate(0);
+
+    sats.forEach((sat) => {
+      sat.addEventListener('click', () => {
+        const idx = Number(sat.dataset.featureIndex || 0);
+        activate(idx);
+      });
+    });
+  })();
+</script>
+
+<style>
+  .of-detail {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem 5rem;
+    color: rgba(255, 255, 255, 0.85);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    text-align: center;
+  }
+
+  .of-back {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    transition: color 0.2s ease;
+  }
+  .of-back:hover { color: #fff; }
+
+  .of-header { margin-bottom: 2.5rem; }
+
+  .of-eyebrow {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(0, 240, 255, 0.7);
+    margin-bottom: 0.85rem;
+  }
+  .of-eyebrow--center { text-align: center; margin-bottom: 1.5rem; }
+
+  .of-title {
+    font-size: clamp(2rem, 5vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    margin: 0 0 1rem;
+    color: #fff;
+  }
+
+  .of-tagline {
+    margin: 0 auto;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 56ch;
+  }
+
+  /* ── Stage ── */
+  .of-stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-width: 760px;
+    margin: 1.5rem auto 3rem;
+  }
+
+  .of-orbits {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .of-orbit-ring {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.1);
+    stroke-width: 1;
+    stroke-dasharray: 2 4;
+  }
+
+  /* Center core */
+  .of-core {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 280px;
+    height: 280px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 0 60px rgba(0, 240, 255, 0.2),
+      0 0 120px rgba(138, 43, 226, 0.15);
+    background: #08080e;
+  }
+
+  .of-core img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    animation: ofCoreSpin 80s linear infinite;
+  }
+
+  .of-core-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: #fff;
+    font-weight: 800;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .of-core-ring {
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    animation: ofRingPulse 4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes ofCoreSpin {
+    from { transform: scale(1.04) rotate(0deg); }
+    to   { transform: scale(1.04) rotate(360deg); }
+  }
+  @keyframes ofRingPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.25); opacity: 1; }
+    50%      { box-shadow: 0 0 0 18px rgba(0, 240, 255, 0); opacity: 0.6; }
+  }
+
+  /* ── Satellites ── */
+  .of-satellites {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+  }
+
+  .of-sat {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    transform: rotate(var(--base-angle)) translateX(var(--orbit-radius));
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    animation: ofOrbit 32s linear infinite;
+  }
+
+  .of-sat--outer {
+    animation: ofOrbit 48s linear infinite reverse;
+  }
+
+  .of-sat-dot {
+    position: absolute;
+    top: -7px;
+    left: -7px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--neon-blue, #00f0ff);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .of-sat--outer .of-sat-dot {
+    background: var(--neon-purple, #8a2be2);
+    box-shadow: 0 0 16px rgba(138, 43, 226, 0.7);
+  }
+
+  .of-sat-label {
+    position: absolute;
+    top: 12px;
+    left: 14px;
+    transform: rotate(calc(-1 * var(--base-angle)));
+    transform-origin: -14px -12px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(8, 8, 14, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    white-space: nowrap;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+
+  .of-sat:hover .of-sat-dot,
+  .of-sat.is-active .of-sat-dot {
+    transform: scale(1.6);
+    box-shadow: 0 0 28px rgba(0, 240, 255, 0.95);
+  }
+
+  @keyframes ofOrbit {
+    from { transform: rotate(var(--base-angle)) translateX(var(--orbit-radius)) rotate(0deg); }
+    to   { transform: rotate(calc(var(--base-angle) + 360deg)) translateX(var(--orbit-radius)) rotate(-360deg); }
+  }
+
+  /* Pause on hover so satellites are clickable */
+  .of-stage:hover .of-sat,
+  .of-stage:hover .of-core img { animation-play-state: paused; }
+
+  /* ── Feature reveal ── */
+  .of-features { margin: 2.5rem auto 3rem; max-width: 720px; }
+
+  .of-feature-stack {
+    position: relative;
+    min-height: 180px;
+  }
+
+  .of-feature {
+    position: absolute;
+    inset: 0;
+    text-align: left;
+    padding: 1.75rem 2rem;
+    background: rgba(20, 20, 28, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+    transition: opacity 0.4s ease, transform 0.4s ease;
+    pointer-events: none;
+  }
+
+  .of-feature.is-active {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    position: relative;
+  }
+
+  .of-feature-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--neon-blue, #00f0ff);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.65rem;
+    display: inline-block;
+  }
+
+  .of-feature h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  .of-feature p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.65;
+  }
+
+  /* ── Actions ── */
+  .of-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin: 2rem 0 3rem;
+  }
+
+  .of-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transition: all 0.2s ease;
+  }
+  .of-btn:hover {
+    background: rgba(0, 240, 255, 0.12);
+    border-color: rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.18);
+  }
+
+  .of-btn--primary {
+    background: var(--neon-blue, #00f0ff);
+    color: #08080e;
+    border-color: transparent;
+    font-weight: 700;
+  }
+  .of-btn--primary:hover {
+    background: #fff;
+    box-shadow: 0 0 32px rgba(0, 240, 255, 0.35);
+  }
+
+  /* ── Long form ── */
+  .of-content {
+    text-align: left;
+    max-width: 720px;
+    margin: 0 auto;
+    line-height: 1.85;
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .of-content :global(h2),
+  .of-content :global(h3),
+  .of-content :global(h4) { color: #fff; margin-top: 1.75rem; }
+  .of-content :global(a) { color: var(--neon-blue, #00f0ff); text-decoration: none; }
+  .of-content :global(a:hover) { text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+  .of-content :global(code) {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+  }
+  .of-content :global(img) { border-radius: 12px; max-width: 100%; }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .of-stage { max-width: 400px; }
+    .of-core { width: 180px; height: 180px; }
+    .of-sat-label { font-size: 0.68rem; }
+  }
+  @media (max-width: 480px) {
+    .of-stage { max-width: 300px; }
+    .of-core { width: 130px; height: 130px; }
+    .of-sat-label { display: none; }
+  }
+</style>
