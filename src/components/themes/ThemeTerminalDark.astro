@@ -1,0 +1,318 @@
+---
+import type { ThemeProps } from './types';
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+---
+
+<article class="terminal-detail">
+  <a href="/#projects" class="back-link" data-i18n="project.back">
+    <span class="prompt">$</span> cd ..
+  </a>
+
+  <header class="terminal-header">
+    <div class="terminal-bar">
+      <span class="dot dot-red"></span>
+      <span class="dot dot-yellow"></span>
+      <span class="dot dot-green"></span>
+      <span class="terminal-title">~/projects/{project.slug}</span>
+    </div>
+
+    <div class="terminal-body">
+      <p class="line"><span class="prompt">$</span> <span class="cmd">whoami</span></p>
+      <h1 class="output">{project.title.rendered}</h1>
+
+      {technologies.length > 0 && (
+        <div class="line-group">
+          <p class="line"><span class="prompt">$</span> <span class="cmd">cat tech_stack.txt</span></p>
+          <ul class="tech-list output">
+            {technologies.map((tech: string) => (
+              <li><span class="arrow">›</span> {tech}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {acf.github_url && (
+        <div class="line-group">
+          <p class="line"><span class="prompt">$</span> <span class="cmd">git remote -v</span></p>
+          <p class="output">
+            <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="repo-link">
+              origin &nbsp;&nbsp;{acf.github_url} (fetch)
+            </a>
+          </p>
+          <p class="line"><span class="prompt">$</span> <span class="cursor-blink">_</span></p>
+        </div>
+      )}
+
+      {acf.download_url && (
+        <p class="line">
+          <span class="prompt">$</span>
+          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="cmd exec-cmd">
+            ./install.sh
+          </a>
+        </p>
+      )}
+    </div>
+  </header>
+
+  {image?.url && (
+    <div class="terminal-image-frame">
+      <span class="frame-label">// screenshot.png</span>
+      <img src={image.url} alt={image.alt || project.title.rendered} />
+    </div>
+  )}
+
+  <section class="terminal-content">
+    <p class="line"><span class="prompt">$</span> <span class="cmd">cat README.md</span></p>
+    <div class="content output" set:html={project.content.rendered} />
+  </section>
+</article>
+
+<style>
+  .terminal-detail {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+    color: #c8ffc8;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #7fff7f;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    transition: color 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: #00fff0;
+  }
+
+  /* ── Terminal Window ── */
+  .terminal-header {
+    border: 1px solid #00ff9044;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 30px rgba(0, 255, 144, 0.07), 0 0 60px rgba(0, 240, 255, 0.04);
+  }
+
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #111;
+    border-bottom: 1px solid #00ff9033;
+    padding: 0.6rem 1rem;
+  }
+
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .dot-red    { background: #ff5f56; }
+  .dot-yellow { background: #ffbd2e; }
+  .dot-green  { background: #27c93f; }
+
+  .terminal-title {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: #4a4a4a;
+  }
+
+  .terminal-body {
+    background: #050505;
+    padding: 1.5rem;
+  }
+
+  /* ── Lines ── */
+  .line {
+    margin: 0.25rem 0;
+    font-size: 0.9rem;
+    white-space: pre-wrap;
+  }
+
+  .line-group {
+    margin: 1rem 0;
+  }
+
+  .prompt {
+    color: #00ff90;
+    font-weight: 700;
+    margin-right: 0.5rem;
+    user-select: none;
+  }
+
+  .cmd {
+    color: #00e5ff;
+  }
+
+  .exec-cmd {
+    color: #00ff90;
+    text-decoration: none;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+  }
+
+  .exec-cmd:hover {
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 255, 144, 0.6);
+  }
+
+  .output {
+    color: #b0ffb0;
+    padding-left: 1.5rem;
+    margin: 0.25rem 0 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .cursor-blink {
+    display: inline-block;
+    animation: blink 1s step-end infinite;
+    color: #00ff90;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* ── Tech List ── */
+  .tech-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tech-list li {
+    font-size: 0.85rem;
+    color: #90ffc8;
+    line-height: 1.8;
+  }
+
+  .arrow {
+    color: #00ff90;
+    margin-right: 0.4rem;
+  }
+
+  /* ── Repo link ── */
+  .repo-link {
+    color: #00e5ff;
+    text-decoration: none;
+    transition: text-shadow 0.2s ease;
+  }
+
+  .repo-link:hover {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+  }
+
+  /* ── Screenshot ── */
+  .terminal-image-frame {
+    margin-bottom: 2rem;
+    border: 1px solid #00ff9033;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .frame-label {
+    display: block;
+    background: #0a0a0a;
+    color: #3a6a3a;
+    font-size: 0.75rem;
+    padding: 0.35rem 1rem;
+    border-bottom: 1px solid #00ff9022;
+  }
+
+  .terminal-image-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: saturate(0.7) contrast(1.05);
+    transition: filter 0.4s ease;
+  }
+
+  .terminal-image-frame:hover img {
+    filter: saturate(1) contrast(1);
+  }
+
+  /* ── Content ── */
+  .terminal-content {
+    border: 1px solid #00ff9022;
+    border-radius: 6px;
+    background: #050505;
+    padding: 1.5rem;
+  }
+
+  .content {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: #a8d8a8;
+  }
+
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4) {
+    color: #00ff90;
+    font-weight: 700;
+    margin-top: 1.5rem;
+  }
+
+  .content :global(p) {
+    color: #a8d8a8;
+  }
+
+  .content :global(a) {
+    color: #00e5ff;
+    text-decoration: none;
+  }
+
+  .content :global(a:hover) {
+    text-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  }
+
+  .content :global(strong) {
+    color: #c8ffc8;
+  }
+
+  .content :global(code) {
+    background: rgba(0, 255, 144, 0.06);
+    border: 1px solid rgba(0, 255, 144, 0.12);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.88em;
+    color: #7fff7f;
+  }
+
+  .content :global(pre) {
+    background: #0a0a0a;
+    border: 1px solid #00ff9022;
+    border-radius: 6px;
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .content :global(blockquote) {
+    border-left: 3px solid #00ff90;
+    padding: 0.75rem 1.25rem;
+    margin-left: 0;
+    color: #7fff7f;
+    background: rgba(0, 255, 144, 0.03);
+  }
+
+  .content :global(img) {
+    border-radius: 4px;
+    border: 1px solid #00ff9022;
+    max-width: 100%;
+  }
+
+  @media (max-width: 768px) {
+    .terminal-detail {
+      padding: 2rem 1rem;
+    }
+  }
+</style>

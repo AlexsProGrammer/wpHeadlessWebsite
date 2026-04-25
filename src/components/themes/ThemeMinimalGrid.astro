@@ -1,0 +1,301 @@
+---
+import type { ThemeProps } from './types';
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+---
+
+<article class="mg-detail">
+  <div class="mg-grid">
+
+    <div class="mg-cell mg-cell--header">
+      <a href="/#projects" class="back-link" data-i18n="project.back">&larr;</a>
+      <h1>{project.title.rendered}</h1>
+    </div>
+
+    {technologies.length > 0 && (
+      <div class="mg-cell mg-cell--tags">
+        <span class="cell-label">TECH</span>
+        <ul class="tech-list">
+          {technologies.map((tech: string) => (
+            <li>{tech}</li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {image?.url && (
+      <div class="mg-cell mg-cell--image">
+        <img src={image.url} alt={image.alt || project.title.rendered} />
+      </div>
+    )}
+
+    {(acf.github_url || acf.download_url) && (
+      <div class="mg-cell mg-cell--actions">
+        <span class="cell-label">LINKS</span>
+        <div class="action-group">
+          {acf.github_url && (
+            <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="mg-link">
+              GitHub &rarr;
+            </a>
+          )}
+          {acf.download_url && (
+            <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="mg-link">
+              Download &rarr;
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+
+    <div class="mg-cell mg-cell--content">
+      <span class="cell-label">ABOUT</span>
+      <div class="content" set:html={project.content.rendered} />
+    </div>
+
+  </div>
+</article>
+
+<style>
+  .mg-detail {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  .mg-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  /* ── Cells ── */
+  .mg-cell {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem;
+    position: relative;
+  }
+
+  .mg-cell--header {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mg-cell--tags {
+    grid-column: 1 / 2;
+  }
+
+  .mg-cell--actions {
+    grid-column: 2 / 3;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .mg-cell--image {
+    grid-column: 1 / -1;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .mg-cell--content {
+    grid-column: 1 / -1;
+  }
+
+  /* ── Cell Label ── */
+  .cell-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(255, 255, 255, 0.25);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+  }
+
+  /* ── Back Link ── */
+  .back-link {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    transition: color 0.2s ease;
+  }
+
+  .back-link:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ── Title ── */
+  .mg-cell--header h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0;
+    color: #fff;
+  }
+
+  /* ── Tech List ── */
+  .tech-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .tech-list li {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    padding-bottom: 0.5rem;
+    transition: color 0.2s ease;
+  }
+
+  .tech-list li:last-child {
+    border-bottom: none;
+  }
+
+  .mg-cell--tags:hover .tech-list li {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  /* ── Actions ── */
+  .action-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .mg-link {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.45);
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+  }
+
+  .mg-link:hover {
+    color: #fff;
+  }
+
+  /* ── Image ── */
+  .mg-cell--image img {
+    width: 100%;
+    height: 340px;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(100%);
+    transition: filter 0.5s ease;
+  }
+
+  .mg-cell--image:hover img {
+    filter: grayscale(0%);
+  }
+
+  /* ── Content ── */
+  .content {
+    margin-top: 0.5rem;
+    line-height: 1.85;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4) {
+    color: #fff;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding-bottom: 0.5rem;
+    margin-top: 2rem;
+  }
+
+  .content :global(p) {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .content :global(a) {
+    color: #fff;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(255, 255, 255, 0.25);
+    transition: text-decoration-color 0.2s ease;
+  }
+
+  .content :global(a:hover) {
+    text-decoration-color: rgba(255, 255, 255, 0.8);
+  }
+
+  .content :global(strong) {
+    color: #fff;
+  }
+
+  .content :global(code) {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.15rem 0.45rem;
+    border-radius: 3px;
+    font-size: 0.88em;
+  }
+
+  .content :global(pre) {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .content :global(blockquote) {
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 1.25rem;
+    margin-left: 0;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .content :global(img) {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    max-width: 100%;
+    filter: grayscale(100%);
+    transition: filter 0.4s ease;
+  }
+
+  .content :global(img:hover) {
+    filter: grayscale(0%);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .mg-detail {
+      padding: 1.5rem 1rem;
+    }
+
+    .mg-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mg-cell--tags,
+    .mg-cell--actions {
+      grid-column: 1 / -1;
+    }
+
+    .mg-cell--header h1 {
+      font-size: 2rem;
+    }
+
+    .mg-cell--image img {
+      height: 220px;
+    }
+  }
+</style>

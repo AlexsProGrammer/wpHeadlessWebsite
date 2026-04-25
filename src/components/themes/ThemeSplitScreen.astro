@@ -1,0 +1,274 @@
+---
+import type { ThemeProps } from './types';
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+---
+
+<div class="ss-layout">
+
+  <!-- Left panel: sticky -->
+  <aside class="ss-left">
+    <a href="/#projects" class="back-link" data-i18n="project.back">&larr; Back</a>
+
+    <h1>{project.title.rendered}</h1>
+
+    {technologies.length > 0 && (
+      <ul class="tech-list">
+        {technologies.map((tech: string) => (
+          <li>{tech}</li>
+        ))}
+      </ul>
+    )}
+
+    <div class="action-group">
+      {acf.github_url && (
+        <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="ss-btn ss-btn--outline">
+          GitHub
+        </a>
+      )}
+      {acf.download_url && (
+        <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="ss-btn ss-btn--solid">
+          Download
+        </a>
+      )}
+    </div>
+
+    {image?.url && (
+      <div class="ss-image">
+        <img src={image.url} alt={image.alt || project.title.rendered} />
+      </div>
+    )}
+  </aside>
+
+  <!-- Right panel: scrolls -->
+  <main class="ss-right">
+    <div class="content" set:html={project.content.rendered} />
+  </main>
+
+</div>
+
+<style>
+  /* ── Layout ── */
+  .ss-layout {
+    display: flex;
+    min-height: 100vh;
+  }
+
+  /* ── Left Panel ── */
+  .ss-left {
+    width: 50vw;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 3rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.015);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    gap: 1.5rem;
+  }
+
+  /* ── Right Panel ── */
+  .ss-right {
+    width: 50vw;
+    padding: 5rem 3.5rem;
+    overflow-y: auto;
+  }
+
+  /* ── Back Link ── */
+  .back-link {
+    display: inline-block;
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    transition: color 0.2s ease;
+    align-self: flex-start;
+  }
+
+  .back-link:hover {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  /* ── Title ── */
+  .ss-left h1 {
+    font-size: clamp(1.75rem, 3.5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin: 0;
+    color: #fff;
+  }
+
+  /* ── Tech Tags ── */
+  .tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tech-list li {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    color: rgba(255, 255, 255, 0.5);
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+
+  /* ── Buttons ── */
+  .action-group {
+    display: flex;
+    gap: 0.65rem;
+    flex-wrap: wrap;
+  }
+
+  .ss-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .ss-btn--outline {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .ss-btn--outline:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+  }
+
+  .ss-btn--solid {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid transparent;
+    color: #080810;
+    font-weight: 700;
+  }
+
+  .ss-btn--solid:hover {
+    background: #fff;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+  }
+
+  /* ── Image ── */
+  .ss-image {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    flex-shrink: 0;
+  }
+
+  .ss-image img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .ss-left:hover .ss-image img {
+    transform: scale(1.04);
+  }
+
+  /* ── Right Content ── */
+  .content {
+    line-height: 1.9;
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4) {
+    color: #fff;
+    font-weight: 700;
+    margin-top: 2.5rem;
+  }
+
+  .content :global(p) {
+    color: rgba(255, 255, 255, 0.6);
+  }
+
+  .content :global(a) {
+    color: var(--neon-blue, #00f0ff);
+    text-decoration: none;
+    transition: text-shadow 0.2s ease;
+  }
+
+  .content :global(a:hover) {
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+  }
+
+  .content :global(strong) {
+    color: #fff;
+  }
+
+  .content :global(code) {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.15rem 0.45rem;
+    border-radius: 5px;
+    font-size: 0.88em;
+  }
+
+  .content :global(pre) {
+    background: rgba(8, 8, 14, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    padding: 1.25rem;
+    overflow-x: auto;
+  }
+
+  .content :global(blockquote) {
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 0.75rem 1.25rem;
+    margin-left: 0;
+    color: rgba(255, 255, 255, 0.4);
+  }
+
+  .content :global(img) {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    max-width: 100%;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .ss-layout {
+      flex-direction: column;
+      min-height: auto;
+    }
+
+    .ss-left {
+      width: 100%;
+      height: auto;
+      position: relative;
+      padding: 2.5rem 1.5rem;
+      border-right: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .ss-right {
+      width: 100%;
+      padding: 2.5rem 1.5rem;
+    }
+  }
+</style>

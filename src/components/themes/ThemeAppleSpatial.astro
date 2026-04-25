@@ -1,0 +1,340 @@
+---
+import type { ThemeProps } from './types';
+const { project, acf, image, technologies } = Astro.props as ThemeProps;
+---
+
+<article class="project-detail">
+  <a href="/#projects" class="back-link reveal" data-i18n="project.back">&larr; Zurück zur Startseite</a>
+
+  <div class="project-hero reveal" style="transition-delay: 80ms">
+    <div class="hero-info">
+      <h1>{project.title.rendered}</h1>
+
+      {technologies.length > 0 && (
+        <ul class="tech-list">
+          {technologies.map((tech: string) => (
+            <li>{tech}</li>
+          ))}
+        </ul>
+      )}
+
+      <div class="project-actions">
+        {acf.github_url && (
+          <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="btn btn-github">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+        )}
+        {acf.download_url && (
+          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="btn btn-download">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download
+          </a>
+        )}
+      </div>
+    </div>
+
+    {image?.url && (
+      <div class="hero-image">
+        <img src={image.url} alt={image.alt || project.title.rendered} />
+        <div class="image-shine"></div>
+      </div>
+    )}
+  </div>
+
+  <div class="content-panel reveal" style="transition-delay: 200ms">
+    <div class="content" set:html={project.content.rendered} />
+  </div>
+</article>
+
+<style>
+  .project-detail {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 3.5rem 2rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 2.5rem;
+    font-size: 0.9rem;
+    transition: color 0.25s ease, gap 0.3s var(--transition-spring);
+  }
+
+  .back-link:hover {
+    color: var(--text-main);
+    gap: 0.6rem;
+  }
+
+  /* ── Project Hero ── */
+  .project-hero {
+    display: flex;
+    gap: 2.5rem;
+    align-items: flex-start;
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: var(--glass-radius);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .project-hero:hover {
+    border-color: var(--glass-border-hover);
+    box-shadow: var(--glass-shadow-hover);
+  }
+
+  .hero-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* ── Hero Image with glass frame ── */
+  .hero-image {
+    position: relative;
+    flex-shrink: 0;
+    width: 360px;
+    border-radius: var(--glass-radius-sm);
+    overflow: hidden;
+    border: 1px solid var(--glass-border);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  .hero-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    transition: transform 0.6s var(--transition-spring);
+  }
+
+  .project-hero:hover .hero-image img {
+    transform: scale(1.03);
+  }
+
+  .image-shine {
+    position: absolute;
+    inset: 0;
+    border-radius: var(--glass-radius-sm);
+    background: linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.08) 0%,
+      transparent 40%,
+      transparent 60%,
+      rgba(255, 255, 255, 0.03) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* ── Title ── */
+  .project-detail h1 {
+    font-size: 2.75rem;
+    font-weight: 800;
+    margin: 0 0 1.25rem;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, var(--text-main), var(--neon-blue));
+    background-size: 200% 100%;
+    background-position: 100% 0%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: background-position 0.5s ease;
+  }
+
+  .project-hero:hover h1 {
+    background-position: 0% 100%;
+  }
+
+  /* ── Tech Pills ── */
+  .tech-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1.5rem;
+  }
+
+  .tech-list li {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.55);
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: border-color 0.3s ease, color 0.3s ease, background 0.3s ease;
+  }
+
+  .project-hero:hover .tech-list li {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: rgba(255, 255, 255, 0.7);
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  /* ── Action Buttons ── */
+  .project-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.3rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition:
+      background 0.25s ease,
+      transform 0.15s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+  }
+
+  .btn:active {
+    transform: scale(0.96);
+  }
+
+  .btn-github {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+  }
+
+  .btn-github:hover {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 20px rgba(138, 43, 226, 0.15);
+    border-color: var(--glass-border-hover);
+  }
+
+  .btn-download {
+    background: rgba(255, 255, 255, 0.92);
+    color: var(--bg-dark);
+    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+  }
+
+  .btn-download:hover {
+    background: #ffffff;
+    box-shadow:
+      0 0 24px rgba(255, 255, 255, 0.2),
+      0 0 48px rgba(0, 240, 255, 0.08);
+  }
+
+  /* ── Content Panel ── */
+  .content-panel {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius);
+    padding: 2.5rem;
+    box-shadow: var(--glass-shadow);
+  }
+
+  .content {
+    line-height: 1.85;
+    font-size: 1.05rem;
+    color: var(--text-muted);
+  }
+
+  .content :global(h2),
+  .content :global(h3),
+  .content :global(h4) {
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  .content :global(p) {
+    color: var(--text-muted);
+  }
+
+  .content :global(a) {
+    color: var(--neon-blue);
+    text-decoration: none;
+    transition: text-shadow 0.2s ease;
+  }
+
+  .content :global(a:hover) {
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+  }
+
+  .content :global(strong) {
+    color: var(--text-main);
+  }
+
+  .content :global(code) {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 0.15rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.88em;
+  }
+
+  .content :global(pre) {
+    background: rgba(8, 8, 14, 0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius-sm);
+    padding: 1.25rem;
+    overflow-x: auto;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .content :global(blockquote) {
+    border-left: 3px solid var(--neon-purple);
+    padding: 1rem 1.25rem;
+    margin-left: 0;
+    color: var(--text-muted);
+    background: rgba(138, 43, 226, 0.04);
+    border-radius: 0 var(--glass-radius-sm) var(--glass-radius-sm) 0;
+  }
+
+  .content :global(img) {
+    border-radius: var(--glass-radius-sm);
+    border: 1px solid var(--glass-border);
+    max-width: 100%;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .project-hero {
+      flex-direction: column-reverse;
+      gap: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .hero-image {
+      width: 100%;
+    }
+
+    .project-detail h1 {
+      font-size: 1.75rem;
+    }
+
+    .content-panel {
+      padding: 1.5rem;
+    }
+  }
+</style>
