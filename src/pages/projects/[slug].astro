@@ -1,6 +1,5 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import DecorBreak from '../../components/decor/DecorBreak.astro';
 import { getProjectBySlug, getProjectImage, getAllProjects } from '../../lib/api';
 
 import ThemeAppleSpatial from '../../components/themes/ThemeAppleSpatial.astro';
@@ -15,7 +14,7 @@ import ThemeDataPipeline from '../../components/themes/ThemeDataPipeline.astro';
 import ThemeNeonCyber from '../../components/themes/ThemeNeonCyber.astro';
 import ThemeEditorialZine from '../../components/themes/ThemeEditorialZine.astro';
 import ThemeVoid from '../../components/themes/ThemeVoid.astro';
-import CustomMemorySnatcher from '../../components/themes/CustomMemorySnatcher.astro';
+import CustomThemeMemorySnatcher from '../../components/themes/CustomThemeMemorySnatcher.astro';
 
 export async function getStaticPaths() {
   const projects = await getAllProjects();
@@ -35,49 +34,54 @@ const technologies = acf.tech_stack
   ? acf.tech_stack.split(',').map((t: string) => t.trim()).filter(Boolean)
   : [];
 
-// Check if WP ACF field enforces a specific theme
+// Random pool — only `theme_*` keys (NEVER `custom_*`).
+const RANDOM_THEMES = [
+  'theme_apple_spatial',
+  'theme_terminal_dark',
+  'theme_minimal_grid',
+  'theme_split_screen',
+  'theme_orbital_flow',
+  'theme_blueprint_schematic',
+  'theme_hud_telemetry',
+  'theme_glass_cascade',
+  'theme_data_pipeline',
+  'theme_neon_cyber',
+  'theme_editorial_zine',
+  'theme_void',
+];
+
+// ACF can pin any specific theme (including custom_*).
 const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'random' ? acf.theme_layout : null;
 ---
 
 <MainLayout title={project.title.rendered}>
 
-  <script is:inline define:vars={{ slug, forceTheme }}>
-    (function() {
-      // 1. If ACF mandates a theme, use it.
-      if (forceTheme) {
-        document.documentElement.setAttribute('data-project-theme', forceTheme);
-        return;
+  <!-- Inline FOUC-prevention: pick theme BEFORE first paint -->
+  <script is:inline define:vars={{ slug, forceTheme, RANDOM_THEMES }}>
+    (function () {
+      try {
+        document.documentElement.classList.add('has-project-theme');
+        document.documentElement.setAttribute('data-project-slug', slug);
+
+        if (forceTheme) {
+          document.documentElement.setAttribute('data-project-theme', forceTheme);
+          return;
+        }
+
+        var key = 'theme_seed_' + slug;
+        var picked = null;
+        try { picked = sessionStorage.getItem(key); } catch (e) { /* private mode */ }
+
+        if (!picked || RANDOM_THEMES.indexOf(picked) === -1) {
+          picked = RANDOM_THEMES[Math.floor(Math.random() * RANDOM_THEMES.length)];
+          try { sessionStorage.setItem(key, picked); } catch (e) {}
+        }
+
+        document.documentElement.setAttribute('data-project-theme', picked);
+      } catch (err) {
+        // Fail-safe: never leave the page blank.
+        document.documentElement.setAttribute('data-project-theme', 'theme_apple_spatial');
       }
-
-      // 2. Define available random themes (excluding custom ones)
-      const availableThemes = [
-        'theme_apple_spatial',
-        'theme_terminal_dark',
-        'theme_minimal_grid',
-        'theme_split_screen',
-        'theme_orbital_flow',
-        'theme_blueprint_schematic',
-        'theme_hud_telemetry',
-        'theme_glass_cascade',
-        'theme_data_pipeline',
-        'theme_neon_cyber',
-        'theme_editorial_zine',
-        'theme_void'
-      ];
-
-      // 3. Check SessionStorage to maintain theme consistency per project during the visit
-      const storageKey = `theme_seed_${slug}`;
-      let selectedTheme = sessionStorage.getItem(storageKey);
-
-      // 4. Generate new theme if none exists in session
-      if (!selectedTheme) {
-        const randomIndex = Math.floor(Math.random() * availableThemes.length);
-        selectedTheme = availableThemes[randomIndex];
-        sessionStorage.setItem(storageKey, selectedTheme);
-      }
-
-      // 5. Apply to HTML tag instantly (prevents FOUC)
-      document.documentElement.setAttribute('data-project-theme', selectedTheme);
     })();
   </script>
 
@@ -85,85 +89,94 @@ const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'rand
     <div class="theme-wrapper" data-theme-id="theme_apple_spatial">
       <ThemeAppleSpatial project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_terminal_dark">
       <ThemeTerminalDark project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_minimal_grid">
       <ThemeMinimalGrid project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_split_screen">
       <ThemeSplitScreen project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_orbital_flow">
       <ThemeOrbitalFlow project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_blueprint_schematic">
       <ThemeBlueprintSchematic project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_hud_telemetry">
       <ThemeHudTelemetry project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_glass_cascade">
       <ThemeGlassCascade project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_data_pipeline">
       <ThemeDataPipeline project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_neon_cyber">
       <ThemeNeonCyber project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_editorial_zine">
       <ThemeEditorialZine project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="theme_void">
       <ThemeVoid project={project} acf={acf} image={image} technologies={technologies} />
     </div>
-
     <div class="theme-wrapper" data-theme-id="custom_memorysnatcher">
-      <CustomMemorySnatcher project={project} acf={acf} image={image} technologies={technologies} />
+      <CustomThemeMemorySnatcher project={project} acf={acf} image={image} technologies={technologies} />
     </div>
   </div>
-
-  <DecorBreak id="project-detail-end" />
 </MainLayout>
 
-<style>
-  /* Hide all theme wrappers by default */
-  .theme-wrapper {
-    display: none;
-  }
+<!-- ── Global rules: full-bleed project pages, hide site decor ── -->
+<style is:global>
+  /* Hide every theme by default; reveal only the active one. */
+  html.has-project-theme .theme-wrapper { display: none; }
 
-  /* Reveal the selected theme based on the HTML attribute set by the inline script */
-  :global(html[data-project-theme="theme_apple_spatial"]) .theme-wrapper[data-theme-id="theme_apple_spatial"],
-  :global(html[data-project-theme="theme_terminal_dark"]) .theme-wrapper[data-theme-id="theme_terminal_dark"],
-  :global(html[data-project-theme="theme_minimal_grid"]) .theme-wrapper[data-theme-id="theme_minimal_grid"],
-  :global(html[data-project-theme="theme_split_screen"]) .theme-wrapper[data-theme-id="theme_split_screen"],
-  :global(html[data-project-theme="theme_orbital_flow"]) .theme-wrapper[data-theme-id="theme_orbital_flow"],
-  :global(html[data-project-theme="theme_blueprint_schematic"]) .theme-wrapper[data-theme-id="theme_blueprint_schematic"],
-  :global(html[data-project-theme="theme_hud_telemetry"]) .theme-wrapper[data-theme-id="theme_hud_telemetry"],
-  :global(html[data-project-theme="theme_glass_cascade"]) .theme-wrapper[data-theme-id="theme_glass_cascade"],
-  :global(html[data-project-theme="theme_data_pipeline"]) .theme-wrapper[data-theme-id="theme_data_pipeline"],
-  :global(html[data-project-theme="theme_neon_cyber"]) .theme-wrapper[data-theme-id="theme_neon_cyber"],
-  :global(html[data-project-theme="theme_editorial_zine"]) .theme-wrapper[data-theme-id="theme_editorial_zine"],
-  :global(html[data-project-theme="theme_void"]) .theme-wrapper[data-theme-id="theme_void"],
-  :global(html[data-project-theme="custom_memorysnatcher"]) .theme-wrapper[data-theme-id="custom_memorysnatcher"] {
+  html[data-project-theme="theme_apple_spatial"]       .theme-wrapper[data-theme-id="theme_apple_spatial"],
+  html[data-project-theme="theme_terminal_dark"]       .theme-wrapper[data-theme-id="theme_terminal_dark"],
+  html[data-project-theme="theme_minimal_grid"]        .theme-wrapper[data-theme-id="theme_minimal_grid"],
+  html[data-project-theme="theme_split_screen"]        .theme-wrapper[data-theme-id="theme_split_screen"],
+  html[data-project-theme="theme_orbital_flow"]        .theme-wrapper[data-theme-id="theme_orbital_flow"],
+  html[data-project-theme="theme_blueprint_schematic"] .theme-wrapper[data-theme-id="theme_blueprint_schematic"],
+  html[data-project-theme="theme_hud_telemetry"]       .theme-wrapper[data-theme-id="theme_hud_telemetry"],
+  html[data-project-theme="theme_glass_cascade"]       .theme-wrapper[data-theme-id="theme_glass_cascade"],
+  html[data-project-theme="theme_data_pipeline"]       .theme-wrapper[data-theme-id="theme_data_pipeline"],
+  html[data-project-theme="theme_neon_cyber"]          .theme-wrapper[data-theme-id="theme_neon_cyber"],
+  html[data-project-theme="theme_editorial_zine"]      .theme-wrapper[data-theme-id="theme_editorial_zine"],
+  html[data-project-theme="theme_void"]                .theme-wrapper[data-theme-id="theme_void"],
+  html[data-project-theme="custom_memorysnatcher"]     .theme-wrapper[data-theme-id="custom_memorysnatcher"] {
     display: block;
-    animation: themeFadeIn 0.5s ease-out forwards;
+    opacity: 1;
+    animation: dispatcherFadeIn 0.45s ease-out both;
   }
 
-  @keyframes themeFadeIn {
-    from { opacity: 0; transform: translateY(15px); }
+  @keyframes dispatcherFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Full-bleed: project page takes over the whole viewport. */
+  html.has-project-theme body { background: #000; }
+  html.has-project-theme .page-content {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+  html.has-project-theme .project-theme-dispatcher,
+  html.has-project-theme .project-theme-dispatcher > .theme-wrapper {
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  /* Hide global cosmic decor on project detail pages so it never bleeds through theme backgrounds. */
+  html.has-project-theme .cosmic-decor,
+  html.has-project-theme .cosmic-decor-column,
+  html.has-project-theme .cosmic-decor-mount,
+  html.has-project-theme [class*="cosmic-"],
+  html.has-project-theme .scroll-edge {
+    display: none !important;
   }
 </style>

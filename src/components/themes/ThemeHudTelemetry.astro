@@ -159,9 +159,9 @@ const sysId = project.slug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) |
 <style>
   .hud-detail {
     position: relative;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 4rem 4rem 5rem;
+    width: 100%;
+    margin: 0;
+    padding: 4rem 6vw 5rem;
     color: #d4ffe9;
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
     background:
@@ -171,6 +171,7 @@ const sysId = project.slug.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8) |
     box-sizing: border-box;
     overflow: hidden;
   }
+  .hud-detail > * { max-width: 1300px; margin-left: auto; margin-right: auto; }
 
   /* Outer corners */
   .hud-corner {

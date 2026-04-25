@@ -92,6 +92,10 @@ const techNodes = getTechNodes(acf, technologies);
 <style>
   .apple-detail {
     color: var(--text-main);
+    background: #08080e;
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
   }
 
   /* ────────── Full-bleed Hero ────────── */
@@ -131,7 +135,7 @@ const techNodes = getTechNodes(acf, technologies);
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 6rem 2rem 5rem;
+    padding: 6rem 2rem 6.5rem;
     position: relative;
   }
 
@@ -270,9 +274,9 @@ const techNodes = getTechNodes(acf, technologies);
   /* ────────── Glass Pills (post-hero) ────────── */
   .apple-pill {
     max-width: 1100px;
-    margin: -6rem auto 0;
-    padding: 4rem;
-    border-radius: 28px;
+    margin: 3rem auto 0;
+    padding: 2.25rem 2.5rem;
+    border-radius: 24px;
     background: rgba(20, 20, 28, 0.55);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow:
@@ -287,26 +291,31 @@ const techNodes = getTechNodes(acf, technologies);
   .apple-pill + .apple-pill,
   .apple-bento + .apple-pill,
   .apple-pill + .apple-bento {
-    margin-top: 2.5rem;
+    margin-top: 2rem;
   }
 
+  /* The tech pill is a horizontal strip — keep it tight so it doesn't dwarf the page. */
   .apple-pill--tech {
+    padding: 1.5rem 2rem;
     text-align: center;
   }
 
   .apple-pill--content {
+    padding: 3rem 3rem 3.5rem;
     margin-bottom: 5rem;
   }
 
   .apple-eyebrow {
     display: block;
-    font-size: 0.72rem;
+    font-size: 0.7rem;
     letter-spacing: 0.22em;
     font-weight: 700;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
-    margin-bottom: 1.5rem;
+    color: rgba(255, 255, 255, 0.45);
+    margin-bottom: 0.85rem;
   }
+
+  .apple-pill--tech .apple-eyebrow { margin-bottom: 0.65rem; }
 
   .apple-eyebrow--center { text-align: center; }
 
@@ -325,9 +334,9 @@ const techNodes = getTechNodes(acf, technologies);
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
     color: rgba(255, 255, 255, 0.85);
-    padding: 0.5rem 1.1rem;
+    padding: 0.4rem 0.9rem;
     border-radius: 999px;
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 600;
     letter-spacing: 0.04em;
   }

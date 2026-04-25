@@ -121,15 +121,17 @@ const techNodes = getTechNodes(acf, technologies);
 
 <style>
   .dp-detail {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 3rem 2rem 5rem;
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 4rem 6vw 6rem;
     color: rgba(220, 245, 230, 0.85);
     font-family: 'JetBrains Mono', 'Fira Code', monospace;
     background:
       radial-gradient(ellipse at top, rgba(0, 60, 40, 0.25), transparent 60%),
       #050a0a;
   }
+  .dp-detail > * { max-width: 1100px; margin-left: auto; margin-right: auto; }
 
   .dp-back {
     display: inline-block;
