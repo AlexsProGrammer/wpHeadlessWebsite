@@ -2,8 +2,14 @@
 /**
  * CustomThemeMemorySnatcher (custom_memorysnatcher)
  *
- * A bespoke, project-specific theme reserved for the "Memory Snatcher" game.
- * NOT included in the random rotation. Activate via ACF `theme_layout = custom_memorysnatcher`.
+ * Inspired by the MemorySnatcher desktop-app aesthetic — but a *project page*,
+ * not a clone of the UI. Vibe: dark surface, amber/yellow accent, soft
+ * dark cards with subtle borders, status pills, mono code accents,
+ * lightweight icon tiles. Layout follows the same structural pattern as
+ * theme_blueprint_schematic / theme_horror_crt: header → hero card →
+ * features → tech → long-form, all centered, full-bleed background.
+ *
+ * Reserved for the MemorySnatcher project — excluded from random rotation.
  */
 import type { ThemeProps } from './types';
 import { getYear, getOwner, getDescShort, getFeatures, getTechNodes } from './types';
@@ -17,486 +23,514 @@ const features = getFeatures(acf);
 const techNodes = getTechNodes(acf, technologies);
 ---
 
-<article class="ms-detail">
+<article class="msa-detail">
 
-  <!-- CRT scanlines + vignette -->
-  <div class="ms-fx" aria-hidden="true">
-    <div class="ms-scanlines"></div>
-    <div class="ms-vignette"></div>
-    <div class="ms-noise"></div>
-  </div>
+  <a href="/#projects" class="msa-back" data-i18n="project.back">&larr; Back to projects</a>
 
-  <!-- Top bar -->
-  <header class="ms-topbar">
-    <a href="/#projects" class="ms-back" data-i18n="project.back">&lt;&lt; EXIT TO MAIN MENU</a>
-    <div class="ms-status">
-      <span class="ms-led"></span>
-      <span>SAVE_STATE: CORRUPTED</span>
-      <span class="ms-divider">|</span>
-      <span>CHANNEL 04 / NTSC</span>
+  <!-- ── Header ── -->
+  <header class="msa-header">
+    <div class="msa-header__meta">
+      <span class="msa-pill msa-pill--accent">
+        <span class="msa-led" aria-hidden="true"></span>
+        Local vault
+      </span>
+      <span class="msa-pill msa-pill--soft">{owner || 'Project'}{year && <> · {year}</>}</span>
     </div>
+    <h1 class="msa-title">{project.title.rendered}</h1>
+    {descShort && <p class="msa-tagline">{descShort}</p>}
+
+    {(acf.github_url || acf.download_url) && (
+      <div class="msa-actions">
+        {acf.download_url && (
+          <a class="msa-btn msa-btn--primary" href={acf.download_url} target="_blank" rel="noopener noreferrer">
+            <span aria-hidden="true">▶</span> Download installer
+          </a>
+        )}
+        {acf.github_url && (
+          <a class="msa-btn msa-btn--ghost" href={acf.github_url} target="_blank" rel="noopener noreferrer">
+            <span aria-hidden="true">↗</span> View source
+          </a>
+        )}
+      </div>
+    )}
   </header>
 
-  <!-- Hero -->
-  <section class="ms-hero">
-    <div class="ms-hero__copy">
-      <span class="ms-eyebrow">// CASE FILE — {project.slug}</span>
-      <h1 class="ms-title" data-text={project.title.rendered}>{project.title.rendered}</h1>
-      <div class="ms-meta">
-        <span><b>SUBJECT</b>{owner}</span>
-        {year && <span><b>YEAR</b>{year}</span>}
-        <span><b>SEVERITY</b><em>EXTREME</em></span>
-      </div>
-      {descShort && <p class="ms-tagline">{descShort}</p>}
-
-      <div class="ms-actions">
-        {acf.github_url && (
-          <a href={acf.github_url} target="_blank" rel="noopener noreferrer" class="ms-btn ms-btn--ghost">
-            [ ACCESS SOURCE.GIT ]
-          </a>
-        )}
-        {acf.download_url && (
-          <a href={acf.download_url} target="_blank" rel="noopener noreferrer" class="ms-btn ms-btn--primary">
-            [ INSTALL.EXE ]
-          </a>
-        )}
+  <!-- ── Hero card ── -->
+  <section class="msa-card msa-card--hero">
+    <div class="msa-card__head">
+      <span class="msa-icon-tile msa-icon-tile--amber" aria-hidden="true">▣</span>
+      <div class="msa-card__head-text">
+        <h2 class="msa-card__title">
+          Project snapshot
+          <span class="msa-pill msa-pill--soft">v{year || '1.0'}</span>
+        </h2>
+        <p class="msa-card__sub">
+          A look at <strong>{project.title.rendered}</strong> — what it does, what it's built with, and where to get it.
+        </p>
       </div>
     </div>
 
     {image?.url && (
-      <figure class="ms-screen">
-        <div class="ms-screen-bezel">
-          <div class="ms-screen-chrome">
-            <span class="ms-chrome-dots"><span></span><span></span><span></span></span>
-            <span class="ms-chrome-label">PREVIEW.MP4 — REC ●</span>
-          </div>
-          <img src={image.url} alt={image.alt || project.title.rendered} />
-          <span class="ms-screen-flicker"></span>
-        </div>
-      </figure>
+      <div class="msa-card__shot">
+        <img src={image.url} alt={image.alt || project.title.rendered} loading="lazy" />
+      </div>
     )}
+
+    {/* Quick stats strip — mirrors the app's tile row, but reframed for a project page */}
+    <div class="msa-stats">
+      <div class="msa-stat">
+        <span class="msa-stat__icon" aria-hidden="true">▦</span>
+        <div>
+          <p class="msa-stat__label">Features</p>
+          <p class="msa-stat__value">{features.length || '—'}</p>
+        </div>
+      </div>
+      <div class="msa-stat">
+        <span class="msa-stat__icon" aria-hidden="true">⚙</span>
+        <div>
+          <p class="msa-stat__label">Tech stack</p>
+          <p class="msa-stat__value">{techNodes.length || '—'}</p>
+        </div>
+      </div>
+      <div class="msa-stat">
+        <span class="msa-stat__icon" aria-hidden="true">★</span>
+        <div>
+          <p class="msa-stat__label">Released</p>
+          <p class="msa-stat__value">{year || '—'}</p>
+        </div>
+      </div>
+      <div class="msa-stat">
+        <span class="msa-stat__icon" aria-hidden="true">●</span>
+        <div>
+          <p class="msa-stat__label">Status</p>
+          <p class="msa-stat__value msa-stat__value--ok">Stable</p>
+        </div>
+      </div>
+    </div>
   </section>
 
-  <!-- Tech rack -->
-  {techNodes.length > 0 && (
-    <section class="ms-block">
-      <span class="ms-block-tag">// TECH STACK</span>
-      <ul class="ms-tags">
-        {techNodes.map((t: string) => (
-          <li class="ms-tag">{t}</li>
+  <!-- ── Features ── -->
+  {features.length > 0 && (
+    <section class="msa-card">
+      <div class="msa-card__head">
+        <span class="msa-icon-tile msa-icon-tile--mint" aria-hidden="true">▦</span>
+        <div class="msa-card__head-text">
+          <h2 class="msa-card__title">
+            Features
+            <span class="msa-pill msa-pill--soft">{features.length}</span>
+          </h2>
+          <p class="msa-card__sub">Highlights from the build.</p>
+        </div>
+      </div>
+
+      <ul class="msa-featurelist">
+        {features.map((f, i) => (
+          <li class="msa-featurelist__row">
+            <span class="msa-featurelist__num">#{String(i + 1).padStart(2, '0')}</span>
+            <div>
+              <p class="msa-featurelist__name">{f.title}</p>
+              {f.description && <p class="msa-featurelist__desc">{f.description}</p>}
+            </div>
+            <span class="msa-pill msa-pill--ok">OK</span>
+          </li>
         ))}
       </ul>
     </section>
   )}
 
-  <!-- Features as case-file entries -->
-  {features.length > 0 && (
-    <section class="ms-block">
-      <span class="ms-block-tag">// EVIDENCE LOG</span>
-      <div class="ms-features">
-        {features.map((f, i) => (
-          <article class="ms-feature">
-            <span class="ms-feat-id">EVD-{String(i + 1).padStart(2, '0')}</span>
-            <h3>{f.title}</h3>
-            {f.description && <p>{f.description}</p>}
-          </article>
-        ))}
+  <!-- ── Tech stack ── -->
+  {techNodes.length > 0 && (
+    <section class="msa-card">
+      <div class="msa-card__head">
+        <span class="msa-icon-tile msa-icon-tile--violet" aria-hidden="true">⚙</span>
+        <div class="msa-card__head-text">
+          <h2 class="msa-card__title">
+            Tech stack
+            <span class="msa-pill msa-pill--soft">{techNodes.length}</span>
+          </h2>
+          <p class="msa-card__sub">Built with these tools.</p>
+        </div>
       </div>
+
+      <ul class="msa-chips">
+        {techNodes.map((t) => <li class="msa-chip">{t}</li>)}
+      </ul>
     </section>
   )}
 
-  <!-- Long-form -->
-  <section class="ms-block">
-    <span class="ms-block-tag">// FULL DOSSIER</span>
-    <div class="ms-content content" set:html={project.content.rendered} />
-  </section>
-
-  <footer class="ms-foot">
-    <span>END OF FILE — DO NOT REDISTRIBUTE</span>
-    <span class="ms-foot-glitch">▮▮▮ ▮▮ ▯▯▮ ▯▮▮</span>
-  </footer>
+  <!-- ── Long form ── -->
+  {project.content?.rendered && (
+    <section class="msa-card msa-card--prose">
+      <div class="msa-card__head">
+        <span class="msa-icon-tile msa-icon-tile--amber" aria-hidden="true">&gt;_</span>
+        <div class="msa-card__head-text">
+          <h2 class="msa-card__title">Notes</h2>
+          <p class="msa-card__sub">Background, design choices, and lessons learned.</p>
+        </div>
+      </div>
+      <div class="msa-content content" set:html={project.content.rendered} />
+    </section>
+  )}
 
 </article>
 
 <style>
-  /* ── Base ── */
-  .ms-detail {
-    position: relative;
+  /* ────────────────────────── Theme tokens ────────────────────────── */
+  .msa-detail {
+    --msa-bg:        #1c1c1c;
+    --msa-bg-deep:   #141414;
+    --msa-card:      #232323;
+    --msa-card-2:    #2a2a2a;
+    --msa-border:    #2f2f2f;
+    --msa-border-2: #3a3a3a;
+    --msa-text:      #e8e8e8;
+    --msa-text-mute: #9a9a9a;
+    --msa-text-dim:  #6a6a6a;
+    --msa-accent:    #f5b800;
+    --msa-accent-2: #ffd34d;
+    --msa-success:   #76d479;
+    --msa-danger:    #ff6b6b;
+    --msa-mint:      #6ee0c0;
+    --msa-violet:    #b794f4;
+
     width: 100%;
     min-height: 100vh;
-    padding: 4rem 6vw 6rem;
-    color: #ff6a6a;
-    font-family: 'JetBrains Mono', 'Courier New', monospace;
+    padding: 4rem 6vw 5rem;
+    color: var(--msa-text);
     background:
-      radial-gradient(ellipse at 50% 20%, rgba(180, 30, 30, 0.18), transparent 60%),
-      radial-gradient(ellipse at 80% 90%, rgba(255, 0, 80, 0.08), transparent 60%),
-      #060000;
-    overflow: hidden;
+      radial-gradient(ellipse at 50% -10%, rgba(245, 184, 0, 0.08), transparent 55%),
+      var(--msa-bg);
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
   }
 
-  /* ── FX overlays ── */
-  .ms-fx { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-  .ms-fx > * { position: absolute; inset: 0; }
-
-  .ms-scanlines {
-    background: repeating-linear-gradient(
-      0deg,
-      rgba(0, 0, 0, 0.18) 0 1px,
-      transparent 1px 3px
-    );
-    mix-blend-mode: multiply;
+  /* Center inner content. */
+  .msa-detail > * {
+    max-width: 880px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
-  .ms-vignette {
-    background:
-      radial-gradient(ellipse at center, transparent 50%, rgba(0, 0, 0, 0.85) 100%);
-  }
-
-  .ms-noise {
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='0.6'/></svg>");
-    opacity: 0.18;
-    animation: msNoise 0.6s steps(3) infinite;
-  }
-
-  @keyframes msNoise {
-    0%   { transform: translate(0, 0); }
-    33%  { transform: translate(-2px, 1px); }
-    66%  { transform: translate(2px, -1px); }
-    100% { transform: translate(0, 0); }
-  }
-
-  .ms-detail > *:not(.ms-fx) { position: relative; z-index: 1; }
-
-  /* ── Top bar ── */
-  .ms-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    border-bottom: 1px solid rgba(255, 50, 50, 0.25);
-    padding-bottom: 0.85rem;
-    margin-bottom: 3rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.18em;
-  }
-
-  .ms-back {
-    color: #ff8585;
+  /* Back */
+  .msa-back {
+    display: inline-block;
+    color: var(--msa-text-mute);
     text-decoration: none;
-    transition: color 0.2s ease, letter-spacing 0.2s ease;
-  }
-  .ms-back:hover { color: #fff; letter-spacing: 0.22em; }
-
-  .ms-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    color: rgba(255, 100, 100, 0.65);
-  }
-  .ms-led {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ff3030;
-    box-shadow: 0 0 12px #ff3030;
-    animation: msBlink 1.6s ease-in-out infinite;
-  }
-  .ms-divider { color: rgba(255, 100, 100, 0.3); }
-
-  @keyframes msBlink {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: 0.25; }
-  }
-
-  /* ── Hero ── */
-  .ms-hero {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 3rem;
-    align-items: center;
-    margin-bottom: 4rem;
-  }
-
-  .ms-eyebrow {
-    display: block;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    color: rgba(255, 80, 80, 0.7);
-    margin-bottom: 1rem;
-  }
-
-  /* Title with chromatic horror echo */
-  .ms-title {
-    position: relative;
-    margin: 0 0 1.25rem;
-    font-family: 'Courier New', monospace;
-    font-size: clamp(2.4rem, 5.5vw, 4.5rem);
-    font-weight: 900;
-    line-height: 1;
-    letter-spacing: -0.01em;
-    color: #fff;
-    text-transform: uppercase;
-    text-shadow:
-      2px 0 0 #ff003c,
-      -2px 0 0 #00fff0,
-      0 0 24px rgba(255, 0, 60, 0.35);
-  }
-
-  .ms-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.25rem;
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    color: rgba(255, 130, 130, 0.65);
+    font-size: 0.85rem;
     margin-bottom: 1.5rem;
   }
-  .ms-meta b {
-    color: rgba(255, 80, 80, 0.5);
-    margin-right: 0.45rem;
-    letter-spacing: 0.15em;
-  }
-  .ms-meta em {
-    color: #ff3030;
-    font-style: normal;
-    font-weight: 700;
-    animation: msBlink 2.2s ease-in-out infinite;
-  }
+  .msa-back:hover { color: var(--msa-accent); }
 
-  .ms-tagline {
-    margin: 0 0 1.75rem;
-    color: rgba(255, 200, 200, 0.78);
-    font-size: 1rem;
-    line-height: 1.6;
-    max-width: 50ch;
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  /* ────────────────────────── Header ────────────────────────── */
+  .msa-header {
+    margin-bottom: 1.75rem;
   }
-
-  /* Buttons */
-  .ms-actions {
+  .msa-header__meta {
     display: flex;
-    gap: 0.75rem;
     flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .msa-title {
+    margin: 0 0 0.5rem;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--msa-text);
+  }
+  .msa-tagline {
+    margin: 0 0 1.25rem;
+    color: var(--msa-text-mute);
+    font-size: 1rem;
+    max-width: 60ch;
   }
 
-  .ms-btn {
+  .msa-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /* ────────────────────────── Buttons ────────────────────────── */
+  .msa-btn {
     display: inline-flex;
     align-items: center;
-    padding: 0.85rem 1.4rem;
-    border: 1px solid rgba(255, 50, 50, 0.5);
-    background: rgba(255, 50, 50, 0.05);
-    color: #ffb0b0;
+    gap: 0.5rem;
+    padding: 0.6rem 1.05rem;
+    border-radius: 8px;
+    font-size: 0.88rem;
+    font-weight: 600;
     text-decoration: none;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
   }
-  .ms-btn:hover {
-    background: rgba(255, 50, 50, 0.15);
-    color: #fff;
-    border-color: #ff3030;
-    box-shadow: 0 0 24px rgba(255, 0, 60, 0.4);
+  .msa-btn--primary {
+    background: var(--msa-accent);
+    color: #1c1c1c;
   }
-  .ms-btn--primary {
-    background: #ff003c;
-    border-color: #ff003c;
-    color: #fff;
+  .msa-btn--primary:hover { background: var(--msa-accent-2); }
+  .msa-btn--ghost {
+    background: transparent;
+    border-color: var(--msa-border-2);
+    color: var(--msa-text);
   }
-  .ms-btn--primary:hover {
-    background: #ff3050;
-    box-shadow: 0 0 32px rgba(255, 0, 60, 0.7);
-  }
+  .msa-btn--ghost:hover { border-color: var(--msa-text-mute); }
 
-  /* ── Screen mock ── */
-  .ms-screen { margin: 0; }
-  .ms-screen-bezel {
-    position: relative;
-    border: 1px solid rgba(255, 80, 80, 0.4);
-    background: #0a0202;
-    padding: 0.4rem;
-    box-shadow: 0 0 0 4px #1a0606, 0 25px 80px rgba(255, 0, 60, 0.18);
-    overflow: hidden;
-  }
-  .ms-screen-chrome {
-    display: flex;
-    justify-content: space-between;
+  /* ────────────────────────── Pills ────────────────────────── */
+  .msa-pill {
+    display: inline-flex;
     align-items: center;
-    padding: 0.45rem 0.65rem;
-    background: #110404;
-    border-bottom: 1px solid rgba(255, 80, 80, 0.25);
-    font-size: 0.65rem;
-    color: rgba(255, 130, 130, 0.7);
-    letter-spacing: 0.12em;
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
   }
-  .ms-chrome-dots { display: inline-flex; gap: 0.35rem; }
-  .ms-chrome-dots span {
-    width: 9px; height: 9px; border-radius: 50%; display: inline-block;
-    background: rgba(255, 80, 80, 0.25);
-    border: 1px solid rgba(255, 80, 80, 0.5);
-  }
-  .ms-chrome-dots span:nth-child(1) { background: #ff3030; }
-  .ms-chrome-dots span:nth-child(2) { background: #ffaa30; }
-  .ms-chrome-dots span:nth-child(3) { background: #30ff7a; }
+  .msa-pill--soft   { background: rgba(255, 255, 255, 0.06); color: var(--msa-text-mute); }
+  .msa-pill--accent { background: rgba(245, 184, 0, 0.18);   color: var(--msa-accent); }
+  .msa-pill--ok     { background: rgba(118, 212, 121, 0.18); color: var(--msa-success); }
 
-  .ms-screen-bezel img {
+  .msa-led {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--msa-accent);
+    box-shadow: 0 0 6px rgba(245, 184, 0, 0.8);
+    animation: msaBlink 1.6s ease-in-out infinite;
+  }
+  @keyframes msaBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+  }
+
+  /* ────────────────────────── Cards ────────────────────────── */
+  .msa-card {
+    background: var(--msa-card);
+    border: 1px solid var(--msa-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+  }
+  .msa-card--hero {
+    background:
+      linear-gradient(180deg, rgba(245, 184, 0, 0.04), transparent 60%),
+      var(--msa-card);
+  }
+  .msa-card__head {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.85rem;
+    margin-bottom: 1rem;
+  }
+  .msa-card__head-text { flex: 1; min-width: 0; }
+  .msa-card__title {
+    margin: 0 0 0.2rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--msa-text);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  .msa-card__sub {
+    margin: 0;
+    color: var(--msa-text-mute);
+    font-size: 0.88rem;
+  }
+
+  /* Hero image */
+  .msa-card__shot {
+    margin-top: 0.5rem;
+    border: 1px solid var(--msa-border);
+    border-radius: 9px;
+    overflow: hidden;
+    background: var(--msa-bg-deep);
+  }
+  .msa-card__shot img {
+    display: block;
     width: 100%;
     height: auto;
-    display: block;
-    filter: hue-rotate(-10deg) saturate(0.85) contrast(1.1) brightness(0.95);
+    max-height: 380px;
+    object-fit: cover;
   }
 
-  .ms-screen-flicker {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 0%, rgba(255, 50, 50, 0.1) 50%, transparent 100%);
-    pointer-events: none;
-    animation: msScreenFlicker 6s steps(20) infinite;
-    mix-blend-mode: screen;
+  /* ────────────────────────── Icon tiles ────────────────────────── */
+  .msa-icon-tile {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
   }
-  @keyframes msScreenFlicker {
-    0%, 90%, 100% { opacity: 0.3; }
-    91%           { opacity: 0.7; transform: translateY(-2px); }
-    92%           { opacity: 0.1; }
-    93%           { opacity: 0.6; transform: translateY(1px); }
+  .msa-icon-tile--amber  { background: rgba(245, 184, 0, 0.18);   color: var(--msa-accent); }
+  .msa-icon-tile--mint   { background: rgba(110, 224, 192, 0.15); color: var(--msa-mint); }
+  .msa-icon-tile--violet { background: rgba(183, 148, 244, 0.15); color: var(--msa-violet); }
+
+  /* ────────────────────────── Stats grid ────────────────────────── */
+  .msa-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 0.6rem;
+    margin-top: 1.25rem;
   }
-
-  /* ── Blocks ── */
-  .ms-block { margin: 3rem 0; }
-
-  .ms-block-tag {
-    display: block;
-    font-size: 0.72rem;
-    letter-spacing: 0.22em;
-    color: rgba(255, 80, 80, 0.7);
-    margin-bottom: 1rem;
+  .msa-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    background: var(--msa-card-2);
+    border: 1px solid var(--msa-border);
+    border-radius: 9px;
+    padding: 0.7rem 0.9rem;
+  }
+  .msa-stat__icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--msa-text-mute);
+    font-size: 0.95rem;
+    flex-shrink: 0;
+  }
+  .msa-stat__label {
+    margin: 0;
+    color: var(--msa-text-dim);
+    font-size: 0.7rem;
     text-transform: uppercase;
-    border-left: 2px solid #ff003c;
-    padding-left: 0.7rem;
+    letter-spacing: 0.08em;
+  }
+  .msa-stat__value {
+    margin: 0.15rem 0 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--msa-text);
+    font-variant-numeric: tabular-nums;
+  }
+  .msa-stat__value--ok { color: var(--msa-success); }
+
+  /* ────────────────────────── Feature list ────────────────────────── */
+  .msa-featurelist {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .msa-featurelist__row {
+    display: grid;
+    grid-template-columns: 48px 1fr auto;
+    align-items: start;
+    gap: 0.85rem;
+    background: var(--msa-card-2);
+    border: 1px solid var(--msa-border);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    transition: border-color 0.15s ease;
+  }
+  .msa-featurelist__row:hover { border-color: var(--msa-accent); }
+  .msa-featurelist__num {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    color: var(--msa-accent);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .msa-featurelist__name {
+    margin: 0 0 0.15rem;
+    font-weight: 600;
+    color: var(--msa-text);
+    font-size: 0.92rem;
+  }
+  .msa-featurelist__desc {
+    margin: 0;
+    color: var(--msa-text-mute);
+    font-size: 0.85rem;
   }
 
-  /* Tech tags */
-  .ms-tags {
+  /* ────────────────────────── Chips ────────────────────────── */
+  .msa-chips {
     list-style: none;
     margin: 0;
     padding: 0;
     display: flex;
     flex-wrap: wrap;
-    gap: 0.45rem;
+    gap: 0.4rem;
   }
-  .ms-tag {
-    border: 1px solid rgba(255, 80, 80, 0.4);
-    padding: 0.4rem 0.85rem;
+  .msa-chip {
+    background: var(--msa-card-2);
+    border: 1px solid var(--msa-border);
+    color: var(--msa-text);
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
     font-size: 0.78rem;
-    color: #ffb8b8;
-    background: rgba(255, 0, 60, 0.05);
-    transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    font-weight: 500;
+    transition: border-color 0.15s ease, color 0.15s ease;
   }
-  .ms-tag:hover {
-    background: rgba(255, 0, 60, 0.18);
-    color: #fff;
-    transform: translateY(-2px);
+  .msa-chip:hover {
+    border-color: var(--msa-accent);
+    color: var(--msa-accent);
   }
 
-  /* Features */
-  .ms-features {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 0.75rem;
+  /* ────────────────────────── Long-form prose ────────────────────────── */
+  .msa-card--prose .msa-content {
+    color: var(--msa-text);
+    font-size: 0.93rem;
+    line-height: 1.75;
+  }
+  .msa-content :global(h1),
+  .msa-content :global(h2),
+  .msa-content :global(h3),
+  .msa-content :global(h4) {
+    color: var(--msa-text);
+    margin-top: 1.4rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  .msa-content :global(p) { margin: 0 0 0.9rem; color: var(--msa-text-mute); }
+  .msa-content :global(a) { color: var(--msa-accent); text-decoration: none; }
+  .msa-content :global(a:hover) { color: var(--msa-accent-2); }
+  .msa-content :global(img) {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--msa-border);
+    margin: 0.5rem 0;
+  }
+  .msa-content :global(code) {
+    background: rgba(245, 184, 0, 0.1);
+    color: var(--msa-accent);
+    padding: 0.12rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+  .msa-content :global(pre) {
+    background: var(--msa-bg-deep);
+    border: 1px solid var(--msa-border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    font-size: 0.82rem;
   }
 
-  .ms-feature {
-    border: 1px solid rgba(255, 80, 80, 0.3);
-    padding: 1.25rem;
-    background: rgba(20, 0, 0, 0.5);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .ms-feature:hover {
-    border-color: #ff003c;
-    box-shadow: 0 0 24px rgba(255, 0, 60, 0.25), inset 0 0 24px rgba(255, 0, 60, 0.04);
-  }
-
-  .ms-feat-id {
-    display: block;
-    font-size: 0.65rem;
-    color: #ff003c;
-    letter-spacing: 0.2em;
-    margin-bottom: 0.55rem;
-  }
-
-  .ms-feature h3 {
-    margin: 0 0 0.45rem;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    font-family: 'Courier New', monospace;
-  }
-  .ms-feature p {
-    margin: 0;
-    color: rgba(255, 200, 200, 0.65);
-    font-size: 0.85rem;
-    line-height: 1.55;
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  }
-
-  /* Content */
-  .ms-content {
-    line-height: 1.85;
-    font-size: 0.95rem;
-    color: rgba(255, 200, 200, 0.7);
-    padding: 1.5rem;
-    border: 1px dashed rgba(255, 80, 80, 0.25);
-    background: rgba(20, 0, 0, 0.35);
-    font-family: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  }
-  .ms-content :global(h2),
-  .ms-content :global(h3),
-  .ms-content :global(h4) {
-    color: #fff;
-    text-transform: uppercase;
-    margin-top: 1.5rem;
-    border-left: 3px solid #ff003c;
-    padding-left: 0.65rem;
-  }
-  .ms-content :global(a) { color: #ff8a8a; text-decoration: underline; text-underline-offset: 3px; }
-  .ms-content :global(a:hover) { color: #fff; text-shadow: 0 0 8px rgba(255, 0, 60, 0.5); }
-  .ms-content :global(code) {
-    font-family: 'JetBrains Mono', monospace;
-    background: rgba(255, 0, 60, 0.08);
-    border: 1px solid rgba(255, 0, 60, 0.2);
-    padding: 0.15rem 0.4rem;
-    color: #ffb0b0;
-  }
-  .ms-content :global(img) { border: 1px solid rgba(255, 80, 80, 0.3); max-width: 100%; }
-
-  /* Footer */
-  .ms-foot {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 1rem;
-    margin-top: 4rem;
-    padding-top: 1rem;
-    border-top: 1px solid rgba(255, 80, 80, 0.25);
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
-    color: rgba(255, 100, 100, 0.45);
-  }
-  .ms-foot-glitch {
-    animation: msBlink 3s ease-in-out infinite;
-    font-family: monospace;
-    letter-spacing: 0.05em;
-  }
-
-  /* Responsive */
-  @media (max-width: 880px) {
-    .ms-detail { padding: 3rem 5vw 5rem; }
-    .ms-hero { grid-template-columns: 1fr; gap: 2rem; }
+  /* ────────────────────────── Responsive ────────────────────────── */
+  @media (max-width: 720px) {
+    .msa-detail { padding: 2.5rem 1.25rem 4rem; }
+    .msa-card { padding: 1.1rem; }
+    .msa-featurelist__row {
+      grid-template-columns: 36px 1fr;
+    }
+    .msa-featurelist__row > .msa-pill { grid-column: 2; justify-self: start; }
   }
 </style>

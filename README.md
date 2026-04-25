@@ -68,12 +68,13 @@ Each project detail page (`/projects/<slug>`) is rendered with one of several ra
 | `theme_neon_cyber`           | Synthwave neon — chromatic glitch title and grid horizon. |
 | `theme_editorial_zine`       | Print-zine typography with oversized display headlines. |
 | `theme_void`                 | Brutalist black-and-white minimalism, all-caps. |
+| `theme_horror_crt`           | Corrupted-CRT horror: scanlines, vignette, chromatic-shadow title, evidence-log feature cards. |
 
 #### Custom (ACF-only, never random) (`custom_*`)
 
 | Key                          | Description |
 | :--------------------------- | :---------- |
-| `custom_memorysnatcher`      | Horror / corrupted-CRT aesthetic for the *Memory Snatcher* project. |
+| `custom_memorysnatcher`      | Mirrors the actual MemorySnatcher desktop-app UI (dark sidebar, amber accent, status pills, progress bar). |
 
 ### Adding a new theme
 
