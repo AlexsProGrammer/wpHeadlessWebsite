@@ -1,8 +1,8 @@
 # IMPLEMENTATION.md
 
 ## 1. Project Context & Architecture
-- **Goal:** Execute Part 2 of the mobile optimization strategy: Architectural Refactor (Astro SSG Alignment). We will migrate the massive JavaScript-based HTML generation (`innerHTML`) into server-side rendered Astro markup. This drastically improves SEO, eliminates JS-parsing lag during mobile animations, and reduces the client bundle.
-- **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, GSAP. 
+- **Goal:** Execute Part 3 of the mobile optimization strategy: Mobile UX Divergence (Tabs + CSS Scroll-Snap). Split the interactive framework so that desktop screens maintain the highly interactive 3D orbital animation, while mobile platforms transition to a lightweight, performant, and native 60fps card scroller paired with top tab-based navigation.
+- **Tech Stack & Dependencies:** Astro, CSS Scroll-Snap, Vanilla JS, GSAP (for lightweight mobile crossfades only).
 - **File Structure:**
   ```text
   ├── src/
@@ -11,47 +11,42 @@
 
 ```
 
-* **Attention Points:** - The 4 Orbit Cards follow a strict mathematical matrix: `pos = (orbitIdx + targetStep) % 4`. Each Orbit Card must contain exactly 4 statically rendered `.topic-content` blocks corresponding to its content across the 4 steps.
-* **i18n Alignment:** Since Astro renders on the server, use default German text in the HTML but add `data-i18n="[translation-key]"` attributes to every translatable element so `src/i18n/client.ts` can hydrate it automatically on the client.
-* **GSAP Flip Compatibility:** The GSAP Flip logic requires the `.card-face` to remain intact. We will toggle the visibility of the inner `.topic-content` wrappers inside `.card-face` instead of destroying and recreating the DOM.
+* **Attention Points:** - Ensure the mobile media queries override all complex grid coordinates (`grid-area`) used in `.layout-0` through `.layout-3` without causing stylesheet cascade leaks.
+* The center card (`.card-center`) must be completely hidden on mobile devices, making room for a full breakout slider.
+* Resetting scroll position on tab switch must use smooth native behavior (`behavior: 'smooth'`) to maximize modern mobile platform design patterns.
 
 
-* **DSGVO:** No external APIs or third-party tracking added. Server-Side Generation (SSG) respects privacy by offloading computation from the client.
+* **DSGVO:** Native browser features (`scroll-snap`, `matchMedia`) perform calculations entirely on the user's local system. No user telemetry, touch trackers, or analytics are transferred.
 
 ## 2. Execution Phases
 
-#### Phase 1: Astro Server-Side Data Preparation
+#### Phase 1: CSS Layout Overrides for Mobile Swiping
 
-* [x] **Step 1.1:** In the frontmatter (the `---` block at the top) of `src/components/SlidingBento.astro`, define a mapping array/function that resolves the matrix logic. For a given `orbitIdx` (0-3) and `step` (0-3), calculate the `topicIndex` (which equals `step`) and the positional layout `pos = (orbitIdx + step) % 4`.
-* [x] **Step 1.2:** In the frontmatter, ensure `highlightedProjects` (passed via Props) is available to be mapped directly into the HTML for Topic 3. Remove the `projectsJSON` stringification logic—it is no longer needed.
-* [x] **Verification:** Run the Astro build (`npm run build`). It should complete without type errors regarding the removed `projectsJSON`.
+* [x] **Step 1.1:** Open `src/components/SlidingBento.astro` and locate the desktop `<style>` block. At the bottom, enhance the existing `@media (max-width: 768px)` query.
+* [x] **Step 1.2:** Within the mobile media query, override `.bento-container` to break out of the 3-column grid structure. Transition it to `display: flex !important; flex-direction: row !important; overflow-x: auto !important; scroll-snap-type: x mandatory !important; -webkit-overflow-scrolling: touch;`. Add horizontal padding (`padding: 0 1.5rem 1.5rem;`) and negative margins if necessary to enable edge-to-edge swiping.
+* [x] **Step 1.3:** Within the mobile media query, target `.orbit-card`. Apply flex configurations: `flex: 0 0 85% !important; max-width: 85% !important; width: 85% !important; scroll-snap-align: center !important; position: relative !important;`. Explicitly override any layout rotations or transitions by enforcing `transform: none !important; left: auto !important; top: auto !important;`.
+* [x] **Step 1.4:** Within the mobile media query, target the center card toggle track (`.card-center`, `#sb-center-card`) and force-hide it completely via `display: none !important;`.
+* [ ] **Verification:** Run `npm run dev`. Open Chrome Developer Tools, toggle the device toolbar, and set the screen size to mobile viewport widths (e.g., 375px). Verify that the 4 bento cards now line up horizontally and allow hardware-accelerated horizontal swiping that smoothly snaps into place for each card.
 
-#### Phase 2: Statically Rendering the Orbit Matrix (HTML Migration)
+#### Phase 2: Client-Side Environment Separation
 
-* [x] **Step 2.1:** In the template section of `src/components/SlidingBento.astro`, update the 4 `<div class="bento-card orbit-card">` blocks. Inside each card's front `.card-face`, create a loop that iterates 4 times (for steps 0 to 3).
-* [x] **Step 2.2:** For each step in the loop, render a wrapper `<div class="topic-content" data-step="{step}" data-pos="{pos}">`.
-* [x] **Step 2.3:** Extract the raw HTML from `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` (currently in the `<script>` tag). Port this HTML directly into your Astro template inside the respective `.topic-content` wrappers.
-* [x] **Step 2.4:** Replace all JavaScript template literal translations (e.g., `${t('bento.about.n.title', lang)}`) with standard text wrapped with data attributes: e.g., `<h3 class="hero-title" data-i18n="bento.about.n.title">Über Mich</h3>`.
-* [x] **Step 2.5:** For the Project cards (Topic 3), use the `highlightedProjects` prop to dynamically generate the project markup (Title, excerpt, image URL, and tech stack pills) directly via Astro JSX/map syntax. Handle the empty state fallback exactly as the JS function did.
-* [x] **Verification:** Inspect the page source in the browser (`Ctrl+U` or `Cmd+U`). Verify that the raw HTML for all topics, origins, services, and projects is present in the source code on initial load.
+* [ ] **Step 2.1:** Scroll down to the `<script>` block in `src/components/SlidingBento.astro`. Locate the beginning of the `init()` execution block.
+* [ ] **Step 2.2:** Instantiate a media match query instance at the top of the function: `const mobileQuery = window.matchMedia("(max-width: 768px)");`.
+* [ ] **Step 2.3:** Group the GSAP configuration logic. Wrap the executions for `setupCenterBtn()` and `playEntryAnimation()` inside an environment condition check: `if (!mobileQuery.matches) { ... }`.
+* [ ] **Step 2.4:** Under the `else` branch of the media condition (running exclusively on mobile layout initialization), trigger a GSAP property reset using `gsap.set(orbitCards, { clearProps: "all" });` to scrub out inline remnants left behind during orientation flips or desktop window resizing.
+* [ ] **Verification:** Refresh your browser in mobile responsive mode. Inspect the console and verify that the script executes cleanly without registering GSAP Draggable dependencies or absolute calculation warnings on the hidden center track knob element.
 
-#### Phase 3: CSS Visibility & State Management
+#### Phase 3: Mobile Tab Switching Mechanics & Smooth Scroll Reset
 
-* [x] **Step 3.1:** In the `<style>` block, add rules to hide `.topic-content` by default. Example: `.topic-content { display: none; opacity: 0; }`.
-* [x] **Step 3.2:** Add an active state class: `.topic-content.is-active { display: flex; opacity: 1; height: 100%; }`. (Ensure `flex-direction: column` and `gap` properties are retained from the old `.card-face` logic).
-* [x] **Step 3.3:** Ensure the `.card-face` logic accommodates this new wrapper without breaking the background gradients, paddings, and positional overrides (e.g., `.card-face[data-pos="0"]`). You may need to map the `data-pos` attribute to the visible `.topic-content` wrapper rather than `.card-face`.
-* [x] **Verification:** Run `npm run dev`. On initial load, only the contents for `data-step="0"` should be visible on the screen. The layout should look visually identical to the original JS-rendered version.
-
-#### Phase 4: Client-Side Script Refactor & GSAP Adaptation
-
-* [x] **Step 4.1:** Delete the `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` functions from the `<script>` tag in `SlidingBento.astro`.
-* [x] **Step 4.2:** Rewrite the `populateTopicCards` function. It no longer needs to use `innerHTML`. It should simply find all `.topic-content` elements within the current `orbitCards` and toggle the `.is-active` class so that only the wrapper matching `data-step="${targetStep}"` is active.
-* [x] **Step 4.3:** In the `goToStep(targetStep)` function, update the `Flip` preparation logic. Instead of injecting `innerHTML` into `.card-face-back`, clone the target step's `.topic-content` from the front face and append it to the back face for the flip reveal.
-* [x] **Step 4.4:** In the `goToStep` cleanup phase (after `flipMoveDone`), call `populateTopicCards(targetStep)` to toggle `is-active` on front faces and update glow colors; clear back faces via `innerHTML = ""`.
-* [x] **Verification:** `npm run build` exits 0 with no TypeScript errors. The 4 render functions are fully removed from the client bundle.
+* [ ] **Step 3.1:** In the `<script>` tag, find the click event registration loop assigned to the category label nodes (`catEls.forEach(...)`).
+* [ ] **Step 3.2:** Refactor the internal event block to differentiate between interfaces. If `mobileQuery.matches` evaluates to true, intercept the execution path and route it to a new client utility function named `executeMobileTabSwitch(i, lang);`.
+* [ ] **Step 3.3:** Define `executeMobileTabSwitch(targetStep, lang)`. Update the system loop track state: set `step = targetStep;` and invoke the existing tracking method `updateLabels(targetStep, lang);` to update active highlighters on the header navigation pills.
+* [ ] **Step 3.4:** Inside `executeMobileTabSwitch`, perform a lightweight opacity crossfade across the card sub-contents. Target the child active elements, animate their `opacity` to 0 over 0.15 seconds, loop through to switch active visibility flags (`.is-active`) matching the target step, and fade back to 1.
+* [ ] **Step 3.5:** Conclude `executeMobileTabSwitch` by forcefully re-centering the carousel navigation track. Fetch the parent container object (`container`) and execute a smooth native scrolling reset: `container.scrollTo({ left: 0, behavior: 'smooth' });`.
+* [ ] **Verification:** Click on the various category labels ("Über Mich", "Die Geschichte", "Leistungen", "Projekte") using mobile browser simulation. Confirm the text content across all 4 horizontal cards updates immediately with a clean fade transition, and that the viewport container automatically animations its scroll track smoothly back to the first card.
 
 ## 3. Global Testing Strategy
 
-* **SEO/No-JS Test:** Disable JavaScript in your browser. Refresh the page. The "Über Mich" bento cards MUST be fully rendered, visible, and styled perfectly. Inspect the DOM to ensure the markup for the other 3 steps is present but hidden.
-* **i18n Hydration Test:** Use the `LangToggle` component to switch the site to English. Verify that the statically rendered text inside the Bento Cards updates immediately (powered by the existing `client.ts` looking for `data-i18n` attributes).
-* **GSAP Integrity Test:** Repeatedly click the next and previous arrows on the center card. Ensure the `Flip` animations and 3D rotations still sync perfectly without flashing blank cards.
+* **Swipe Velocity Boundary Test:** Swipe rapidly across the carousel items on a real touch display device. Verify that the CSS engine matches velocity correctly and reliably locks into viewport alignment on a singular card layout at each snap interval.
+* **Carousel Navigation Reset Test:** Scroll horizontally deep into Card 3 or 4 of a given topic. Tap on an inactive category heading tab at the top. Confirm that content switches immediately and the browser smoothly rolls the carousel position back to show Card 1 without layout breaks.
+* **Orientation Continuity Test:** Flip a mobile smartphone from portrait viewport mode to landscape wide-screen mode. Verify that layout cascades adapt dynamically and do not lock interface items into crushed column dimensions.
