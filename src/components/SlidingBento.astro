@@ -12,9 +12,10 @@ interface HighlightedProject {
 
 interface Props {
   highlightedProjects?: HighlightedProject[];
+  totalProjectCount?: number;
 }
 
-const { highlightedProjects = [] } = Astro.props;
+const { highlightedProjects = [], totalProjectCount = 0 } = Astro.props;
 
 // Matrix helper: for a given orbitIdx (0-3) and step (0-3),
 // topicIndex equals the current step, and pos determines the
@@ -44,7 +45,9 @@ const covers = [
   "linear-gradient(135deg, rgba(120,60,255,0.55) 0%, rgba(0,220,255,0.35) 50%, rgba(0,220,120,0.2) 100%)",
 ] as const;
 
-const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : '8+';
+const totalCount = totalProjectCount > 0 ? totalProjectCount : highlightedProjects.length;
+const baseTens = totalCount >= 10 ? Math.floor(totalCount / 10) * 10 : totalCount;
+const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
 ---
 
 <section class="bento-section" id="leistungen">

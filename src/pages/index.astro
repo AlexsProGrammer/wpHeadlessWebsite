@@ -41,7 +41,7 @@ const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || '';
   <SupernovaHero />
 
   <!-- Sliding Bento (4 topics × 4 orbit sub-cards) -->
-  <SlidingBento highlightedProjects={projectsWithImages.slice(0, 3)} />
+  <SlidingBento highlightedProjects={projectsWithImages} totalProjectCount={projects.length} />
 
   <DecorBreak id="hero-to-projects" max={1} />
 

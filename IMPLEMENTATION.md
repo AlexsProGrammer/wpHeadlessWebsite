@@ -1,48 +1,60 @@
 # IMPLEMENTATION.md
 
 ## 1. Project Context & Architecture
-- **Goal:** Execute Part 2 of the testing optimization strategy: Smart Scroll Trapping & Mouse-Wheel Pass-Through. This phase corrects obstructive layout behavior where hovering or scrolling over non-scrollable or fully-scrolled terminal component paths traps the mouse wheel input, passing it back into the global smooth scroll engine (Lenis) seamlessly.
-- **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, Lenis Smooth Scroll.
-- **File Structure:**
-  ```text
-  ├── src/
-  │   └── components/
-  │       └── TerminalFooter.astro (Modify)
+
+* **Goal:** Execute Part 3 of the testing optimization strategy: Dynamic Metrics, Visual Cueing & Mobile Card Scaling. This phase replaces static fallback counters with live base-ten math pipeline equations, adds a physics-driven horizontal idle discovery loop to the toggle knob, and rescales mobile layouts to eradicate responsive element truncation.
+* **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, CSS Keyframes, GSAP (Core + Draggable).
+* **File Structure:**
+```text
+├── src/
+│   └── components/
+│       └── SlidingBento.astro  (Modify)
 
 ```
 
-* **Attention Points:** The event handlers must register with `{ passive: false }` to enable conditional execution blocking via `e.preventDefault()` only when the terminal is actively absorbing internal scrolling tracks.
-* **DSGVO:** This optimization phase utilizes native client-side events exclusively. No analytical mouse tracking, scroll logging, or interaction metrics are captured or forwarded to remote servers.
+
+* **Attention Points:** The idle wiggle interaction must cleanly decouple from the active GSAP Draggable logic to prevent timeline contention or erratic layout jumps when a user grabs the handle.
+* **DSGVO:** Calculations and asset computations execute locally within the client viewport loop. No external asset trackers, telemetry tools, or micro-interaction tracking logs are deployed.
+
+---
 
 ## 2. Execution Phases
 
-#### Phase 1: Dynamic Overflow Assessment & Pointer Interaction Control
+#### Phase 1: Base-Tens Project Counter Automation Pipeline
 
-* [x] **Step 1.1:** In `src/components/TerminalFooter.astro`, locate the `<script>` tag and query the primary terminal content scroll viewport element (e.g., `.terminal-body` or its container wrapper).
-* [x] **Step 1.2:** Attach a client-side `wheel` event listener to the terminal container with the option parameter `{ passive: false }`.
-* [x] **Step 1.3:** Inside the event callback, establish an overflow layout condition that compares the container's physical layout metrics: `const isScrollable = container.scrollHeight > container.clientHeight;`.
-* [x] **Step 1.4:** Implement conditional fallback logic: If `isScrollable` evaluates to false (the content is fully visible without scrolling), allow the event to bubble up unhindered without execution blocks, or forward the delta directly into the main viewport scroller instance via `(window as any).__lenis?.scroll(e.deltaY);`.
-* [x] **Verification:** Run `npm run dev`. Open your local instance on a desktop viewport. When the terminal outputs short lines of text (no active scrollbar tracks visible), hover over the terminal window and roll the scroll wheel. The parent main layout page must scroll smoothly and instantly.
-
-#### Phase 2: Boundary Escape Logic & Lenis Momentum Forwarding
-
-* [x] **Step 2.1:** Inside the `wheel` event handler block for `src/components/TerminalFooter.astro`, extract the dynamic runtime position parameters: `const { scrollTop, scrollHeight, clientHeight } = container;`.
-* [x] **Step 2.2:** Construct the top ceiling boundary detection rule: Check if the user is attempting an upward scroll input (`e.deltaY < 0`) while the element position is pinned to the top line (`scrollTop === 0`).
-* [x] **Step 2.3:** Construct the bottom floor boundary detection rule: Check if the user is attempting a downward scroll input (`e.deltaY > 0`) while the element position reaches the maximum height threshold (`scrollTop + clientHeight >= scrollHeight - 1`).
-* [x] **Step 2.4:** Integrate the pass-through bypass mechanism: If either boundary condition evaluates to true, do not block the window track. Instead, pass the scrolling momentum straight into the Lenis framework:
+* [x] **Step 1.1:** Open `src/components/SlidingBento.astro`. Locate line 98 in the frontmatter code block where `projectCountLabel` is hardcoded.
+* [x] **Step 1.2:** Replace the line with an automated base-ten rounding formula that operates on the complete prop tree `highlightedProjects.length` (before slicing occurs):
 ```typescript
-if ((window as any).__lenis) {
-  (window as any).__lenis.scroll(e.deltaY);
-}
+const totalCount = highlightedProjects.length;
+const baseTens = totalCount >= 10 ? Math.floor(totalCount / 10) * 10 : totalCount;
+const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
 
 ```
 
 
-* [x] **Step 2.5:** Enforce script execution hygiene: Only invoke `e.preventDefault()` if `isScrollable` is active and the current scroll positions lie strictly between the upper and lower boundary thresholds (meaning the terminal is actively absorbing the wheel action internally).
-* [x] **Verification:** Populate the terminal output container with long logs until a vertical scrollbar appears. Scroll internally down the terminal box. Once the scrollbar strikes the absolute bottom boundary, continue rolling the mouse wheel downwards. Confirm that the main page layout seamlessly catches the scrolling wheel momentum and continues moving downward without freezing or requiring cursor repositioning.
+* [x] **Verification:** Temporarily adjust your mock data or incoming WordPress fetch parameters to provide an arbitrary number of entries (e.g., 74 items). Build or run the development server, and inspect the project section on the home page. The counter badge must dynamically evaluate and render `70+` instead of an arbitrary static placeholder.
+
+#### Phase 2: Slider Idle Physics Wiggle Micro-Interaction
+
+* [ ] **Step 2.1:** In `src/components/SlidingBento.astro`, navigate to the client-side `<script>` tag. Declare a scoped reference tracking pointer: `let idleWiggleTimeline: gsap.core.Timeline | null = null;`.
+* [ ] **Step 2.2:** Formulate an execution function named `initiateSliderIdleCue()`. Inside it, construct a looping GSAP timeline assigned to `idleWiggleTimeline` that targets the selector `#sb-center-btn`.
+* [ ] **Step 2.3:** Set the timeline to repeat indefinitely (`repeat: -1`, `repeatDelay: 4.0`), executing a quick horizontal displacement sequence: animate `x: -6` over 0.1s (`ease: "sine.inOut"`), followed by `x: 6` over 0.15s, and return smoothly to `x: 0` over 0.5s with an elastic or custom spring ease.
+* [ ] **Step 2.4:** Define a cleanup listener wrapper `killIdleWiggleCue()`. Inside it, check if `idleWiggleTimeline` is running; if true, invoke `.kill()`, clear it out (`null`), reset the thumb position to `x: 0`, and unbind the activation events from the toggle track container.
+* [ ] **Step 2.5:** In the `init()` routine, trigger `initiateSliderIdleCue()` right after setting up the desktop button configuration. Attach a `pointerdown` event listener to `#sb-toggle-track` that pipes directly into your `killIdleWiggleCue()` handler to permanently terminate the idle loop on first contact.
+* [ ] **Verification:** Load the home page on a desktop window and leave the page completely idle for 5 seconds. Confirm that the glassmorphic center knob executes a clean horizontal wiggle to signpost its interactivity to the user. Click or swipe the knob; verify that the loop breaks instantly and normal drag physics take over cleanly.
+
+#### Phase 3: Mobile Aspect Ratio & Min-Height Scaling Correction
+
+* [ ] **Step 3.1:** Locate the global scoped styling block inside `src/components/SlidingBento.astro` and find the mobile responsive rule block (`@media (max-width: 768px)`).
+* [ ] **Step 3.2:** Locate line 728 where `.bento-card` is restricted to `min-height: 160px;`. Delete this line or overwrite it.
+* [ ] **Step 3.3:** Apply a uniform vertical footprint constraint across the layout stack. Target the `.orbit-card` element selector within the screen query block and enforce an explicit minimum height bound: `min-height: 480px !important;`.
+* [ ] **Step 3.4:** Ensure that structural children inside `.topic-content` layout blocks properly handle space distribution across this expanded height. Set `.card-content` elements inside mobile selectors to use `justify-content: space-between` or apply systematic spacing parameters to maintain text, badges, and link alignments without collisions.
+* [ ] **Verification:** Open the site in Chrome DevTools using responsive phone profiles (e.g., Pixel 7 or iPhone SE). Cycle across all topics ("Über Mich", "Die Geschichte", "Leistungen", "Projekte"). Verify that long descriptive descriptions, multi-step vertical timelines, and project grid listings now sit inside the cards with generous structural padding and zero line cut-offs or overflow bugs.
+
+---
 
 ## 3. Global Testing Strategy
 
-* **Short Terminal Pass-Through Test:** Verify that when the terminal window has fewer lines than its visual height constraints, mouse wheel scroll loops inside its boundary act exactly as if scrolling on standard blank page elements.
-* **Edge Continuity Validation:** Scroll up and down inside a long log sequence. Ensure that hitting the top or bottom wall transitions scroll wheel momentum back to the parent Lenis layout with a frame-perfect handover.
-* **Cross-Engine Delta Calibration Test:** Validate operation across Chromium, Gecko, and WebKit-based browser instances to verify that standard mouse wheel ticks (`e.deltaY`) feed steady translation numbers to the Lenis engine regardless of individual platform scalar differences.
+* **Idle State Disengagement Test:** Leave the viewport stagnant to verify the slider wiggle loops periodically without building up event cycles in memory. Interact with it using various inputs (mouse drag, trackpad pan, touch gesture) to confirm that the loop disconnects permanently and leaves no execution trace.
+* **Mobile Truncation Sweep Test:** Check every face layout combination at ultra-narrow screen widths (320px up to 480px). Ensure that no headings collide with action pills or overlap layout decorations.
+* **Counter Metric Sanity Test:** Double-check that if zero projects return from the API endpoint, the counter renders an expected default cleanly without throwing errors or breaking layout arrays.
