@@ -27,9 +27,9 @@
 
 #### Phase 2: Hero Viewport Adaptation
 
-* [ ] **Step 2.1:** In `src/pages/index.astro`, locate the `<style>` block at the bottom of the file.
-* [ ] **Step 2.2:** Find the `.hero` class selector.
-* [ ] **Step 2.3:** Locate the `height: 100svh;` property. Change this to `height: 100dvh;`. Leave the fallback `height: 100vh;` above it intact.
+* [x] **Step 2.1:** In `src/pages/index.astro`, locate the `<style>` block at the bottom of the file.
+* [x] **Step 2.2:** Find the `.hero` class selector.
+* [x] **Step 2.3:** Locate the `height: 100svh;` property. Change this to `height: 100dvh;`. Leave the fallback `height: 100vh;` above it intact.
 * [ ] **Verification:** Run `npm run dev`. Open the site on a physical mobile device (preferably iOS Safari). Scroll down slightly to trigger the browser's address bar to shrink. Verify that the Hero section dynamically resizes to fill the exact screen height without leaving a gap at the bottom or forcing unnatural jumps.
 
 ## 3. Global Testing Strategy
