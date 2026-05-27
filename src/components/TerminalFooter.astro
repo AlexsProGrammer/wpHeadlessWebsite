@@ -606,6 +606,69 @@ const termData = {
 
     }, { passive: false });
 
+    // ── Touch: Smart scroll routing for mobile ──
+    // We always preventDefault + manually drive the right Lenis instance.
+    // Relying on event propagation fails because mobile browsers synthesize
+    // mouseenter on first touch, which fires our mouseenter→lenis.stop() listener
+    // before the first touchmove, leaving main Lenis stopped with no touchstart
+    // reference — so it can't compute deltas from propagated events.
+    // Using immediate:true for main Lenis gives 1:1 finger tracking (no lerp lag).
+    let touchStartY     = 0;
+    let touchMainTarget = 0;
+    let touchTermTarget = 0;
+
+    body.addEventListener("touchstart", (e: TouchEvent) => {
+      touchStartY     = e.touches[0].clientY;
+      touchTermTarget = terminalLenis?.scroll ?? 0;
+      touchMainTarget = (window as any).__lenis?.scroll ?? 0;
+    }, { passive: true });
+
+    body.addEventListener("touchmove", (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const deltaY   = touchStartY - currentY; // positive = scrolling down
+      touchStartY    = currentY;
+
+      // Always prevent browser default — we drive Lenis manually in every branch.
+      e.preventDefault();
+
+      const mainLenis = (window as any).__lenis;
+
+      const forwardToMain = (delta: number): void => {
+        if (mainLenis) {
+          mainLenis.start(); // un-pause in case mouseenter stopped it on touch
+          touchMainTarget += delta;
+          mainLenis.scrollTo(touchMainTarget, { immediate: true }); // 1:1, no lerp lag
+        }
+      };
+
+      const isScrollable = content.scrollHeight > body.clientHeight;
+
+      if (!isScrollable) {
+        forwardToMain(deltaY);
+        return;
+      }
+
+      // Clamp terminal target; boundary fires when clamping changes the value.
+      const limit     = terminalLenis!.limit;
+      const unclamped = touchTermTarget + deltaY;
+      touchTermTarget = Math.max(0, Math.min(limit, unclamped));
+
+      // Overflow = the portion of the swipe that exceeded the terminal's scroll range.
+      // Forward ONLY the overflow (not the full deltaY) so the terminal absorbs first
+      // and the main page only starts moving with whatever genuinely exceeded the limit.
+      const overflow = unclamped - touchTermTarget; // 0 when mid-scroll, non-zero at boundary
+
+      // Subtle edge cushion: 1:1 tracking in the middle, lerp only in the last 15px.
+      const EDGE_ZONE    = 15;
+      const distFromEdge = Math.min(touchTermTarget, limit - touchTermTarget);
+      terminalLenis!.scrollTo(touchTermTarget, { immediate: distFromEdge >= EDGE_ZONE });
+
+      if (overflow !== 0) {
+        forwardToMain(overflow);
+      }
+
+    }, { passive: false });
+
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
       const cmd = input.value;
