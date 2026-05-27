@@ -16,22 +16,18 @@ interface Props {
 
 const { highlightedProjects = [] } = Astro.props;
 
-const projectsJSON = JSON.stringify(
-  highlightedProjects.slice(0, 3).map(({ project, acf, image }) => ({
-    title: project.title?.rendered ?? '',
-    excerpt: project.excerpt?.rendered ?? project.content?.rendered ?? '',
-    slug: project.slug ?? '',
-    imageUrl: image?.url ?? '',
-    imageAlt: image?.alt ?? '',
-    techStack: acf?.tech_stack ?? '',
-  }))
-);
+// Matrix helper: for a given orbitIdx (0-3) and step (0-3),
+// topicIndex equals the current step, and pos determines the
+// positional layout slot following the clockwise orbit rule.
+function getOrbitMatrix(orbitIdx: number, step: number): { topicIndex: number; pos: number } {
+  return {
+    topicIndex: step,
+    pos: (orbitIdx + step) % 4,
+  };
+}
 ---
 
 <section class="bento-section" id="leistungen">
-
-  <!-- Project data island -->
-  <script type="application/json" id="sb-projects-data" set:html={projectsJSON}></script>
 
   <!-- ── Category labels ────────────────────────────────── -->
   <div class="category-row reveal" id="sb-category-row">
