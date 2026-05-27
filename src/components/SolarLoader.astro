@@ -277,6 +277,19 @@
   const isFreshVisit = !hasSeenIntro;
   const shouldShow   = isFreshVisit || isHardReload;
 
+  // Hard reload (Ctrl+Shift+R): clear all cached navigation state so the
+  // site returns to its default position — bento resets to step 0 and all
+  // stored scroll coordinates are wiped.
+  if (isHardReload) {
+    sessionStorage.removeItem("sb-active-step");
+    const scrollKeys: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key?.startsWith("scroll-pos-")) scrollKeys.push(key);
+    }
+    scrollKeys.forEach(k => sessionStorage.removeItem(k));
+  }
+
   const lockScroll = (): void => {
     document.documentElement.classList.add("solar-loading");
     document.body.classList.add("solar-loading");

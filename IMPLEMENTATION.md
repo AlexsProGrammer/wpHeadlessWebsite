@@ -94,15 +94,15 @@ sessionStorage.setItem("sb-active-step", String(targetStep));
 
 #### Phase 3: Lenis Scroll Coordinate Tracker Integration
 
-* [ ] **Step 3.1:** Open `src/layouts/MainLayout.astro` and find the `<script>` tag where the `Lenis` smoothing instance is configured.
-* [ ] **Step 3.2:** Inside the tracking listener block (`lenis.on("scroll", ...)`), append an execution statement to continuously record viewport progress values:
+* [x] **Step 3.1:** Open `src/layouts/MainLayout.astro` and find the `<script>` tag where the `Lenis` smoothing instance is configured.
+* [x] **Step 3.2:** Inside the tracking listener block (`lenis.on("scroll", ...)`), append an execution statement to continuously record viewport progress values:
 ```typescript
 sessionStorage.setItem(`scroll-pos-${window.location.pathname}`, String(lenis.scroll));
 
 ```
 
 
-* [ ] **Step 3.3:** Below the global identifier binding assignment (`(window as any).__lenis = lenis;`), attach an automated check to catch navigation events that bypassed full loader execution passes:
+* [x] **Step 3.3:** Below the global identifier binding assignment (`(window as any).__lenis = lenis;`), attach an automated check to catch navigation events that bypassed full loader execution passes:
 ```typescript
 if (!sessionStorage.getItem("solarLoaderActive")) {
   const historicalPos = sessionStorage.getItem(`scroll-pos-${window.location.pathname}`);
@@ -116,7 +116,7 @@ if (!sessionStorage.getItem("solarLoaderActive")) {
 ```
 
 
-* [ ] **Verification:** Navigate to the main home page, scroll down directly to the `SlidingBento` section container, and click the Project Gallery redirection link. Once the gallery page resolves, scroll halfway down its track and click on any specific individual project case detail view. Press Back to return to the project overview gallery, and confirm your exact position down the list is restored. Press Back once more to return to the root home page; verify the browser instantly slides the view down to keep the `SlidingBento` section perfectly focused.
+* [x] **Verification:** Navigate to the main home page, scroll down directly to the `SlidingBento` section container, and click the Project Gallery redirection link. Once the gallery page resolves, scroll halfway down its track and click on any specific individual project case detail view. Press Back to return to the project overview gallery, and confirm your exact position down the list is restored. Press Back once more to return to the root home page; verify the browser instantly slides the view down to keep the `SlidingBento` section perfectly focused.
 
 ## 3. Global Testing Strategy
 

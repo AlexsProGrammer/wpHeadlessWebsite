@@ -48,7 +48,7 @@ export const translations: Record<string, Translations> = {
     'projects.page.subtitle': 'Eine kuratierte Sammlung von Geschwindigkeit und Ästhetik.',
 
     // Project detail
-    'project.back': '← Zurück zur Startseite',
+    'project.back': '← Zurück',
 
     // Project card
     'card.details': 'Details →',
@@ -276,7 +276,7 @@ export const translations: Record<string, Translations> = {
     'projects.page.subtitle': 'A curated collection of speed and aesthetics.',
 
     // Project detail
-    'project.back': '← Back to Home',
+    'project.back': '← Go Back',
 
     // Project card
     'card.details': 'Details →',

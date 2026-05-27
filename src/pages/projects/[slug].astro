@@ -133,6 +133,29 @@ const forceTheme: string | null = acf.theme_layout && acf.theme_layout !== 'rand
   </div>
 </MainLayout>
 
+<script>
+  // Smart back navigation for all theme back buttons.
+  // - Same-origin referrer (in-session navigation): use browser history.back()
+  //   so the user returns to exactly where they came from (e.g. /projects/).
+  // - No referrer or external referrer (direct link, Google, typed URL):
+  //   fall back to the home page for a safe landing.
+  document.querySelectorAll<HTMLAnchorElement>('[data-i18n="project.back"]').forEach(btn => {
+    btn.addEventListener('click', (e: MouseEvent) => {
+      e.preventDefault();
+      try {
+        const ref = document.referrer;
+        if (ref && new URL(ref).origin === window.location.origin) {
+          history.back();
+        } else {
+          window.location.href = '/';
+        }
+      } catch {
+        window.location.href = '/';
+      }
+    });
+  });
+</script>
+
 <!-- ── Global rules: full-bleed project pages, hide site decor ── -->
 <style is:global>
   /* Hide every theme by default; reveal only the active one. */

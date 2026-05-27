@@ -236,8 +236,12 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
 
   const lenis = new Lenis();
 
-  // Keep ScrollTrigger in sync with Lenis scroll position
-  lenis.on("scroll", () => ScrollTrigger.update());
+  // Keep ScrollTrigger in sync with Lenis scroll position and record the
+  // current viewport offset so it can be restored on back/forward navigation.
+  lenis.on("scroll", () => {
+    ScrollTrigger.update();
+    sessionStorage.setItem(`scroll-pos-${window.location.pathname}`, String(lenis.scroll));
+  });
 
   // Drive Lenis via GSAP ticker for precise frame timing
   gsap.ticker.add((time: number) => {
@@ -248,6 +252,18 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
 
   // Expose globally so child components (hero, bento) can call .scrollTo()
   (window as any).__lenis = lenis;
+
+  // Restore the saved scroll position for navigations that bypassed the
+  // SolarLoader (i.e. in-session link clicks and back/forward). Skip when
+  // the loader is still active — it owns the final scroll target in that case.
+  if (!sessionStorage.getItem("solarLoaderActive")) {
+    const historicalPos = sessionStorage.getItem(`scroll-pos-${window.location.pathname}`);
+    if (historicalPos) {
+      requestAnimationFrame(() => {
+        lenis.scrollTo(parseFloat(historicalPos), { immediate: true });
+      });
+    }
+  }
 </script>
 
 <script>
