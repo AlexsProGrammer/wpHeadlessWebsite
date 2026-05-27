@@ -84,7 +84,7 @@ const items: BreakItem[] = Array.from({ length: count }, (_, i) => ({
   name: pick(),
   accent: ACCENTS[Math.floor(rng() * ACCENTS.length)],
   scale: 0.55 + rng() * 0.55,
-  rotate: Math.floor(rng() * 360) - 180,
+  rotate: 0,
   variant: (Math.floor(rng() * 3)) as 0 | 1 | 2,
   motion: MOTIONS[Math.floor(rng() * MOTIONS.length)],
   quadrant: shuffledQ[i],
