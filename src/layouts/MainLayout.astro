@@ -26,7 +26,7 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
     <meta charset="utf-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
     <title>{fullTitle}</title>
   </head>
@@ -79,7 +79,9 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
   html {
     overflow-y: auto;
     overflow-x: hidden;
+    width: 100%;
     max-width: 100%;
+    background-color: var(--bg-dark);
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
     overscroll-behavior: none;
