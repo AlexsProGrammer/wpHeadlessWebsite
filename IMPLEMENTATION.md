@@ -58,8 +58,8 @@ if (shouldShow) {
 
 #### Phase 2: Sliding Bento State Persistence Cache
 
-* [ ] **Step 2.1:** Open `src/components/SlidingBento.astro`. Locate the tracking script initialization method `init()`.
-* [ ] **Step 2.2:** Locate the statement assignment `step = 0;` inside `init()`. Replace this statement with a retrieval look-up targeting session transaction logs:
+* [x] **Step 2.1:** Open `src/components/SlidingBento.astro`. Locate the tracking script initialization method `init()`.
+* [x] **Step 2.2:** Locate the statement assignment `step = 0;` inside `init()`. Replace this statement with a retrieval look-up targeting session transaction logs:
 ```typescript
 const cachedStep = sessionStorage.getItem("sb-active-step");
 step = cachedStep !== null ? parseInt(cachedStep, 10) : 0;
@@ -67,7 +67,7 @@ step = cachedStep !== null ? parseInt(cachedStep, 10) : 0;
 ```
 
 
-* [ ] **Step 2.3:** Locate the fallback layout assignment configuration inside `init()`:
+* [x] **Step 2.3:** Locate the fallback layout assignment configuration inside `init()`:
 ```typescript
 LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
 container.classList.add(LAYOUT_CLASSES[step]);
@@ -76,21 +76,21 @@ container.classList.add(LAYOUT_CLASSES[step]);
 
 
 Ensure it accepts this restored index value dynamically instead of defaulting to layout zero. Pass `step` into `populateTopicCards` and `updateLabels` respectively.
-* [ ] **Step 2.4:** Locate the internal state update lines within the `goToStep(targetStep)` rotation handler block. Append a state mutation update trigger:
+* [x] **Step 2.4:** Locate the internal state update lines within the `goToStep(targetStep)` rotation handler block. Append a state mutation update trigger:
 ```typescript
 sessionStorage.setItem("sb-active-step", String(targetStep));
 
 ```
 
 
-* [ ] **Step 2.5:** Locate the desktop-to-mobile matching transition routing logic within the vertical mobile swiper utility function `executeMobileTabSwitch(targetStep, lang)`. Append an identical record entry block directly below the local index step updates:
+* [x] **Step 2.5:** Locate the desktop-to-mobile matching transition routing logic within the vertical mobile swiper utility function `executeMobileTabSwitch(targetStep, lang)`. Append an identical record entry block directly below the local index step updates:
 ```typescript
 sessionStorage.setItem("sb-active-step", String(targetStep));
 
 ```
 
 
-* [ ] **Verification:** Load the web application, click the center tracking disk knob to advance the layout to Step 2 ("Leistungen"). Click a link to open another sub-route or legal text page. Click the browser's Back button. Verify that the Sliding Bento initializes immediately on Step 2 with proper navigation label indicators active.
+* [x] **Verification:** Load the web application, click the center tracking disk knob to advance the layout to Step 2 ("Leistungen"). Click a link to open another sub-route or legal text page. Click the browser's Back button. Verify that the Sliding Bento initializes immediately on Step 2 with proper navigation label indicators active.
 
 #### Phase 3: Lenis Scroll Coordinate Tracker Integration
 

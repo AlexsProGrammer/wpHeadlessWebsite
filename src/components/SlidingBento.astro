@@ -3605,6 +3605,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
 
     // 5. Update step + labels immediately (non-blocking)
     step = targetStep;
+    sessionStorage.setItem("sb-active-step", String(targetStep));
     updateLabels(targetStep, lang);
     if (centerTopic) {
       gsap.to(centerTopic, {
@@ -3768,6 +3769,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
 
     // Step 3.3 — update state + navigation pills
     step = targetStep;
+    sessionStorage.setItem("sb-active-step", String(targetStep));
     updateLabels(targetStep, lang);
 
     // Step 3.4 — fade out active sub-contents, swap .is-active, fade back in
@@ -3842,13 +3844,14 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
     const mobileQuery = window.matchMedia("(max-width: 768px)");
     mobileQuery.addEventListener("change", handleViewportMutation);
 
-    step = 0;
+    const cachedStep = sessionStorage.getItem("sb-active-step");
+    step = cachedStep !== null ? parseInt(cachedStep, 10) : 0;
     LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
-    container.classList.add("layout-0");
+    container.classList.add(LAYOUT_CLASSES[step]);
 
     const lang = getCurrentLang();
-    populateTopicCards(0, lang);
-    updateLabels(0, lang);
+    populateTopicCards(step, lang);
+    updateLabels(step, lang);
 
     requestAnimationFrame(() => {
       // Step 2.3 — desktop-only: GSAP Draggable + orbital entry animation
