@@ -1,52 +1,47 @@
 # IMPLEMENTATION.md
 
 ## 1. Project Context & Architecture
-- **Goal:** Execute Part 3 of the mobile optimization strategy: Mobile UX Divergence (Tabs + CSS Scroll-Snap). Split the interactive framework so that desktop screens maintain the highly interactive 3D orbital animation, while mobile platforms transition to a lightweight, performant, and native 60fps card scroller paired with top tab-based navigation.
-- **Tech Stack & Dependencies:** Astro, CSS Scroll-Snap, Vanilla JS, GSAP (for lightweight mobile crossfades only).
-- **File Structure:**
-  ```text
-  ├── src/
-  │   ├── components/
-  │   │   └── SlidingBento.astro  (Modify)
+
+* **Goal:** Execute Part 4 of the mobile optimization strategy: Performance Optimization & Graceful Degradation. This phase eliminates high-overhead composite layers (`backdrop-filter` rendering, `conic-gradient` spin recalculations) on mobile viewports to prevent GPU thermal throttling and frame drops on older hardware, while establishing runtime window state sanitization.
+* **Tech Stack & Dependencies:** Astro, CSS, GSAP.
+* **File Structure:**
+```text
+├── src/
+│   ├── components/
+│   │   └── SlidingBento.astro  (Modify)
+│   ├── layouts/
+│   │   └── MainLayout.astro    (Optional Modify)
 
 ```
 
-* **Attention Points:** - Ensure the mobile media queries override all complex grid coordinates (`grid-area`) used in `.layout-0` through `.layout-3` without causing stylesheet cascade leaks.
-* The center card (`.card-center`) must be completely hidden on mobile devices, making room for a full breakout slider.
-* Resetting scroll position on tab switch must use smooth native behavior (`behavior: 'smooth'`) to maximize modern mobile platform design patterns.
+
+* **Attention Points:** - Overriding animations on `::before` pseudo-elements must completely deload the layout thread from tracking the `--glow-angle` custom property animation tick on narrow screens.
+* The resize listener must be throttled or safely tied to a breakpoint change event to avoid structural layout thrashing on minimal scroll adjustments (like mobile browser address bar hide/show triggers).
 
 
-* **DSGVO:** Native browser features (`scroll-snap`, `matchMedia`) perform calculations entirely on the user's local system. No user telemetry, touch trackers, or analytics are transferred.
+* **DSGVO:** Local processing exclusively via native client-side event handlers and declarative styles. No external optimization SDKs, telemetry metrics, or cloud monitoring dependencies are introduced.
 
 ## 2. Execution Phases
 
-#### Phase 1: CSS Layout Overrides for Mobile Swiping
+#### Phase 1: GPU Optimization & Composite Layer Relief
 
-* [x] **Step 1.1:** Open `src/components/SlidingBento.astro` and locate the desktop `<style>` block. At the bottom, enhance the existing `@media (max-width: 768px)` query.
-* [x] **Step 1.2:** Within the mobile media query, override `.bento-container` to break out of the 3-column grid structure. Transition it to `display: flex !important; flex-direction: row !important; overflow-x: auto !important; scroll-snap-type: x mandatory !important; -webkit-overflow-scrolling: touch;`. Add horizontal padding (`padding: 0 1.5rem 1.5rem;`) and negative margins if necessary to enable edge-to-edge swiping.
-* [x] **Step 1.3:** Within the mobile media query, target `.orbit-card`. Apply flex configurations: `flex: 0 0 85% !important; max-width: 85% !important; width: 85% !important; scroll-snap-align: center !important; position: relative !important;`. Explicitly override any layout rotations or transitions by enforcing `transform: none !important; left: auto !important; top: auto !important;`.
-* [x] **Step 1.4:** Within the mobile media query, target the center card toggle track (`.card-center`, `#sb-center-card`) and force-hide it completely via `display: none !important;`.
-* [ ] **Verification:** Run `npm run dev`. Open Chrome Developer Tools, toggle the device toolbar, and set the screen size to mobile viewport widths (e.g., 375px). Verify that the 4 bento cards now line up horizontally and allow hardware-accelerated horizontal swiping that smoothly snaps into place for each card.
+* [x] **Step 1.1:** Open `src/components/SlidingBento.astro` and locate the mobile media query (`@media (max-width: 768px)`).
+* [x] **Step 1.2:** Within the mobile media query, target the `.bento-card` and `.card-center` selectors. Explicitly reset their filter stacks by declaring `backdrop-filter: none !important; -webkit-backdrop-filter: none !important;`.
+* [x] **Step 1.3:** Apply a stable, high-opacity aesthetic fallback to both classes within the media query by setting `background: rgba(8, 8, 18, 0.98) !important;`.
+* [x] **Step 1.4:** Disable the continuous gradient borders by targeting the pseudo-elements `.orbit-card::before` and `.bento-card::before` within the mobile block. Enforce `display: none !important; animation: none !important; transition: none !important;` to drop the paint invalidation pass completely.
+* [ ] **Verification:** Run `npm run dev`. Open the site in Chrome DevTools using mobile device emulation. Inspect the computed styles for `.bento-card` to verify that `backdrop-filter` evaluates to `none` and that the border-spin animation properties are not inherited or cycling.
 
-#### Phase 2: Client-Side Environment Separation
+#### Phase 2: Responsive Client Script Sanitization
 
-* [x] **Step 2.1:** Scroll down to the `<script>` block in `src/components/SlidingBento.astro`. Locate the beginning of the `init()` execution block.
-* [x] **Step 2.2:** Instantiate a media match query instance at the top of the function: `const mobileQuery = window.matchMedia("(max-width: 768px)");`.
-* [x] **Step 2.3:** Group the GSAP configuration logic. Wrap the executions for `setupCenterBtn()` and `playEntryAnimation()` inside an environment condition check: `if (!mobileQuery.matches) { ... }`.
-* [x] **Step 2.4:** Under the `else` branch of the media condition (running exclusively on mobile layout initialization), trigger a GSAP property reset using `gsap.set(orbitCards, { clearProps: "all" });` to scrub out inline remnants left behind during orientation flips or desktop window resizing.
-* [ ] **Verification:** Refresh your browser in mobile responsive mode. Inspect the console and verify that the script executes cleanly without registering GSAP Draggable dependencies or absolute calculation warnings on the hidden center track knob element.
-
-#### Phase 3: Mobile Tab Switching Mechanics & Smooth Scroll Reset
-
-* [x] **Step 3.1:** In the `<script>` tag, find the click event registration loop assigned to the category label nodes (`catEls.forEach(...)`).
-* [x] **Step 3.2:** Refactor the internal event block to differentiate between interfaces. If `mobileQuery.matches` evaluates to true, intercept the execution path and route it to a new client utility function named `executeMobileTabSwitch(i, lang);`.
-* [x] **Step 3.3:** Define `executeMobileTabSwitch(targetStep, lang)`. Update the system loop track state: set `step = targetStep;` and invoke the existing tracking method `updateLabels(targetStep, lang);` to update active highlighters on the header navigation pills.
-* [x] **Step 3.4:** Inside `executeMobileTabSwitch`, perform a lightweight opacity crossfade across the card sub-contents. Target the child active elements, animate their `opacity` to 0 over 0.15 seconds, loop through to switch active visibility flags (`.is-active`) matching the target step, and fade back to 1.
-* [x] **Step 3.5:** Conclude `executeMobileTabSwitch` by forcefully re-centering the carousel navigation track. Fetch the parent container object (`container`) and execute a smooth native scrolling reset: `container.scrollTo({ left: 0, behavior: 'smooth' });`.
-* [ ] **Verification:** Click on the various category labels ("Über Mich", "Die Geschichte", "Leistungen", "Projekte") using mobile browser simulation. Confirm the text content across all 4 horizontal cards updates immediately with a clean fade transition, and that the viewport container automatically animations its scroll track smoothly back to the first card.
+* [ ] **Step 2.1:** Navigate to the `<script>` tag inside `src/components/SlidingBento.astro`. Locate the setup block where the environment variables or match structures are evaluated.
+* [ ] **Step 2.2:** Establish a viewport change observer by appending a listener to the media query instantiation: `mobileQuery.addEventListener("change", handleViewportMutation);`.
+* [ ] **Step 2.3:** Implement the callback function `handleViewportMutation(e)`. Check the incoming state match flag (`e.matches`).
+* [ ] **Step 2.4:** Inside the true clause of `handleViewportMutation` (transitioning from Desktop down to Mobile), clear layout-altering GSAP calculations. Invoke `gsap.set(orbitCards, { clearProps: "all" });` along with parent elements to completely purge inline inline-styles, flex configurations, absolute dimensions, and 3D rotation properties.
+* [ ] **Step 2.5:** Ensure that if a user scales back up to desktop (`!e.matches`), the script cleanly re-invokes the desktop initialization routines: safely reconstruct `setupCenterBtn()` and re-render the default active layout states.
+* [ ] **Verification:** Load the page in a desktop browser instance. Open DevTools and manually drag the browser window width down past the 768px threshold. Observe the element panel: all inline style properties generated by GSAP (such as `transform: translate3d(...)`, `position: absolute`, `width`, `height`) must vanish instantly, allowing the horizontal flex layout to immediately map cleanly.
 
 ## 3. Global Testing Strategy
 
-* **Swipe Velocity Boundary Test:** Swipe rapidly across the carousel items on a real touch display device. Verify that the CSS engine matches velocity correctly and reliably locks into viewport alignment on a singular card layout at each snap interval.
-* **Carousel Navigation Reset Test:** Scroll horizontally deep into Card 3 or 4 of a given topic. Tap on an inactive category heading tab at the top. Confirm that content switches immediately and the browser smoothly rolls the carousel position back to show Card 1 without layout breaks.
-* **Orientation Continuity Test:** Flip a mobile smartphone from portrait viewport mode to landscape wide-screen mode. Verify that layout cascades adapt dynamically and do not lock interface items into crushed column dimensions.
+* **GPU Profiling / Frame Rate Test:** Connect a mobile testing device to a desktop performance profiler (e.g., Safari Web Inspector or Chrome Remote Debugging). Performance-profile the section swiping and scroll passes. Ensure the main thread experiences zero long-tasks (above 50ms) and that layer tree allocations drop significantly compared to original benchmarks.
+* **Orientation Flipping Stability Test:** Rotate a mobile device back and forth between portrait and landscape. Ensure layout transitions gracefully clear absolute structures and switch cleanly between standard grid and swipable carousel frames without locking cards into invalid aspect ratios.
+* **Desktop Window Elasticity Test:** Rapidly resize desktop windows past the 768px break line to make sure no race conditions occur between the layout engine and the GSAP runtime instantiation controls.
