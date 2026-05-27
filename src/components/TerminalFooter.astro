@@ -606,68 +606,142 @@ const termData = {
 
     }, { passive: false });
 
-    // ── Touch: Smart scroll routing for mobile ──
-    // We always preventDefault + manually drive the right Lenis instance.
-    // Relying on event propagation fails because mobile browsers synthesize
-    // mouseenter on first touch, which fires our mouseenter→lenis.stop() listener
-    // before the first touchmove, leaving main Lenis stopped with no touchstart
-    // reference — so it can't compute deltas from propagated events.
-    // Using immediate:true for main Lenis gives 1:1 finger tracking (no lerp lag).
+    // ── Touch: iOS-style gesture-locked scroll routing ──
+    //
+    // One gesture = one scroller. On the first intentional movement (|delta| > 2px)
+    // we resolve a lock based on the terminal's current scroll state + swipe direction.
+    // That scroller owns the entire gesture until the finger lifts. Overflow is never
+    // forwarded mid-gesture; the user lifts and re-touches to scroll the other surface.
+    //
+    // Rubber-band: when locked to terminal and the user pulls past a scroll limit, we
+    // apply a diminishing-resistance CSS translate to the terminal body so it visually
+    // "stretches". On touchend it springs back with a short ease.
+
+    type GestureTarget = 'term' | 'main' | null;
+
     let touchStartY     = 0;
-    let touchMainTarget = 0;
     let touchTermTarget = 0;
+    let touchMainTarget = 0;
+    let gestureTarget: GestureTarget = null;
+    let rubberOvershoot = 0; // raw accumulated overshoot px past the limit
+    let rubberRafId: number | null = null; // spring-back animation frame id
+
+    // Diminishing resistance curve: feels like stretching an elastic band.
+    const rubberDamp = (raw: number): number => raw / (1 + Math.abs(raw) * 0.025);
+
+    // Animate terminal body transform back to 0 after finger lifts.
+    const snapRubberBand = (): void => {
+      if (rubberRafId !== null) cancelAnimationFrame(rubberRafId);
+      const start    = performance.now();
+      const duration = 320; // ms
+      const fromY    = rubberDamp(rubberOvershoot);
+      rubberOvershoot = 0;
+
+      const tick = (now: number): void => {
+        const t = Math.min((now - start) / duration, 1);
+        // cubic-bezier(.2,.8,.2,1) — fast deceleration, settles smoothly
+        const ease = 1 - Math.pow(1 - t, 3);
+        const currentY = fromY * (1 - ease);
+        body.style.transform = currentY !== 0 ? `translateY(${currentY}px)` : '';
+        if (t < 1) {
+          rubberRafId = requestAnimationFrame(tick);
+        } else {
+          body.style.transform = '';
+          rubberRafId = null;
+        }
+      };
+      rubberRafId = requestAnimationFrame(tick);
+    };
+
+    const resetGesture = (): void => {
+      gestureTarget   = null;
+      snapRubberBand();
+    };
 
     body.addEventListener("touchstart", (e: TouchEvent) => {
+      if (e.touches.length > 1) return; // multi-touch — leave to browser
       touchStartY     = e.touches[0].clientY;
       touchTermTarget = terminalLenis?.scroll ?? 0;
       touchMainTarget = (window as any).__lenis?.scroll ?? 0;
+      gestureTarget   = null;
+      rubberOvershoot = 0;
+      if (rubberRafId !== null) {
+        cancelAnimationFrame(rubberRafId);
+        rubberRafId = null;
+        body.style.transform = '';
+      }
     }, { passive: true });
 
     body.addEventListener("touchmove", (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        // Multi-touch interrupted the gesture — reset and let browser handle.
+        gestureTarget = null;
+        return;
+      }
+
       const currentY = e.touches[0].clientY;
       const deltaY   = touchStartY - currentY; // positive = scrolling down
       touchStartY    = currentY;
 
-      // Always prevent browser default — we drive Lenis manually in every branch.
+      // Always block browser default — we route manually in all branches.
       e.preventDefault();
 
-      const mainLenis = (window as any).__lenis;
-
-      const forwardToMain = (delta: number): void => {
-        if (mainLenis) {
-          mainLenis.start(); // un-pause in case mouseenter stopped it on touch
-          touchMainTarget += delta;
-          mainLenis.scrollTo(touchMainTarget, { immediate: true }); // 1:1, no lerp lag
-        }
-      };
-
+      const mainLenis    = (window as any).__lenis;
       const isScrollable = content.scrollHeight > body.clientHeight;
+      const limit        = terminalLenis!.limit;
 
-      if (!isScrollable) {
-        forwardToMain(deltaY);
+      // ── Resolve lock on first intentional movement ──
+      if (gestureTarget === null && Math.abs(deltaY) > 2) {
+        if (!isScrollable) {
+          gestureTarget = 'main';
+        } else {
+          const pos = terminalLenis!.scroll;
+          const atTop    = pos <= 1;
+          const atBottom = pos >= limit - 1;
+
+          if (atBottom && deltaY > 0) {
+            gestureTarget = 'main'; // at bottom, scrolling down → main page
+          } else if (atTop && deltaY < 0) {
+            gestureTarget = 'main'; // at top, scrolling up → main page
+          } else {
+            gestureTarget = 'term'; // terminal can absorb
+          }
+        }
+      }
+
+      if (gestureTarget === null) return; // below dead-zone, wait for direction
+
+      // ── Locked: main page ──
+      if (gestureTarget === 'main') {
+        if (mainLenis) {
+          mainLenis.start();
+          touchMainTarget += deltaY;
+          mainLenis.scrollTo(touchMainTarget, { immediate: true });
+        }
         return;
       }
 
-      // Clamp terminal target; boundary fires when clamping changes the value.
-      const limit     = terminalLenis!.limit;
+      // ── Locked: terminal ──
       const unclamped = touchTermTarget + deltaY;
       touchTermTarget = Math.max(0, Math.min(limit, unclamped));
+      terminalLenis!.scrollTo(touchTermTarget, { immediate: true });
 
-      // Overflow = the portion of the swipe that exceeded the terminal's scroll range.
-      // Forward ONLY the overflow (not the full deltaY) so the terminal absorbs first
-      // and the main page only starts moving with whatever genuinely exceeded the limit.
-      const overflow = unclamped - touchTermTarget; // 0 when mid-scroll, non-zero at boundary
-
-      // Subtle edge cushion: 1:1 tracking in the middle, lerp only in the last 15px.
-      const EDGE_ZONE    = 15;
-      const distFromEdge = Math.min(touchTermTarget, limit - touchTermTarget);
-      terminalLenis!.scrollTo(touchTermTarget, { immediate: distFromEdge >= EDGE_ZONE });
-
-      if (overflow !== 0) {
-        forwardToMain(overflow);
+      // Rubber-band: accumulate overshoot and apply dampened translate.
+      const rawOvershoot = unclamped - touchTermTarget;
+      if (rawOvershoot !== 0) {
+        rubberOvershoot += rawOvershoot;
+        body.style.transform = `translateY(${-rubberDamp(rubberOvershoot)}px)`;
+      } else if (rubberOvershoot !== 0) {
+        // Overshoot unwound — clear the stretch.
+        rubberOvershoot = 0;
+        body.style.transform = '';
       }
 
     }, { passive: false });
+
+    // Spring back on finger lift or system-cancelled gesture.
+    body.addEventListener("touchend",    resetGesture, { passive: true });
+    body.addEventListener("touchcancel", resetGesture, { passive: true });
 
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
