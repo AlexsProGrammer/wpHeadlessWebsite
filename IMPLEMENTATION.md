@@ -30,10 +30,10 @@
 
 #### Phase 2: Client-Side Environment Separation
 
-* [ ] **Step 2.1:** Scroll down to the `<script>` block in `src/components/SlidingBento.astro`. Locate the beginning of the `init()` execution block.
-* [ ] **Step 2.2:** Instantiate a media match query instance at the top of the function: `const mobileQuery = window.matchMedia("(max-width: 768px)");`.
-* [ ] **Step 2.3:** Group the GSAP configuration logic. Wrap the executions for `setupCenterBtn()` and `playEntryAnimation()` inside an environment condition check: `if (!mobileQuery.matches) { ... }`.
-* [ ] **Step 2.4:** Under the `else` branch of the media condition (running exclusively on mobile layout initialization), trigger a GSAP property reset using `gsap.set(orbitCards, { clearProps: "all" });` to scrub out inline remnants left behind during orientation flips or desktop window resizing.
+* [x] **Step 2.1:** Scroll down to the `<script>` block in `src/components/SlidingBento.astro`. Locate the beginning of the `init()` execution block.
+* [x] **Step 2.2:** Instantiate a media match query instance at the top of the function: `const mobileQuery = window.matchMedia("(max-width: 768px)");`.
+* [x] **Step 2.3:** Group the GSAP configuration logic. Wrap the executions for `setupCenterBtn()` and `playEntryAnimation()` inside an environment condition check: `if (!mobileQuery.matches) { ... }`.
+* [x] **Step 2.4:** Under the `else` branch of the media condition (running exclusively on mobile layout initialization), trigger a GSAP property reset using `gsap.set(orbitCards, { clearProps: "all" });` to scrub out inline remnants left behind during orientation flips or desktop window resizing.
 * [ ] **Verification:** Refresh your browser in mobile responsive mode. Inspect the console and verify that the script executes cleanly without registering GSAP Draggable dependencies or absolute calculation warnings on the hidden center track knob element.
 
 #### Phase 3: Mobile Tab Switching Mechanics & Smooth Scroll Reset

@@ -3756,6 +3756,9 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
 
     if (!container || !centerBtn || orbitCards.length < 4) return;
 
+    // Step 2.2 — environment detection (DSGVO-safe: runs locally, no telemetry)
+    const mobileQuery = window.matchMedia("(max-width: 768px)");
+
     step = 0;
     LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
     container.classList.add("layout-0");
@@ -3765,8 +3768,14 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
     updateLabels(0, lang);
 
     requestAnimationFrame(() => {
-      setupCenterBtn();
-      playEntryAnimation();
+      // Step 2.3 — desktop-only: GSAP Draggable + orbital entry animation
+      if (!mobileQuery.matches) {
+        setupCenterBtn();
+        playEntryAnimation();
+      } else {
+        // Step 2.4 — mobile: scrub any GSAP inline styles left from orientation flips
+        gsap.set(orbitCards, { clearProps: "all" });
+      }
     });
 
     // Click category labels → jump directly to topic
