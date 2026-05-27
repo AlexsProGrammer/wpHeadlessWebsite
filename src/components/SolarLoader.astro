@@ -280,10 +280,18 @@
   const lockScroll = (): void => {
     document.documentElement.classList.add("solar-loading");
     document.body.classList.add("solar-loading");
+    sessionStorage.setItem("solarLoaderActive", "true");
+    (window as any).__lenis?.stop();
   };
   const unlockScroll = (): void => {
     document.documentElement.classList.remove("solar-loading");
     document.body.classList.remove("solar-loading");
+    sessionStorage.removeItem("solarLoaderActive");
+    // start() is intentionally NOT called here.
+    // finishLoader() calls it inside a requestAnimationFrame AFTER the browser
+    // has repainted without overflow:hidden, so Lenis can measure the correct
+    // scroll limit via resize(). Calling start() here (before repaint) would
+    // leave Lenis with a stale limit=0 and block all scrolling.
   };
 
   let tl: gsap.core.Timeline | null = null;
@@ -292,7 +300,15 @@
 
   const onPageHide = (): void => finishLoader("pagehide");
   const onBeforeUnload = (): void => unlockScroll();
-  const onPageShow = (): void => unlockScroll();
+  // Only unlock on bfcache restores (persisted=true).
+  // On a normal page load pageshow fires while the animation is still running
+  // — calling unlockScroll() there would strip overflow:hidden mid-animation.
+  const onPageShow = (e: Event): void => {
+    if ((e as PageTransitionEvent).persisted) {
+      unlockScroll();
+      requestAnimationFrame(() => { (window as any).__lenis?.start(); });
+    }
+  };
 
   const finishLoader = (_reason: string = "done"): void => {
     if (hasFinished) return;
@@ -316,6 +332,25 @@
     }
 
     unlockScroll();
+
+    // Wait one frame so the browser repaints without overflow:hidden before
+    // Lenis measures the page height. Without this, Lenis keeps limit=0 (the
+    // value it calculated while overflow:hidden was active) and blocks all scroll.
+    requestAnimationFrame(() => {
+      const lenis = (window as any).__lenis;
+      if (lenis) {
+        lenis.resize?.();  // recalculate scroll limit with correct page height
+        lenis.start?.();   // ensure Lenis is running (no-op if already started)
+        if (shouldShow) {
+          lenis.scrollTo(0, { immediate: true });
+        } else {
+          const savedScroll = sessionStorage.getItem(`scroll-pos-${window.location.pathname}`);
+          if (savedScroll) {
+            lenis.scrollTo(parseFloat(savedScroll), { immediate: true });
+          }
+        }
+      }
+    });
 
     window.removeEventListener("pagehide", onPageHide);
     window.removeEventListener("beforeunload", onBeforeUnload);
