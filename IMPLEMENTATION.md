@@ -2,59 +2,49 @@
 
 ## 1. Project Context & Architecture
 
-* **Goal:** Execute Part 3 of the testing optimization strategy: Dynamic Metrics, Visual Cueing & Mobile Card Scaling. This phase replaces static fallback counters with live base-ten math pipeline equations, adds a physics-driven horizontal idle discovery loop to the toggle knob, and rescales mobile layouts to eradicate responsive element truncation.
-* **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, CSS Keyframes, GSAP (Core + Draggable).
+* **Goal:** Execute the final optimization pass for the website: Visual Polish, UI Theme Alignment & Tooltip Readability. This phase stabilizes decorative gimmick tooltips by removing blurred, inverted typography orientations and delivers a premium theme design overhaul to the Sliding Bento control tracks on both mobile and desktop screens.
+* **Tech Stack & Dependencies:** Astro, Vanilla CSS, GSAP. (No new package manager dependencies are required).
 * **File Structure:**
 ```text
 ├── src/
-│   └── components/
-│       └── SlidingBento.astro  (Modify)
+│   ├── components/
+│   │   └── SlidingBento.astro      (Modify)
+│   └── components/decor/
+│       ├── CosmicDecor.astro       (Modify)
+│       ├── DecorBreak.astro        (Modify)
+│       └── decor.css               (Modify)
 
 ```
 
 
-* **Attention Points:** The idle wiggle interaction must cleanly decouple from the active GSAP Draggable logic to prevent timeline contention or erratic layout jumps when a user grabs the handle.
-* **DSGVO:** Calculations and asset computations execute locally within the client viewport loop. No external asset trackers, telemetry tools, or micro-interaction tracking logs are deployed.
+* **Attention Points:** Ensure that tooltip stabilization fixes do not disrupt the subtle floating animations or physics loops assigned to the decorative cosmic elements. Premium button design overhauls must preserve the existing core tap and drag event listener mappings.
+* **DSGVO:** All structural layout changes are executed via standard local styling stylesheets. No external font files, telemetry trackers, or interactive pixel assets are introduced.
 
 ---
 
 ## 2. Execution Phases
 
-#### Phase 1: Base-Tens Project Counter Automation Pipeline
+#### Phase 1: Cosmic Gimmick Tooltip Readability & Sharpness Alignment
 
-* [x] **Step 1.1:** Open `src/components/SlidingBento.astro`. Locate line 98 in the frontmatter code block where `projectCountLabel` is hardcoded.
-* [x] **Step 1.2:** Replace the line with an automated base-ten rounding formula that operates on the complete prop tree `highlightedProjects.length` (before slicing occurs):
-```typescript
-const totalCount = highlightedProjects.length;
-const baseTens = totalCount >= 10 ? Math.floor(totalCount / 10) * 10 : totalCount;
-const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
+* [x] **Step 1.1:** Open `src/components/decor/decor.css` or the style definitions within `DecorBreak.astro` / `CosmicDecor.astro`. Locate the tooltip container element representing the hover text bubble.
+* [x] **Step 1.2:** Isolate the graphic icon's structural rotation from its text bubble sibling. If the artifact utilizes a randomized structural rotation matrix (e.g., `rotate(90deg)` or `rotate(180deg)`), refactor the class rules so the transform applies strictly to the inner visual token node, keeping the parent wrapper wrapper node upright.
+* [x] **Step 1.3:** Alternatively, apply a neutralizing counter-rotation property rule to the hover text bubbles. Ensure that if an artifact is canted, its child text container resets its horizontal plain by utilizing inherited calculation variables or explicit style rules enforcing a stable readability range within $\pm 10^\circ$.
+* [x] **Step 1.4:** Eradicate text layer blurriness on high-density screens by appending performance rendering rules to the text bubbles: set `will-change: transform;`, `backface-visibility: hidden;`, `-webkit-font-smoothing: antialiased;`, and enforce a hardware-accelerated composite baseline via `transform: translate3d(0,0,0);`.
+* [ ] **Verification:** Run `npm run dev`. Hover over the decorative gimmicks located at the page boundaries and section breaks. Verify that every pop-up text block appears completely crisp, reads from left-to-right horizontally, and never displays upside-down or perpendicular to the user viewport.
 
-```
+#### Phase 2: Premium Theme Styling Overhaul for Sliding Bento Controls
 
-
-* [x] **Verification:** Temporarily adjust your mock data or incoming WordPress fetch parameters to provide an arbitrary number of entries (e.g., 74 items). Build or run the development server, and inspect the project section on the home page. The counter badge must dynamically evaluate and render `70+` instead of an arbitrary static placeholder.
-
-#### Phase 2: Slider Idle Physics Wiggle Micro-Interaction
-
-* [x] **Step 2.1:** In `src/components/SlidingBento.astro`, navigate to the client-side `<script>` tag. Declare a scoped reference tracking pointer: `let idleWiggleTimeline: gsap.core.Timeline | null = null;`.
-* [x] **Step 2.2:** Formulate an execution function named `initiateSliderIdleCue()`. Inside it, construct a looping GSAP timeline assigned to `idleWiggleTimeline` that targets the selector `#sb-center-btn`.
-* [x] **Step 2.3:** Set the timeline to repeat indefinitely (`repeat: -1`, `repeatDelay: 4.0`), executing a quick horizontal displacement sequence: animate `x: -6` over 0.1s (`ease: "sine.inOut"`), followed by `x: 6` over 0.15s, and return smoothly to `x: 0` over 0.5s with an elastic or custom spring ease.
-* [x] **Step 2.4:** Define a cleanup listener wrapper `killIdleWiggleCue()`. Inside it, check if `idleWiggleTimeline` is running; if true, invoke `.kill()`, clear it out (`null`), reset the thumb position to `x: 0`, and unbind the activation events from the toggle track container.
-* [x] **Step 2.5:** In the `init()` routine, trigger `initiateSliderIdleCue()` right after setting up the desktop button configuration. Attach a `pointerdown` event listener to `#sb-toggle-track` that pipes directly into your `killIdleWiggleCue()` handler to permanently terminate the idle loop on first contact.
-* [x] **Verification:** Load the home page on a desktop window and leave the page completely idle for 5 seconds. Confirm that the glassmorphic center knob executes a clean horizontal wiggle to signpost its interactivity to the user. Click or swipe the knob; verify that the loop breaks instantly and normal drag physics take over cleanly.
-
-#### Phase 3: Mobile Aspect Ratio & Min-Height Scaling Correction
-
-* [x] **Step 3.1:** Locate the global scoped styling block inside `src/components/SlidingBento.astro` and find the mobile responsive rule block (`@media (max-width: 768px)`).
-* [x] **Step 3.2:** Locate line 728 where `.bento-card` is restricted to `min-height: 160px;`. Delete this line or overwrite it.
-* [x] **Step 3.3:** Apply a uniform vertical footprint constraint across the layout stack. Target the `.orbit-card` element selector within the screen query block and enforce an explicit minimum height bound: `min-height: 480px !important;`.
-* [x] **Step 3.4:** Ensure that structural children inside `.topic-content` layout blocks properly handle space distribution across this expanded height. Set `.card-content` elements inside mobile selectors to use `justify-content: space-between` or apply systematic spacing parameters to maintain text, badges, and link alignments without collisions.
-* [x] **Verification:** Open the site in Chrome DevTools using responsive phone profiles (e.g., Pixel 7 or iPhone SE). Cycle across all topics ("Über Mich", "Die Geschichte", "Leistungen", "Projekte"). Verify that long descriptive descriptions, multi-step vertical timelines, and project grid listings now sit inside the cards with generous structural padding and zero line cut-offs or overflow bugs.
+* [ ] **Step 2.1:** Open `src/components/SlidingBento.astro`. Locate the category navigation bar track defined under class `.category-row` and `#sb-category-row`.
+* [ ] **Step 2.2:** Redesign `.category-row` to feature a high-end luxury developer capsule shell. Add an ultra-subtle transparent dark glass back plate (`background: rgba(255, 255, 255, 0.02)`), a refined border radius (`border-radius: 999px`), a thin custom highlight boundary (`border: 1px solid rgba(255, 255, 255, 0.05)`), and smooth interior padding.
+* [ ] **Step 2.3:** Enhance the tab labels (`.cat-label`). Transition typography weights and adjust active transitions to generate an electric neon purple/cyan color signature matching the site theme: set a vibrant text glow indicator using `text-shadow: 0 0 12px var(--neon-purple);` when state modifiers (`.cat-label--active`) are bound.
+* [ ] **Step 2.4:** Overhaul the central layout dashboard node (`.card-center`) and the interior toggle sliding track (`.toggle-track`). Replace flat styling elements with deep cybernetic glassmorphism layers, neon ambient backlit shadows (`box-shadow: 0 0 30px rgba(138, 43, 226, 0.15)`), and micro-scaled border tracks.
+* [ ] **Step 2.5:** Update the step navigation indicator pipeline nodes (`.step-indicator`, `.step-num`, `.step-line`). Modernize layout proportions, ensure font treatments use crisp tabular layout tracking strings, and replace basic line tracks with high-contrast gradient fillers.
+* [ ] **Verification:** Run `npm run dev`. Inspect the newly updated interface row and control buttons on both a standard desktop browser and a simulated mobile device layout. Confirm that text fields, active neon glow rings, and control thumb capsules align elegantly, maintaining a premium sci-fi dashboard theme across both views.
 
 ---
 
 ## 3. Global Testing Strategy
 
-* **Idle State Disengagement Test:** Leave the viewport stagnant to verify the slider wiggle loops periodically without building up event cycles in memory. Interact with it using various inputs (mouse drag, trackpad pan, touch gesture) to confirm that the loop disconnects permanently and leaves no execution trace.
-* **Mobile Truncation Sweep Test:** Check every face layout combination at ultra-narrow screen widths (320px up to 480px). Ensure that no headings collide with action pills or overlap layout decorations.
-* **Counter Metric Sanity Test:** Double-check that if zero projects return from the API endpoint, the counter renders an expected default cleanly without throwing errors or breaking layout arrays.
+* **Text Legibility Multi-Viewport Sweep:** Scan all visual gimmick tooltips across the home layout track on standard viewports and mobile screens. Ensure that text bubbles adapt cleanly to edge boundaries, never bleed past device margins, and remain perfectly legible.
+* **Theme Contrast Compliance Validation:** Verify that active navigation label glows and dark glass background plates meet high-contrast accessibility parameters against your deep cosmos canvas wallpaper background.
+* **Control Hitbox Interaction Check:** Ensure the redesigned tab buttons and upgraded central toggle elements maintain large touch tap boundaries on mobile layout frames, allowing frictionless sliding actions without physical element overlap bugs.

@@ -36,9 +36,7 @@
   opacity: 0.7;
   transform:
     translateX(var(--decor-tx, 0px))
-    translateY(var(--decor-scroll, 0))
-    rotate(var(--decor-rot, 0deg))
-    scale(var(--decor-scale, 1));
+    translateY(var(--decor-scroll, 0));
   transition: opacity 260ms ease, filter 260ms ease, transform 260ms var(--transition-spring, cubic-bezier(0.16,1,0.3,1));
   filter: drop-shadow(0 0 6px color-mix(in srgb, var(--decor-accent, #00f0ff) 35%, transparent));
   pointer-events: auto;
@@ -54,6 +52,9 @@
   display: block;
   color: rgba(255, 255, 255, 0.75);
   overflow: visible;
+  /* Rotation + scale live here so the parent layout box (and ::after tooltip) stays stable */
+  transform: rotate(var(--decor-rot, 0deg)) scale(var(--decor-scale, 1));
+  transform-origin: 50% 50%;
 }
 
 .decor:hover {
@@ -67,8 +68,11 @@
   position: absolute;
   left: 50%;
   bottom: calc(100% + 6px);
-  transform: translateX(-50%) translateY(4px);
-  white-space: nowrap;
+  transform: translateX(-50%) translateY(4px) translateZ(0);
+  /* Fixed width + wrapping keeps all boxes the same size regardless of text length */
+  width: 140px;
+  white-space: normal;
+  text-align: center;
   font-size: 10px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -83,10 +87,39 @@
   transition: opacity 180ms ease, transform 220ms var(--transition-spring, ease);
   backdrop-filter: blur(8px);
   z-index: 3;
+  will-change: transform;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 .decor:hover::after {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
+  transform: translateX(-50%) translateY(0) translateZ(0);
+}
+
+/* Left column: tooltip slides out to the right (stays inside the page) */
+.decor-col--left .decor::after {
+  left: calc(100% + 10px);
+  right: auto;
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) translateX(-6px) translateZ(0);
+  text-align: left;
+}
+.decor-col--left .decor:hover::after {
+  transform: translateY(-50%) translateX(0) translateZ(0);
+}
+
+/* Right column: tooltip slides out to the left (stays inside the page) */
+.decor-col--right .decor::after {
+  left: auto;
+  right: calc(100% + 10px);
+  bottom: auto;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px) translateZ(0);
+  text-align: right;
+}
+.decor-col--right .decor:hover::after {
+  transform: translateY(-50%) translateX(0) translateZ(0);
 }
 
 /* --- motion primitives --- */
@@ -228,10 +261,7 @@
 .decor--q-center {
   top: 50%;
   left: calc(30% + (var(--jx, 50%) * 0.4));
-  transform:
-    translateY(-50%)
-    rotate(var(--decor-rot, 0deg))
-    scale(var(--decor-scale, 1));
+  transform: translateY(-50%);
 }
 
 /* --- responsive: hide columns on mobile, keep breaks --- */
