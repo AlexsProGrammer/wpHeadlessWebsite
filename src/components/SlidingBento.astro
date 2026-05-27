@@ -3431,6 +3431,44 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
       animation: none !important;
       transition: none !important;
     }
+
+    /* ── Mobile project card normalisation ──────────────────────────
+       Cards #1 (proj-split) and #3 (compact cover-thumb) both reflow
+       to match the vertical stack style of card #2.
+    ─────────────────────────────────────────────────────────────── */
+
+    /* Card #1: convert horizontal split → vertical stack */
+    .proj-split {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 0.45rem;
+      height: 100%;
+    }
+    .proj-split-cover {
+      width: 100% !important;
+      height: 48% !important;
+      min-height: 110px !important;
+      border-radius: 12px;
+    }
+    .proj-split-body {
+      padding-top: 0 !important;
+      flex: 1;
+    }
+
+    /* Card #3: match cover proportions and title scale of card #2 */
+    .topic-content[data-step="3"][data-pos="2"] .cover-thumb {
+      height: 48% !important;
+      min-height: 110px !important;
+    }
+    .topic-content[data-step="3"][data-pos="2"] .proj-title-sm {
+      font-size: 1.12rem !important;
+      -webkit-line-clamp: 2 !important;
+      line-clamp: 2 !important;
+    }
+    .topic-content[data-step="3"][data-pos="2"] .proj-excerpt {
+      -webkit-line-clamp: 3 !important;
+      line-clamp: 3 !important;
+    }
   }
 </style>
 
