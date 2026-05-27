@@ -566,6 +566,22 @@ const termData = {
 
     body.addEventListener("click", () => input.focus());
 
+    // ── Phase 1: Dynamic Overflow Assessment & Pointer Interaction Control ──
+    // Attach with { passive: false } so we can conditionally call preventDefault in later phases.
+    body.addEventListener("wheel", (e: WheelEvent) => {
+      const isScrollable = content.scrollHeight > body.clientHeight;
+      if (!isScrollable) {
+        // Terminal has no overflow — prevent any default trap and forward to main Lenis.
+        // Note: .scroll is a position *property* on Lenis; use scrollTo(current + delta) to drive it.
+        e.preventDefault();
+        const mainLenis = (window as any).__lenis;
+        if (mainLenis) {
+          mainLenis.start(); // un-pause (mouseenter stops it; we drive it manually here)
+          mainLenis.scrollTo(mainLenis.scroll + e.deltaY, { immediate: false });
+        }
+      }
+    }, { passive: false });
+
     input.addEventListener("keydown", (e: KeyboardEvent) => {
       if (e.key !== "Enter") return;
       const cmd = input.value;

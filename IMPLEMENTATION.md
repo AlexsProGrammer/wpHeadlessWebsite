@@ -1,124 +1,48 @@
 # IMPLEMENTATION.md
 
 ## 1. Project Context & Architecture
-- **Goal:** Execute Part 1 of the testing optimization strategy: Scroll Memory, Page Loading Isolation & Navigation Persistence. This phase resolves layout jarring, interaction leakage during introductory load sequences, and viewport misalignments by syncing state history records across session switches.
-- **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, SessionStorage API, Lenis Smooth Scroll.
+- **Goal:** Execute Part 2 of the testing optimization strategy: Smart Scroll Trapping & Mouse-Wheel Pass-Through. This phase corrects obstructive layout behavior where hovering or scrolling over non-scrollable or fully-scrolled terminal component paths traps the mouse wheel input, passing it back into the global smooth scroll engine (Lenis) seamlessly.
+- **Tech Stack & Dependencies:** Astro, Vanilla JavaScript, Lenis Smooth Scroll.
 - **File Structure:**
   ```text
   ├── src/
-  │   ├── components/
-  │   │   ├── SolarLoader.astro   (Modify)
-  │   │   └── SlidingBento.astro  (Modify)
-  │   └── layouts/
-  │       └── MainLayout.astro    (Modify)
+  │   └── components/
+  │       └── TerminalFooter.astro (Modify)
 
 ```
 
-* **Attention Points:** Maintain absolute state isolation. Ensure that interactions with Lenis do not attempt execution before the global window tracker instance (`window.__lenis`) has finished initialization inside `MainLayout.astro`.
-* **DSGVO:** All synchronization metrics are processed exclusively in the browser using the local `sessionStorage` API. No persistent tracking records, external analytics cookies, or identifier parameters are dispatched to remote servers, remaining 100% compliant with German privacy regulations.
+* **Attention Points:** The event handlers must register with `{ passive: false }` to enable conditional execution blocking via `e.preventDefault()` only when the terminal is actively absorbing internal scrolling tracks.
+* **DSGVO:** This optimization phase utilizes native client-side events exclusively. No analytical mouse tracking, scroll logging, or interaction metrics are captured or forwarded to remote servers.
 
 ## 2. Execution Phases
 
-#### Phase 1: Loader Interaction Isolation & Viewport Anchoring
+#### Phase 1: Dynamic Overflow Assessment & Pointer Interaction Control
 
-* [x] **Step 1.1:** Open `src/components/SolarLoader.astro`. Inside the `<script>` block, find the `lockScroll()` function definition.
-* [x] **Step 1.2:** Augment `lockScroll()` to immediately stop the Lenis engine and mark the session loading active state flag. Add:
+* [x] **Step 1.1:** In `src/components/TerminalFooter.astro`, locate the `<script>` tag and query the primary terminal content scroll viewport element (e.g., `.terminal-body` or its container wrapper).
+* [x] **Step 1.2:** Attach a client-side `wheel` event listener to the terminal container with the option parameter `{ passive: false }`.
+* [x] **Step 1.3:** Inside the event callback, establish an overflow layout condition that compares the container's physical layout metrics: `const isScrollable = container.scrollHeight > container.clientHeight;`.
+* [x] **Step 1.4:** Implement conditional fallback logic: If `isScrollable` evaluates to false (the content is fully visible without scrolling), allow the event to bubble up unhindered without execution blocks, or forward the delta directly into the main viewport scroller instance via `(window as any).__lenis?.scroll(e.deltaY);`.
+* [x] **Verification:** Run `npm run dev`. Open your local instance on a desktop viewport. When the terminal outputs short lines of text (no active scrollbar tracks visible), hover over the terminal window and roll the scroll wheel. The parent main layout page must scroll smoothly and instantly.
+
+#### Phase 2: Boundary Escape Logic & Lenis Momentum Forwarding
+
+* [ ] **Step 2.1:** Inside the `wheel` event handler block for `src/components/TerminalFooter.astro`, extract the dynamic runtime position parameters: `const { scrollTop, scrollHeight, clientHeight } = container;`.
+* [ ] **Step 2.2:** Construct the top ceiling boundary detection rule: Check if the user is attempting an upward scroll input (`e.deltaY < 0`) while the element position is pinned to the top line (`scrollTop === 0`).
+* [ ] **Step 2.3:** Construct the bottom floor boundary detection rule: Check if the user is attempting a downward scroll input (`e.deltaY > 0`) while the element position reaches the maximum height threshold (`scrollTop + clientHeight >= scrollHeight - 1`).
+* [ ] **Step 2.4:** Integrate the pass-through bypass mechanism: If either boundary condition evaluates to true, do not block the window track. Instead, pass the scrolling momentum straight into the Lenis framework:
 ```typescript
-sessionStorage.setItem("solarLoaderActive", "true");
-(window as any).__lenis?.stop();
-
-```
-
-
-* [x] **Step 1.3:** Find the `unlockScroll()` function definition. Augment it to release the Lenis execution lock:
-```typescript
-sessionStorage.removeItem("solarLoaderActive");
-(window as any).__lenis?.start();
-
-```
-
-
-* [x] **Step 1.4:** Locate the `finishLoader()` function block. Near the end of the execution block (right after `unlockScroll()`), insert conditional check logic to enforce top anchoring for active loaders or trigger memory restoration for skipped frames:
-```typescript
-if (shouldShow) {
-  (window as any).__lenis?.scrollTo(0, { immediate: true });
-} else {
-  const savedScroll = sessionStorage.getItem(`scroll-pos-${window.location.pathname}`);
-  if (savedScroll) {
-    requestAnimationFrame(() => {
-      (window as any).__lenis?.scrollTo(parseFloat(savedScroll), { immediate: true });
-    });
-  }
+if ((window as any).__lenis) {
+  (window as any).__lenis.scroll(e.deltaY);
 }
 
 ```
 
 
-* [x] **Verification:** Perform a hard reload (`Ctrl+F5` or `Cmd+Shift+R`) on the home page. Verify that scroll wheel gestures and touch swipes are totally blocked while the solar alignment animation is visible. Once the black hole collapses and fades out, verify the viewport is cleanly locked to the absolute top of the Hero section.
-
-#### Phase 2: Sliding Bento State Persistence Cache
-
-* [x] **Step 2.1:** Open `src/components/SlidingBento.astro`. Locate the tracking script initialization method `init()`.
-* [x] **Step 2.2:** Locate the statement assignment `step = 0;` inside `init()`. Replace this statement with a retrieval look-up targeting session transaction logs:
-```typescript
-const cachedStep = sessionStorage.getItem("sb-active-step");
-step = cachedStep !== null ? parseInt(cachedStep, 10) : 0;
-
-```
-
-
-* [x] **Step 2.3:** Locate the fallback layout assignment configuration inside `init()`:
-```typescript
-LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
-container.classList.add(LAYOUT_CLASSES[step]);
-
-```
-
-
-Ensure it accepts this restored index value dynamically instead of defaulting to layout zero. Pass `step` into `populateTopicCards` and `updateLabels` respectively.
-* [x] **Step 2.4:** Locate the internal state update lines within the `goToStep(targetStep)` rotation handler block. Append a state mutation update trigger:
-```typescript
-sessionStorage.setItem("sb-active-step", String(targetStep));
-
-```
-
-
-* [x] **Step 2.5:** Locate the desktop-to-mobile matching transition routing logic within the vertical mobile swiper utility function `executeMobileTabSwitch(targetStep, lang)`. Append an identical record entry block directly below the local index step updates:
-```typescript
-sessionStorage.setItem("sb-active-step", String(targetStep));
-
-```
-
-
-* [x] **Verification:** Load the web application, click the center tracking disk knob to advance the layout to Step 2 ("Leistungen"). Click a link to open another sub-route or legal text page. Click the browser's Back button. Verify that the Sliding Bento initializes immediately on Step 2 with proper navigation label indicators active.
-
-#### Phase 3: Lenis Scroll Coordinate Tracker Integration
-
-* [x] **Step 3.1:** Open `src/layouts/MainLayout.astro` and find the `<script>` tag where the `Lenis` smoothing instance is configured.
-* [x] **Step 3.2:** Inside the tracking listener block (`lenis.on("scroll", ...)`), append an execution statement to continuously record viewport progress values:
-```typescript
-sessionStorage.setItem(`scroll-pos-${window.location.pathname}`, String(lenis.scroll));
-
-```
-
-
-* [x] **Step 3.3:** Below the global identifier binding assignment (`(window as any).__lenis = lenis;`), attach an automated check to catch navigation events that bypassed full loader execution passes:
-```typescript
-if (!sessionStorage.getItem("solarLoaderActive")) {
-  const historicalPos = sessionStorage.getItem(`scroll-pos-${window.location.pathname}`);
-  if (historicalPos) {
-    requestAnimationFrame(() => {
-      lenis.scrollTo(parseFloat(historicalPos), { immediate: true });
-    });
-  }
-}
-
-```
-
-
-* [x] **Verification:** Navigate to the main home page, scroll down directly to the `SlidingBento` section container, and click the Project Gallery redirection link. Once the gallery page resolves, scroll halfway down its track and click on any specific individual project case detail view. Press Back to return to the project overview gallery, and confirm your exact position down the list is restored. Press Back once more to return to the root home page; verify the browser instantly slides the view down to keep the `SlidingBento` section perfectly focused.
+* [ ] **Step 2.5:** Enforce script execution hygiene: Only invoke `e.preventDefault()` if `isScrollable` is active and the current scroll positions lie strictly between the upper and lower boundary thresholds (meaning the terminal is actively absorbing the wheel action internally).
+* [ ] **Verification:** Populate the terminal output container with long logs until a vertical scrollbar appears. Scroll internally down the terminal box. Once the scrollbar strikes the absolute bottom boundary, continue rolling the mouse wheel downwards. Confirm that the main page layout seamlessly catches the scrolling wheel momentum and continues moving downward without freezing or requiring cursor repositioning.
 
 ## 3. Global Testing Strategy
 
-* **Navigation Context Isolation Test:** Confirm that opening the application inside a clean browser tab correctly plays the intro sequence and sets the coordinate track to 0, whereas in-session link navigation leaves previous coordinates unbothered.
-* **Session Cache Sanitation Test:** Open Developer Tools -> Application -> Session Storage. Monitor updates to keys `sb-active-step` and URL scroll tracking paths during high-frequency navigation actions to ensure parameters write cleanly without memory leaks or syntax degradation errors.
+* **Short Terminal Pass-Through Test:** Verify that when the terminal window has fewer lines than its visual height constraints, mouse wheel scroll loops inside its boundary act exactly as if scrolling on standard blank page elements.
+* **Edge Continuity Validation:** Scroll up and down inside a long log sequence. Ensure that hitting the top or bottom wall transitions scroll wheel momentum back to the parent Lenis layout with a frame-perfect handover.
+* **Cross-Engine Delta Calibration Test:** Validate operation across Chromium, Gecko, and WebKit-based browser instances to verify that standard mouse wheel ticks (`e.deltaY`) feed steady translation numbers to the Lenis engine regardless of individual platform scalar differences.
