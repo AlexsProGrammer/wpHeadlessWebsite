@@ -38,11 +38,11 @@
 
 #### Phase 3: Mobile Tab Switching Mechanics & Smooth Scroll Reset
 
-* [ ] **Step 3.1:** In the `<script>` tag, find the click event registration loop assigned to the category label nodes (`catEls.forEach(...)`).
-* [ ] **Step 3.2:** Refactor the internal event block to differentiate between interfaces. If `mobileQuery.matches` evaluates to true, intercept the execution path and route it to a new client utility function named `executeMobileTabSwitch(i, lang);`.
-* [ ] **Step 3.3:** Define `executeMobileTabSwitch(targetStep, lang)`. Update the system loop track state: set `step = targetStep;` and invoke the existing tracking method `updateLabels(targetStep, lang);` to update active highlighters on the header navigation pills.
-* [ ] **Step 3.4:** Inside `executeMobileTabSwitch`, perform a lightweight opacity crossfade across the card sub-contents. Target the child active elements, animate their `opacity` to 0 over 0.15 seconds, loop through to switch active visibility flags (`.is-active`) matching the target step, and fade back to 1.
-* [ ] **Step 3.5:** Conclude `executeMobileTabSwitch` by forcefully re-centering the carousel navigation track. Fetch the parent container object (`container`) and execute a smooth native scrolling reset: `container.scrollTo({ left: 0, behavior: 'smooth' });`.
+* [x] **Step 3.1:** In the `<script>` tag, find the click event registration loop assigned to the category label nodes (`catEls.forEach(...)`).
+* [x] **Step 3.2:** Refactor the internal event block to differentiate between interfaces. If `mobileQuery.matches` evaluates to true, intercept the execution path and route it to a new client utility function named `executeMobileTabSwitch(i, lang);`.
+* [x] **Step 3.3:** Define `executeMobileTabSwitch(targetStep, lang)`. Update the system loop track state: set `step = targetStep;` and invoke the existing tracking method `updateLabels(targetStep, lang);` to update active highlighters on the header navigation pills.
+* [x] **Step 3.4:** Inside `executeMobileTabSwitch`, perform a lightweight opacity crossfade across the card sub-contents. Target the child active elements, animate their `opacity` to 0 over 0.15 seconds, loop through to switch active visibility flags (`.is-active`) matching the target step, and fade back to 1.
+* [x] **Step 3.5:** Conclude `executeMobileTabSwitch` by forcefully re-centering the carousel navigation track. Fetch the parent container object (`container`) and execute a smooth native scrolling reset: `container.scrollTo({ left: 0, behavior: 'smooth' });`.
 * [ ] **Verification:** Click on the various category labels ("Über Mich", "Die Geschichte", "Leistungen", "Projekte") using mobile browser simulation. Confirm the text content across all 4 horizontal cards updates immediately with a clean fade transition, and that the viewport container automatically animations its scroll track smoothly back to the first card.
 
 ## 3. Global Testing Strategy

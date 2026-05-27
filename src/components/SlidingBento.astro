@@ -3740,6 +3740,42 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
   }
 
   /* ─────────────────────────────────────────────────────────
+     MOBILE TAB SWITCH — Steps 3.3–3.5
+  ───────────────────────────────────────────────────────── */
+  function executeMobileTabSwitch(targetStep: number, lang: "de" | "en"): void {
+    if (targetStep === step) return;
+
+    // Step 3.3 — update state + navigation pills
+    step = targetStep;
+    updateLabels(targetStep, lang);
+
+    // Step 3.4 — fade out active sub-contents, swap .is-active, fade back in
+    const activeContents = orbitCards.flatMap(card =>
+      Array.from(card.querySelectorAll<HTMLElement>(".topic-content.is-active"))
+    );
+    gsap.to(activeContents, {
+      opacity: 0,
+      duration: 0.15,
+      onComplete: () => {
+        orbitCards.forEach(card => {
+          card.querySelectorAll<HTMLElement>(".topic-content").forEach(tc => {
+            tc.classList.toggle("is-active", tc.dataset.step === String(targetStep));
+          });
+        });
+        const nextContents = orbitCards.flatMap(card =>
+          Array.from(card.querySelectorAll<HTMLElement>(".topic-content.is-active"))
+        );
+        gsap.to(nextContents, { opacity: 1, duration: 0.15 });
+      },
+    });
+
+    // Step 3.5 — smooth scroll back to card 1
+    if (container) {
+      container.scrollTo({ left: 0, behavior: "smooth" });
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────
      INIT
   ───────────────────────────────────────────────────────── */
   function init() {
@@ -3779,10 +3815,16 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
     });
 
     // Click category labels → jump directly to topic
+    // Step 3.2 — route to mobile or desktop handler based on viewport
     catEls.forEach((el, i) => {
       el.addEventListener("click", () => {
-        if (i === step || isTransitioning) return;
-        goToStep(i);
+        const lang = getCurrentLang();
+        if (mobileQuery.matches) {
+          executeMobileTabSwitch(i, lang);
+        } else {
+          if (i === step || isTransitioning) return;
+          goToStep(i);
+        }
       });
     });
 
