@@ -3797,6 +3797,31 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
   }
 
   /* ─────────────────────────────────────────────────────────
+     VIEWPORT MUTATION HANDLER — Phase 4 · Phase 2
+     Tied to a MediaQueryList change event (not a resize
+     listener) so it fires only on actual breakpoint crossings,
+     preventing layout thrashing from mobile address-bar flicker.
+  ───────────────────────────────────────────────────────── */
+  function handleViewportMutation(e: MediaQueryListEvent): void {
+    if (e.matches) {
+      // ── Desktop → Mobile: kill Draggable, purge all GSAP inline styles ──
+      if (activeDraggable) { activeDraggable.kill(); activeDraggable = null; }
+      gsap.set(orbitCards, { clearProps: "all" });
+      if (container) gsap.set(container, { clearProps: "all" });
+      if (centerBtn) gsap.set(centerBtn, { clearProps: "all" });
+    } else {
+      // ── Mobile → Desktop: reconstruct Draggable + re-render layout state ──
+      const lang = getCurrentLang();
+      populateTopicCards(step, lang);
+      updateLabels(step, lang);
+      requestAnimationFrame(() => {
+        setupCenterBtn();
+        playEntryAnimation();
+      });
+    }
+  }
+
+  /* ─────────────────────────────────────────────────────────
      INIT
   ───────────────────────────────────────────────────────── */
   function init() {
@@ -3815,6 +3840,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
 
     // Step 2.2 — environment detection (DSGVO-safe: runs locally, no telemetry)
     const mobileQuery = window.matchMedia("(max-width: 768px)");
+    mobileQuery.addEventListener("change", handleViewportMutation);
 
     step = 0;
     LAYOUT_CLASSES.forEach(cls => container!.classList.remove(cls));
