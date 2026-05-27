@@ -28,12 +28,12 @@
 
 #### Phase 2: Statically Rendering the Orbit Matrix (HTML Migration)
 
-* [ ] **Step 2.1:** In the template section of `src/components/SlidingBento.astro`, update the 4 `<div class="bento-card orbit-card">` blocks. Inside each card's front `.card-face`, create a loop that iterates 4 times (for steps 0 to 3).
-* [ ] **Step 2.2:** For each step in the loop, render a wrapper `<div class="topic-content" data-step="{step}" data-pos="{pos}">`.
-* [ ] **Step 2.3:** Extract the raw HTML from `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` (currently in the `<script>` tag). Port this HTML directly into your Astro template inside the respective `.topic-content` wrappers.
-* [ ] **Step 2.4:** Replace all JavaScript template literal translations (e.g., `${t('bento.about.n.title', lang)}`) with standard text wrapped with data attributes: e.g., `<h3 class="hero-title" data-i18n="bento.about.n.title">Über Mich</h3>`.
-* [ ] **Step 2.5:** For the Project cards (Topic 3), use the `highlightedProjects` prop to dynamically generate the project markup (Title, excerpt, image URL, and tech stack pills) directly via Astro JSX/map syntax. Handle the empty state fallback exactly as the JS function did.
-* [ ] **Verification:** Inspect the page source in the browser (`Ctrl+U` or `Cmd+U`). Verify that the raw HTML for all topics, origins, services, and projects is present in the source code on initial load.
+* [x] **Step 2.1:** In the template section of `src/components/SlidingBento.astro`, update the 4 `<div class="bento-card orbit-card">` blocks. Inside each card's front `.card-face`, create a loop that iterates 4 times (for steps 0 to 3).
+* [x] **Step 2.2:** For each step in the loop, render a wrapper `<div class="topic-content" data-step="{step}" data-pos="{pos}">`.
+* [x] **Step 2.3:** Extract the raw HTML from `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` (currently in the `<script>` tag). Port this HTML directly into your Astro template inside the respective `.topic-content` wrappers.
+* [x] **Step 2.4:** Replace all JavaScript template literal translations (e.g., `${t('bento.about.n.title', lang)}`) with standard text wrapped with data attributes: e.g., `<h3 class="hero-title" data-i18n="bento.about.n.title">Über Mich</h3>`.
+* [x] **Step 2.5:** For the Project cards (Topic 3), use the `highlightedProjects` prop to dynamically generate the project markup (Title, excerpt, image URL, and tech stack pills) directly via Astro JSX/map syntax. Handle the empty state fallback exactly as the JS function did.
+* [x] **Verification:** Inspect the page source in the browser (`Ctrl+U` or `Cmd+U`). Verify that the raw HTML for all topics, origins, services, and projects is present in the source code on initial load.
 
 #### Phase 3: CSS Visibility & State Management
 

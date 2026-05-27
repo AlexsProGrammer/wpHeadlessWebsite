@@ -25,6 +25,26 @@ function getOrbitMatrix(orbitIdx: number, step: number): { topicIndex: number; p
     pos: (orbitIdx + step) % 4,
   };
 }
+
+// Normalize highlightedProjects into a flat array for direct SSR use (Phase 2)
+const projects = highlightedProjects.slice(0, 3).map(({ project, acf, image }) => ({
+  title:     (project.title?.rendered ?? '') as string,
+  excerpt:   ((project.excerpt?.rendered ?? project.content?.rendered ?? '') as string)
+               .replace(/<[^>]*>/g, '').trim(),
+  slug:      (project.slug ?? '') as string,
+  imageUrl:  (image?.url ?? '') as string,
+  imageAlt:  (image?.alt ?? '') as string,
+  techStack: (acf?.tech_stack ?? '') as string,
+}));
+
+// Fallback gradient covers when no project image is available
+const covers = [
+  "linear-gradient(135deg, rgba(0,220,255,0.55) 0%, rgba(120,60,255,0.35) 50%, rgba(255,0,160,0.25) 100%)",
+  "linear-gradient(135deg, rgba(255,0,160,0.55) 0%, rgba(255,140,0,0.35) 50%, rgba(120,60,255,0.25) 100%)",
+  "linear-gradient(135deg, rgba(120,60,255,0.55) 0%, rgba(0,220,255,0.35) 50%, rgba(0,220,120,0.2) 100%)",
+] as const;
+
+const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : '8+';
 ---
 
 <section class="bento-section" id="leistungen">
@@ -43,10 +63,443 @@ function getOrbitMatrix(orbitIdx: number, step: number): { topicIndex: number; p
   <!-- ── Bento Grid ──────────────────────────────────────── -->
   <div class="bento-container layout-0 reveal" id="sb-bento-container" style="transition-delay: 180ms">
 
-    <div class="bento-card orbit-card" id="sb-orbit-0"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-1"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-2"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
-    <div class="bento-card orbit-card" id="sb-orbit-3"><div class="card-inner"><div class="card-face"></div><div class="card-face card-face-back"></div></div></div>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         ORBIT CARD 0
+         step=0 → About Me   pos=(0+0)%4=0 (N — wide)
+         step=1 → Origin     pos=(0+1)%4=1 (E — tall)
+         step=2 → Services   pos=(0+2)%4=2 (S — small)
+         step=3 → Projects   pos=(0+3)%4=3 (W — viewall)
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="bento-card orbit-card glow-purple" id="sb-orbit-0">
+      <div class="card-inner">
+        <div class="card-face">
+
+          <!-- ── Step 0: About Me · pos 0 (N — wide) ──── -->
+          <div class="topic-content" data-step="0" data-pos="0">
+            <div class="card-bg card-bg--dots"></div>
+            <div class="constellation"></div>
+            <div class="hero-glow"></div>
+            <span class="card-display-num">01</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--purple" data-i18n="bento.about.n.label">01 // ÜBER MICH</span>
+              <span class="status-pill">
+                <span class="status-pill-dot"></span>
+                <span data-i18n="bento.about.n.badge">Verfügbar</span>
+              </span>
+              <h3 class="hero-title">
+                <span data-i18n="bento.about.n.title">Code ist Ausdruck.</span>
+                <span class="typing-cursor"></span>
+              </h3>
+              <p class="hero-sub clamp-2" data-i18n="bento.about.n.desc">CS-Student. LMU München. Seit 2018 im Web.</p>
+            </div>
+          </div>
+
+          <!-- ── Step 1: Origin · pos 1 (E — tall) ─────── -->
+          <div class="topic-content" data-step="1" data-pos="1">
+            <div class="card-bg card-bg--dots"></div>
+            <div class="hero-glow"></div>
+            <span class="card-display-num">02</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--purple" data-i18n="bento.origin.e.label">02 // EVOLUTION</span>
+              <h3 class="hero-title" style="font-size:1.2rem" data-i18n="bento.origin.e.title">Meilensteine</h3>
+              <div class="v-timeline">
+                <div class="v-timeline-node">
+                  <span class="v-timeline-year">2018</span>
+                  <span class="v-timeline-text" data-i18n="bento.origin.e.t1">Erste Zeile Code</span>
+                </div>
+                <div class="v-timeline-node">
+                  <span class="v-timeline-year">2021</span>
+                  <span class="v-timeline-text" data-i18n="bento.origin.e.t2">Erstes Fullstack-Deploy</span>
+                </div>
+                <div class="v-timeline-node">
+                  <span class="v-timeline-year">2025</span>
+                  <span class="v-timeline-text" data-i18n="bento.origin.e.t3">Werbeagentur Gerer</span>
+                </div>
+                <div class="v-timeline-node v-timeline-node--active">
+                  <span class="v-timeline-year">2026</span>
+                  <span class="v-timeline-text" data-i18n="bento.origin.e.t4">Pro-Grammer</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 2: Services · pos 2 (S — small) ──── -->
+          <div class="topic-content" data-step="2" data-pos="2">
+            <div class="card-bg card-bg--dots"></div>
+            <div class="hero-glow hero-glow--magenta"></div>
+            <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.35rem">
+              <span class="proj-badge proj-badge--magenta" data-i18n="bento.services.s.label">03 // MASSARBEIT</span>
+              <div class="progress-ring-wrap">
+                <svg viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" class="ring-bg"/>
+                  <circle cx="50" cy="50" r="45" class="ring-fill"/>
+                </svg>
+                <span class="ring-value">100%</span>
+              </div>
+              <span class="big-metric-sub" style="font-size:0.55rem" data-i18n="bento.services.s.metricLabel">Maßgeschneidert</span>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Projects · pos 3 (W — viewall) ── -->
+          <div class="topic-content" data-step="3" data-pos="3">
+            <a class="card-link" href="/projects" aria-label="Zur Projektgalerie" data-i18n-aria="bento.projects.viewall.cta"></a>
+            <div class="card-bg card-bg--dots"></div>
+            <div class="hero-glow"></div>
+            <span class="card-display-num">04</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--purple" data-i18n="bento.projects.viewall.label">04 // SAMMLUNG</span>
+              <div class="big-metric" style="margin-top:0.35rem">
+                <span class="big-metric-value">{projectCountLabel}</span>
+                <span class="big-metric-sub" data-i18n="bento.projects.viewall.count">Projekte</span>
+              </div>
+              <div class="bento-viewall-grid bento-viewall-grid--animated" style="margin-top:auto;margin-bottom:0.6rem">
+                <span></span><span class="viewall-grid--tall"></span>
+                <span class="viewall-grid--wide"></span><span></span>
+              </div>
+              <a href="/projects" class="proj-cta">
+                <span data-i18n="bento.projects.viewall.cta">Zur Projektgalerie</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </a>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-face card-face-back"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         ORBIT CARD 1
+         step=0 → About Me   pos=(1+0)%4=1 (E — tall)
+         step=1 → Origin     pos=(1+1)%4=2 (S — small)
+         step=2 → Services   pos=(1+2)%4=3 (W — checklist)
+         step=3 → Projects   pos=(1+3)%4=0 (N — wide, projects[0])
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="bento-card orbit-card glow-cyan" id="sb-orbit-1">
+      <div class="card-inner">
+        <div class="card-face">
+
+          <!-- ── Step 0: About Me · pos 1 (E — tall) ────── -->
+          <div class="topic-content" data-step="0" data-pos="1">
+            <div class="card-bg card-bg--grid"></div>
+            <div class="hero-glow hero-glow--cyan"></div>
+            <span class="card-display-num card-display-num--cyan">02</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--cyan" data-i18n="bento.about.e.label">02 // STACK</span>
+              <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem" data-i18n="bento.about.e.title">Bauen. Liefern. Skalieren.</h3>
+              <div class="tech-grid">
+                <div class="tech-tile tech-tile--cyan"><span>TS</span></div>
+                <div class="tech-tile"><span>Astro</span></div>
+                <div class="tech-tile tech-tile--magenta"><span>Node</span></div>
+                <div class="tech-tile tech-tile--green"><span>SQL</span></div>
+                <div class="tech-tile tech-tile--orange"><span>Docker</span></div>
+                <div class="tech-tile"><span>AWS</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 1: Origin · pos 2 (S — small) ─────── -->
+          <div class="topic-content" data-step="1" data-pos="2">
+            <div class="card-bg card-bg--grid"></div>
+            <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.1rem">
+              <span class="proj-badge proj-badge--cyan" data-i18n="bento.origin.s.label">03 // AKTUELL</span>
+              <div class="pulse-badge"><span class="pulse-badge-text">NOW</span></div>
+              <span class="pulse-badge-text" style="font-size:0.7rem" data-i18n="bento.origin.s.title">Werbeagentur Gerer</span>
+              <span class="big-metric-sub" style="font-size:0.5rem" data-i18n="bento.origin.s.subtitle">Seit Juli 2025</span>
+            </div>
+          </div>
+
+          <!-- ── Step 2: Services · pos 3 (W — checklist) ─ -->
+          <div class="topic-content" data-step="2" data-pos="3">
+            <div class="card-bg card-bg--diagonal"></div>
+            <div class="hero-glow"></div>
+            <span class="card-display-num">04</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--purple" data-i18n="bento.services.w.label">04 // BERATUNG</span>
+              <h3 class="hero-title" style="font-size:1.18rem" data-i18n="bento.services.w.title">Consulting</h3>
+              <p class="hero-sub" style="-webkit-line-clamp:2" data-i18n="bento.services.w.desc">Reviews. Audits. White-Label.</p>
+              <div class="check-list">
+                <div class="check-list-item">
+                  <span class="check-list-item-num">01</span>
+                  <span class="check-list-item-text" data-i18n="bento.services.w.li1">Code Reviews</span>
+                </div>
+                <div class="check-list-item">
+                  <span class="check-list-item-num">02</span>
+                  <span class="check-list-item-text" data-i18n="bento.services.w.li2">Architektur-Audits</span>
+                </div>
+                <div class="check-list-item">
+                  <span class="check-list-item-num">03</span>
+                  <span class="check-list-item-text" data-i18n="bento.services.w.li3">Tech Migration</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Projects · pos 0 (N — wide, proj[0]) -->
+          <div class="topic-content" data-step="3" data-pos="0">
+            {projects[0] && (
+              <a class="card-link" href={`/projects/${projects[0].slug}`} aria-label={projects[0].title}></a>
+            )}
+            {!projects[0] && (
+              <a class="card-link" href="/projects" aria-label="Bald" data-i18n-aria="bento.projects.coming"></a>
+            )}
+            {projects[0] ? (
+              <div class="proj-split">
+                <div class="proj-split-cover" style={projects[0].imageUrl ? `background-image:url('${projects[0].imageUrl}')` : `background:${covers[0]}`}>
+                  <span class="proj-split-index">01</span>
+                </div>
+                <div class="proj-split-body">
+                  <span class="proj-badge proj-badge--cyan">01 // PROJEKT</span>
+                  <h3 class="proj-title clamp-2">{projects[0].title}</h3>
+                  <p class="proj-excerpt clamp-3">{projects[0].excerpt}</p>
+                  {projects[0].techStack && (
+                    <div class="proj-tech">
+                      {projects[0].techStack.split(',').slice(0, 3).map((tech: string) => (
+                        <span>{tech.trim()}</span>
+                      ))}
+                    </div>
+                  )}
+                  <span class="proj-cta">
+                    <span data-i18n="bento.projects.details">Projekt ansehen</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div class="card-content" style="gap:0.5rem">
+                <span class="proj-badge proj-badge--cyan">01 // PROJEKT</span>
+                <div class="cover-thumb" style={`background:${covers[0]};flex:1`}>
+                  <span class="cover-thumb-index">01</span>
+                </div>
+                <p class="proj-title-sm clamp-1" style="opacity:0.55" data-i18n="bento.projects.coming">Bald</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+        <div class="card-face card-face-back"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         ORBIT CARD 2
+         step=0 → About Me   pos=(2+0)%4=2 (S — small)
+         step=1 → Origin     pos=(2+1)%4=3 (W — terminal)
+         step=2 → Services   pos=(2+2)%4=0 (N — circuit wide)
+         step=3 → Projects   pos=(2+3)%4=1 (E — tall, projects[1])
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="bento-card orbit-card glow-cyan" id="sb-orbit-2">
+      <div class="card-inner">
+        <div class="card-face">
+
+          <!-- ── Step 0: About Me · pos 2 (S — small) ───── -->
+          <div class="topic-content" data-step="0" data-pos="2">
+            <div class="card-bg card-bg--grid"></div>
+            <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.15rem">
+              <span class="proj-badge proj-badge--cyan" data-i18n="bento.about.s.label">03 // STATUS</span>
+              <div class="radar"><span class="radar-blip"></span></div>
+              <span class="pulse-badge-text" data-i18n="bento.about.s.title">Online</span>
+              <span class="big-metric-sub" style="font-size:0.5rem" data-i18n="bento.about.s.subtitle">München, DE</span>
+            </div>
+          </div>
+
+          <!-- ── Step 1: Origin · pos 3 (W — terminal) ───── -->
+          <div class="topic-content" data-step="1" data-pos="3">
+            <div class="card-bg card-bg--diagonal"></div>
+            <div class="hero-glow"></div>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--purple" data-i18n="bento.origin.w.label">04 // WERBEAGENTUR</span>
+              <span class="status-pill status-pill--purple">
+                <span class="status-pill-dot"></span>
+                <span data-i18n="bento.origin.w.badge">Since 07/2025</span>
+              </span>
+              <h3 class="hero-title" style="font-size:1.2rem" data-i18n="bento.origin.w.title">Werbeagentur Gerer</h3>
+              <p class="hero-sub clamp-2" data-i18n="bento.origin.w.desc">Web, Branding &amp; Kampagnen — für echte Kund:innen.</p>
+              <div class="mini-term">
+                <div class="mini-term-bar"><span></span><span></span><span></span></div>
+                <span class="mini-term-line" data-i18n="bento.origin.w.term1">$ ssh gerer.de</span>
+                <span class="mini-term-line" data-i18n="bento.origin.w.term2">$ deploy —campaign live</span>
+                <span class="mini-term-line mini-term-line--ok" data-i18n="bento.origin.w.term3">✓ Shipping since Jul 2025</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 2: Services · pos 0 (N — circuit wide) -->
+          <div class="topic-content" data-step="2" data-pos="0">
+            <div class="card-bg card-bg--grid"></div>
+            <svg class="circuit-svg" viewBox="0 0 400 180" preserveAspectRatio="none">
+              <path d="M0,36 L80,36 L100,56 L220,56 L240,36 L400,36"/>
+              <path d="M0,148 L90,148 L110,128 L260,128 L280,148 L400,148"/>
+              <path d="M220,56 L220,128"/>
+              <circle cx="100" cy="56" r="3"/><circle cx="240" cy="36" r="3"/>
+              <circle cx="110" cy="128" r="3"/><circle cx="280" cy="148" r="3"/>
+            </svg>
+            <div class="hero-glow hero-glow--cyan"></div>
+            <span class="card-display-num card-display-num--cyan">01</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--cyan" data-i18n="bento.services.n.label">01 // ENTWICKLUNG</span>
+              <h3 class="hero-title hero-title--cyan" data-i18n="bento.services.n.title">Fullstack Engineering.</h3>
+              <p class="hero-sub clamp-2" data-i18n="bento.services.n.desc">Frontend. Backend. Alles dazwischen.</p>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Projects · pos 1 (E — tall, proj[1]) -->
+          <div class="topic-content" data-step="3" data-pos="1">
+            {projects[1] && (
+              <a class="card-link" href={`/projects/${projects[1].slug}`} aria-label={projects[1].title}></a>
+            )}
+            {!projects[1] && (
+              <a class="card-link" href="/projects" aria-label="Bald" data-i18n-aria="bento.projects.coming"></a>
+            )}
+            {projects[1] ? (
+              <div class="card-content" style="gap:0.45rem">
+                <div class="cover-thumb" style={projects[1].imageUrl ? `background-image:url('${projects[1].imageUrl}');height:48%;min-height:110px` : `background:${covers[1]};height:48%;min-height:110px`}>
+                  <span class="cover-thumb-index">02</span>
+                </div>
+                <span class="proj-badge proj-badge--magenta">02 // PROJEKT</span>
+                <h3 class="proj-title clamp-2">{projects[1].title}</h3>
+                <p class="proj-excerpt clamp-3">{projects[1].excerpt}</p>
+                {projects[1].techStack && (
+                  <div class="proj-tech">
+                    {projects[1].techStack.split(',').slice(0, 3).map((tech: string) => (
+                      <span>{tech.trim()}</span>
+                    ))}
+                  </div>
+                )}
+                <span class="proj-cta" style="margin-top:auto">
+                  <span data-i18n="bento.projects.details">Projekt ansehen</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </div>
+            ) : (
+              <div class="card-content" style="gap:0.5rem">
+                <span class="proj-badge proj-badge--magenta">02 // PROJEKT</span>
+                <div class="cover-thumb" style={`background:${covers[1]};flex:1`}>
+                  <span class="cover-thumb-index">02</span>
+                </div>
+                <p class="proj-title-sm clamp-1" style="opacity:0.55" data-i18n="bento.projects.coming">Bald</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+        <div class="card-face card-face-back"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         ORBIT CARD 3
+         step=0 → About Me   pos=(3+0)%4=3 (W — avatar)
+         step=1 → Origin     pos=(3+1)%4=0 (N — wide glitch year)
+         step=2 → Services   pos=(3+2)%4=1 (E — tech grid + terminal)
+         step=3 → Projects   pos=(3+3)%4=2 (S — small, projects[2])
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="bento-card orbit-card glow-purple" id="sb-orbit-3">
+      <div class="card-inner">
+        <div class="card-face">
+
+          <!-- ── Step 0: About Me · pos 3 (W — avatar) ─── -->
+          <div class="topic-content" data-step="0" data-pos="3">
+            <div class="card-bg card-bg--diagonal"></div>
+            <div class="hero-glow"></div>
+            <div class="card-content" style="align-items:center;text-align:center">
+              <span class="proj-badge proj-badge--purple" style="align-self:flex-start" data-i18n="bento.about.w.label">04 // PROFIL</span>
+              <div class="avatar-orbit">
+                <div class="avatar-orbit-ring avatar-orbit-ring--outer"></div>
+                <div class="avatar-orbit-ring"></div>
+                <div class="avatar-orbit-core">&lt;/&gt;</div>
+              </div>
+              <span class="profile-role" data-i18n="bento.about.w.role">Fullstack-Entwickler</span>
+              <span class="profile-location">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span data-i18n="bento.about.w.location">München, DE</span>
+              </span>
+              <div class="link-row">
+                <a class="link-chip" href="https://github.com/AlexsProGrammer" target="_blank" rel="noopener">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+                  <span data-i18n="bento.about.w.github">GitHub</span>
+                </a>
+                <a class="link-chip" href="mailto:hello@pro-grammer.dev">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                  <span data-i18n="bento.about.w.email">Kontakt</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 1: Origin · pos 0 (N — wide glitch yr) -->
+          <div class="topic-content" data-step="1" data-pos="0">
+            <div class="card-bg card-bg--scan"></div>
+            <div class="hero-glow hero-glow--magenta"></div>
+            <span class="card-display-num card-display-num--magenta">01</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--magenta" data-i18n="bento.origin.n.label">01 // DER ANFANG</span>
+              <span class="hero-year" data-text="2018">2018</span>
+              <h3 class="hero-title hero-title--magenta" style="font-size:1.25rem" data-i18n="bento.origin.n.title">Erste Zeile Code.</h3>
+              <p class="hero-sub clamp-2" data-i18n="bento.origin.n.desc">Angefangen mit C++ &amp; Logic Gates. Heute: Fullstack mit echten Produkten.</p>
+            </div>
+          </div>
+
+          <!-- ── Step 2: Services · pos 1 (E — tech + term) -->
+          <div class="topic-content" data-step="2" data-pos="1">
+            <div class="card-bg card-bg--dots"></div>
+            <div class="hero-glow hero-glow--cyan"></div>
+            <span class="card-display-num card-display-num--cyan">02</span>
+            <div class="card-content">
+              <span class="proj-badge proj-badge--cyan" data-i18n="bento.services.e.label">02 // INFRASTRUKTUR</span>
+              <h3 class="hero-title hero-title--cyan" style="font-size:1.2rem" data-i18n="bento.services.e.title">APIs &amp; Daten</h3>
+              <div class="tech-grid tech-grid--cols-2">
+                <div class="tech-tile tech-tile--cyan"><span>PostgreSQL</span></div>
+                <div class="tech-tile tech-tile--magenta"><span>GraphQL</span></div>
+                <div class="tech-tile tech-tile--orange"><span>Docker</span></div>
+                <div class="tech-tile"><span>AWS</span></div>
+              </div>
+              <div class="mini-term" style="margin-top:auto">
+                <div class="mini-term-bar"><span></span><span></span><span></span></div>
+                <span class="mini-term-line" data-i18n="bento.services.e.term1">&gt; Init Sequenz ... OK</span>
+                <span class="mini-term-line" data-i18n="bento.services.e.term2">&gt; DB: verbunden</span>
+                <span class="mini-term-line" data-i18n="bento.services.e.term3">&gt; Signal: 94db</span>
+                <span class="mini-term-line mini-term-line--ok" data-i18n="bento.services.e.term4">&gt; Deploy: live ✓</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ── Step 3: Projects · pos 2 (S — small, proj[2]) -->
+          <div class="topic-content" data-step="3" data-pos="2">
+            {projects[2] && (
+              <a class="card-link" href={`/projects/${projects[2].slug}`} aria-label={projects[2].title}></a>
+            )}
+            {!projects[2] && (
+              <a class="card-link" href="/projects" aria-label="Bald" data-i18n-aria="bento.projects.coming"></a>
+            )}
+            {projects[2] ? (
+              <div class="card-content" style="gap:0.45rem">
+                <div class="cover-thumb" style={projects[2].imageUrl ? `background-image:url('${projects[2].imageUrl}');height:40%;min-height:72px` : `background:${covers[2]};height:40%;min-height:72px`}>
+                  <span class="cover-thumb-index">03</span>
+                </div>
+                <span class="proj-badge proj-badge--purple">03 // PROJEKT</span>
+                <h3 class="proj-title-sm clamp-1">{projects[2].title}</h3>
+                <p class="proj-excerpt clamp-2">{projects[2].excerpt}</p>
+                <span class="proj-cta" style="margin-top:auto">
+                  <span data-i18n="bento.projects.details">Projekt ansehen</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </span>
+              </div>
+            ) : (
+              <div class="card-content" style="gap:0.5rem">
+                <span class="proj-badge proj-badge--purple">03 // PROJEKT</span>
+                <div class="cover-thumb" style={`background:${covers[2]};flex:1`}>
+                  <span class="cover-thumb-index">03</span>
+                </div>
+                <p class="proj-title-sm clamp-1" style="opacity:0.55" data-i18n="bento.projects.coming">Bald</p>
+              </div>
+            )}
+          </div>
+
+        </div>
+        <div class="card-face card-face-back"></div>
+      </div>
+    </div>
 
     <!-- Center glassmorphic toggle -->
     <div class="card-center" id="sb-center-card">
