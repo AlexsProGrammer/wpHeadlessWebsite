@@ -26,10 +26,10 @@
 
 #### Phase 2: Boundary Escape Logic & Lenis Momentum Forwarding
 
-* [ ] **Step 2.1:** Inside the `wheel` event handler block for `src/components/TerminalFooter.astro`, extract the dynamic runtime position parameters: `const { scrollTop, scrollHeight, clientHeight } = container;`.
-* [ ] **Step 2.2:** Construct the top ceiling boundary detection rule: Check if the user is attempting an upward scroll input (`e.deltaY < 0`) while the element position is pinned to the top line (`scrollTop === 0`).
-* [ ] **Step 2.3:** Construct the bottom floor boundary detection rule: Check if the user is attempting a downward scroll input (`e.deltaY > 0`) while the element position reaches the maximum height threshold (`scrollTop + clientHeight >= scrollHeight - 1`).
-* [ ] **Step 2.4:** Integrate the pass-through bypass mechanism: If either boundary condition evaluates to true, do not block the window track. Instead, pass the scrolling momentum straight into the Lenis framework:
+* [x] **Step 2.1:** Inside the `wheel` event handler block for `src/components/TerminalFooter.astro`, extract the dynamic runtime position parameters: `const { scrollTop, scrollHeight, clientHeight } = container;`.
+* [x] **Step 2.2:** Construct the top ceiling boundary detection rule: Check if the user is attempting an upward scroll input (`e.deltaY < 0`) while the element position is pinned to the top line (`scrollTop === 0`).
+* [x] **Step 2.3:** Construct the bottom floor boundary detection rule: Check if the user is attempting a downward scroll input (`e.deltaY > 0`) while the element position reaches the maximum height threshold (`scrollTop + clientHeight >= scrollHeight - 1`).
+* [x] **Step 2.4:** Integrate the pass-through bypass mechanism: If either boundary condition evaluates to true, do not block the window track. Instead, pass the scrolling momentum straight into the Lenis framework:
 ```typescript
 if ((window as any).__lenis) {
   (window as any).__lenis.scroll(e.deltaY);
@@ -38,8 +38,8 @@ if ((window as any).__lenis) {
 ```
 
 
-* [ ] **Step 2.5:** Enforce script execution hygiene: Only invoke `e.preventDefault()` if `isScrollable` is active and the current scroll positions lie strictly between the upper and lower boundary thresholds (meaning the terminal is actively absorbing the wheel action internally).
-* [ ] **Verification:** Populate the terminal output container with long logs until a vertical scrollbar appears. Scroll internally down the terminal box. Once the scrollbar strikes the absolute bottom boundary, continue rolling the mouse wheel downwards. Confirm that the main page layout seamlessly catches the scrolling wheel momentum and continues moving downward without freezing or requiring cursor repositioning.
+* [x] **Step 2.5:** Enforce script execution hygiene: Only invoke `e.preventDefault()` if `isScrollable` is active and the current scroll positions lie strictly between the upper and lower boundary thresholds (meaning the terminal is actively absorbing the wheel action internally).
+* [x] **Verification:** Populate the terminal output container with long logs until a vertical scrollbar appears. Scroll internally down the terminal box. Once the scrollbar strikes the absolute bottom boundary, continue rolling the mouse wheel downwards. Confirm that the main page layout seamlessly catches the scrolling wheel momentum and continues moving downward without freezing or requiring cursor repositioning.
 
 ## 3. Global Testing Strategy
 

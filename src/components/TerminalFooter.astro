@@ -566,20 +566,44 @@ const termData = {
 
     body.addEventListener("click", () => input.focus());
 
-    // ── Phase 1: Dynamic Overflow Assessment & Pointer Interaction Control ──
-    // Attach with { passive: false } so we can conditionally call preventDefault in later phases.
+    // ── Phase 1 + 2: Smart Scroll Trapping & Mouse-Wheel Pass-Through ──
     body.addEventListener("wheel", (e: WheelEvent) => {
+
+      // ── Phase 1: Overflow assessment ──
       const isScrollable = content.scrollHeight > body.clientHeight;
+
       if (!isScrollable) {
-        // Terminal has no overflow — prevent any default trap and forward to main Lenis.
-        // Note: .scroll is a position *property* on Lenis; use scrollTo(current + delta) to drive it.
+        // No scrollable content: prevent browser trap, forward delta to main Lenis.
         e.preventDefault();
         const mainLenis = (window as any).__lenis;
         if (mainLenis) {
           mainLenis.start(); // un-pause (mouseenter stops it; we drive it manually here)
           mainLenis.scrollTo(mainLenis.scroll + e.deltaY, { immediate: false });
         }
+        return;
       }
+
+      // ── Phase 2: Boundary escape logic ──
+      // body.scrollTop stays 0 with overflow:hidden — read position from Lenis directly.
+      const scrollTop = terminalLenis!.scroll; // current animated scroll position
+      const limit     = terminalLenis!.limit;  // max scrollable distance (scrollHeight - clientHeight)
+
+      const atTop    = e.deltaY < 0 && scrollTop <= 0;
+      const atBottom = e.deltaY > 0 && scrollTop >= limit - 1;
+
+      if (atTop || atBottom) {
+        // At a scroll boundary: pass momentum through to main Lenis.
+        const mainLenis = (window as any).__lenis;
+        if (mainLenis) {
+          mainLenis.start();
+          mainLenis.scrollTo(mainLenis.scroll + e.deltaY, { immediate: false });
+        }
+        return;
+      }
+
+      // Terminal is actively absorbing scroll — block page scroll.
+      e.preventDefault();
+
     }, { passive: false });
 
     input.addEventListener("keydown", (e: KeyboardEvent) => {
