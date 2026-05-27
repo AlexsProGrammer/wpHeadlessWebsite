@@ -3458,6 +3458,8 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
   let catEls:      HTMLElement[]      = [];
   let orbitCards:  HTMLElement[]      = [];
   let activeDraggable: Draggable | null = null;
+  let idleWiggleTimeline: gsap.core.Timeline | null = null;
+  let idleWiggleObserver: IntersectionObserver | null = null;
 
   /* ─────────────────────────────────────────────────────────
      STATE
@@ -3722,6 +3724,38 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
   }
 
   /* ─────────────────────────────────────────────────────────
+     IDLE WIGGLE CUE — Physics micro-interaction on center knob
+  ───────────────────────────────────────────────────────── */
+  function initiateSliderIdleCue(): void {
+    if (!centerBtn) return;
+    const section = document.getElementById("leistungen") ?? container;
+    if (!section) return;
+    idleWiggleObserver = new IntersectionObserver((entries, obs) => {
+      if (!entries[0]?.isIntersecting) return;
+      obs.disconnect();
+      idleWiggleObserver = null;
+      idleWiggleTimeline = gsap.timeline({ repeat: -1, delay: 2.0, repeatDelay: 7.0 })
+        .to(centerBtn!, { x: 6,  duration: 0.1,  ease: "sine.inOut" })
+        .to(centerBtn!, { x: -6, duration: 0.15, ease: "sine.inOut" })
+        .to(centerBtn!, { x: 0,  duration: 0.5,  ease: "elastic.out(1, 0.4)" });
+    }, { threshold: 0.3 });
+    idleWiggleObserver.observe(section);
+  }
+
+  function killIdleWiggleCue(): void {
+    if (idleWiggleObserver) {
+      idleWiggleObserver.disconnect();
+      idleWiggleObserver = null;
+    }
+    if (!idleWiggleTimeline) return;
+    idleWiggleTimeline.kill();
+    idleWiggleTimeline = null;
+    if (centerBtn) gsap.set(centerBtn, { x: 0 });
+    const track = document.getElementById("sb-toggle-track");
+    if (track) track.removeEventListener("pointerdown", killIdleWiggleCue);
+  }
+
+  /* ─────────────────────────────────────────────────────────
      ENTRY ANIMATION
   ───────────────────────────────────────────────────────── */
   function playEntryAnimation() {
@@ -3809,18 +3843,22 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
   ───────────────────────────────────────────────────────── */
   function handleViewportMutation(e: MediaQueryListEvent): void {
     if (e.matches) {
-      // ── Desktop → Mobile: kill Draggable, purge all GSAP inline styles ──
+      // ── Desktop → Mobile: kill Draggable + idle wiggle, purge all GSAP inline styles ──
       if (activeDraggable) { activeDraggable.kill(); activeDraggable = null; }
+      killIdleWiggleCue();
       gsap.set(orbitCards, { clearProps: "all" });
       if (container) gsap.set(container, { clearProps: "all" });
       if (centerBtn) gsap.set(centerBtn, { clearProps: "all" });
     } else {
-      // ── Mobile → Desktop: reconstruct Draggable + re-render layout state ──
+      // ── Mobile → Desktop: reconstruct Draggable + idle wiggle + re-render layout state ──
       const lang = getCurrentLang();
       populateTopicCards(step, lang);
       updateLabels(step, lang);
       requestAnimationFrame(() => {
         setupCenterBtn();
+        initiateSliderIdleCue();
+        const track = document.getElementById("sb-toggle-track");
+        if (track) track.addEventListener("pointerdown", killIdleWiggleCue);
         playEntryAnimation();
       });
     }
@@ -3857,9 +3895,12 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
     updateLabels(step, lang);
 
     requestAnimationFrame(() => {
-      // Step 2.3 — desktop-only: GSAP Draggable + orbital entry animation
+      // Step 2.3 — desktop-only: GSAP Draggable + idle wiggle + orbital entry animation
       if (!mobileQuery.matches) {
         setupCenterBtn();
+        initiateSliderIdleCue();
+        const track = document.getElementById("sb-toggle-track");
+        if (track) track.addEventListener("pointerdown", killIdleWiggleCue);
         playEntryAnimation();
       } else {
         // Step 2.4 — mobile: scrub any GSAP inline styles left from orientation flips

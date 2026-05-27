@@ -36,12 +36,12 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
 
 #### Phase 2: Slider Idle Physics Wiggle Micro-Interaction
 
-* [ ] **Step 2.1:** In `src/components/SlidingBento.astro`, navigate to the client-side `<script>` tag. Declare a scoped reference tracking pointer: `let idleWiggleTimeline: gsap.core.Timeline | null = null;`.
-* [ ] **Step 2.2:** Formulate an execution function named `initiateSliderIdleCue()`. Inside it, construct a looping GSAP timeline assigned to `idleWiggleTimeline` that targets the selector `#sb-center-btn`.
-* [ ] **Step 2.3:** Set the timeline to repeat indefinitely (`repeat: -1`, `repeatDelay: 4.0`), executing a quick horizontal displacement sequence: animate `x: -6` over 0.1s (`ease: "sine.inOut"`), followed by `x: 6` over 0.15s, and return smoothly to `x: 0` over 0.5s with an elastic or custom spring ease.
-* [ ] **Step 2.4:** Define a cleanup listener wrapper `killIdleWiggleCue()`. Inside it, check if `idleWiggleTimeline` is running; if true, invoke `.kill()`, clear it out (`null`), reset the thumb position to `x: 0`, and unbind the activation events from the toggle track container.
-* [ ] **Step 2.5:** In the `init()` routine, trigger `initiateSliderIdleCue()` right after setting up the desktop button configuration. Attach a `pointerdown` event listener to `#sb-toggle-track` that pipes directly into your `killIdleWiggleCue()` handler to permanently terminate the idle loop on first contact.
-* [ ] **Verification:** Load the home page on a desktop window and leave the page completely idle for 5 seconds. Confirm that the glassmorphic center knob executes a clean horizontal wiggle to signpost its interactivity to the user. Click or swipe the knob; verify that the loop breaks instantly and normal drag physics take over cleanly.
+* [x] **Step 2.1:** In `src/components/SlidingBento.astro`, navigate to the client-side `<script>` tag. Declare a scoped reference tracking pointer: `let idleWiggleTimeline: gsap.core.Timeline | null = null;`.
+* [x] **Step 2.2:** Formulate an execution function named `initiateSliderIdleCue()`. Inside it, construct a looping GSAP timeline assigned to `idleWiggleTimeline` that targets the selector `#sb-center-btn`.
+* [x] **Step 2.3:** Set the timeline to repeat indefinitely (`repeat: -1`, `repeatDelay: 4.0`), executing a quick horizontal displacement sequence: animate `x: -6` over 0.1s (`ease: "sine.inOut"`), followed by `x: 6` over 0.15s, and return smoothly to `x: 0` over 0.5s with an elastic or custom spring ease.
+* [x] **Step 2.4:** Define a cleanup listener wrapper `killIdleWiggleCue()`. Inside it, check if `idleWiggleTimeline` is running; if true, invoke `.kill()`, clear it out (`null`), reset the thumb position to `x: 0`, and unbind the activation events from the toggle track container.
+* [x] **Step 2.5:** In the `init()` routine, trigger `initiateSliderIdleCue()` right after setting up the desktop button configuration. Attach a `pointerdown` event listener to `#sb-toggle-track` that pipes directly into your `killIdleWiggleCue()` handler to permanently terminate the idle loop on first contact.
+* [x] **Verification:** Load the home page on a desktop window and leave the page completely idle for 5 seconds. Confirm that the glassmorphic center knob executes a clean horizontal wiggle to signpost its interactivity to the user. Click or swipe the knob; verify that the loop breaks instantly and normal drag physics take over cleanly.
 
 #### Phase 3: Mobile Aspect Ratio & Min-Height Scaling Correction
 
