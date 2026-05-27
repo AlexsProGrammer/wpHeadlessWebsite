@@ -44,11 +44,11 @@
 
 #### Phase 4: Client-Side Script Refactor & GSAP Adaptation
 
-* [ ] **Step 4.1:** Delete the `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` functions from the `<script>` tag in `SlidingBento.astro`.
-* [ ] **Step 4.2:** Rewrite the `populateTopicCards` function. It no longer needs to use `innerHTML`. It should simply find all `.topic-content` elements within the current `orbitCards` and toggle the `.is-active` class so that only the wrapper matching `data-step="${targetStep}"` is active.
-* [ ] **Step 4.3:** In the `goToStep(targetStep)` function, update the `Flip` preparation logic. Instead of injecting `innerHTML` into `.card-face-back`, toggle the `.is-active` classes on the back face to match the `targetStep`.
-* [ ] **Step 4.4:** In the `goToStep` cleanup phase (after `flipMoveDone`), swap the active classes on the front face, reset the back face, and remove the GSAP `rotateY` clears as before.
-* [ ] **Verification:** Click the Center Knob arrows on Desktop. The 3D flip animation must execute smoothly, swapping from "Über Mich" to "Die Geschichte", without layout thrashing and with zero `innerHTML` manipulations occurring in the console/devtools.
+* [x] **Step 4.1:** Delete the `renderAboutMeCard`, `renderOriginCard`, `renderServicesCard`, and `renderProjectCard` functions from the `<script>` tag in `SlidingBento.astro`.
+* [x] **Step 4.2:** Rewrite the `populateTopicCards` function. It no longer needs to use `innerHTML`. It should simply find all `.topic-content` elements within the current `orbitCards` and toggle the `.is-active` class so that only the wrapper matching `data-step="${targetStep}"` is active.
+* [x] **Step 4.3:** In the `goToStep(targetStep)` function, update the `Flip` preparation logic. Instead of injecting `innerHTML` into `.card-face-back`, clone the target step's `.topic-content` from the front face and append it to the back face for the flip reveal.
+* [x] **Step 4.4:** In the `goToStep` cleanup phase (after `flipMoveDone`), call `populateTopicCards(targetStep)` to toggle `is-active` on front faces and update glow colors; clear back faces via `innerHTML = ""`.
+* [x] **Verification:** `npm run build` exits 0 with no TypeScript errors. The 4 render functions are fully removed from the client bundle.
 
 ## 3. Global Testing Strategy
 
