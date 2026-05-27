@@ -75,7 +75,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
         <div class="card-face">
 
           <!-- ── Step 0: About Me · pos 0 (N — wide) ──── -->
-          <div class="topic-content" data-step="0" data-pos="0">
+          <div class="topic-content is-active" data-step="0" data-pos="0">
             <div class="card-bg card-bg--dots"></div>
             <div class="constellation"></div>
             <div class="hero-glow"></div>
@@ -180,7 +180,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
         <div class="card-face">
 
           <!-- ── Step 0: About Me · pos 1 (E — tall) ────── -->
-          <div class="topic-content" data-step="0" data-pos="1">
+          <div class="topic-content is-active" data-step="0" data-pos="1">
             <div class="card-bg card-bg--grid"></div>
             <div class="hero-glow hero-glow--cyan"></div>
             <span class="card-display-num card-display-num--cyan">02</span>
@@ -293,7 +293,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
         <div class="card-face">
 
           <!-- ── Step 0: About Me · pos 2 (S — small) ───── -->
-          <div class="topic-content" data-step="0" data-pos="2">
+          <div class="topic-content is-active" data-step="0" data-pos="2">
             <div class="card-bg card-bg--grid"></div>
             <div class="card-content" style="align-items:center;text-align:center;justify-content:center;gap:0.15rem">
               <span class="proj-badge proj-badge--cyan" data-i18n="bento.about.s.label">03 // STATUS</span>
@@ -399,7 +399,7 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
         <div class="card-face">
 
           <!-- ── Step 0: About Me · pos 3 (W — avatar) ─── -->
-          <div class="topic-content" data-step="0" data-pos="3">
+          <div class="topic-content is-active" data-step="0" data-pos="3">
             <div class="card-bg card-bg--diagonal"></div>
             <div class="hero-glow"></div>
             <div class="card-content" style="align-items:center;text-align:center">
@@ -741,10 +741,6 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
   .card-face {
     position: absolute;
     inset: 0;
-    padding: 1.2rem 1.4rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
     overflow: hidden;
     border-radius: 20px;
     z-index: 2;
@@ -757,45 +753,64 @@ const projectCountLabel = projects.length > 0 ? String(projects.length) + '+' : 
     z-index: 1;
   }
 
-  /* Position-aware face overrides: N=wide, E=tall-3, S=small, W=tall-2 */
-  .card-face[data-pos="0"] {
+  /* ── Topic content: hidden by default, shown when active ── */
+  .topic-content {
+    display: none;
+    opacity: 0;
+    position: absolute;
+    inset: 0;
+    padding: 1.2rem 1.4rem;
+    flex-direction: column;
+    gap: 0.2rem;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .topic-content.is-active {
+    display: flex;
+    opacity: 1;
+    height: 100%;
+  }
+
+  /* Position-aware overrides: N=wide, E=tall-3, S=small, W=tall-2 */
+  .topic-content[data-pos="0"] {
     /* N — wide short: horizontal feel */
     padding: 1.1rem 1.4rem;
   }
-  .card-face[data-pos="0"] .card-desc {
+  .topic-content[data-pos="0"] .card-desc {
     -webkit-line-clamp: 2;
   }
 
-  .card-face[data-pos="1"] {
+  .topic-content[data-pos="1"] {
     /* E — tall narrow: full vertical */
     padding: 1.2rem 1.3rem;
     justify-content: flex-start;
   }
-  .card-face[data-pos="1"] .card-desc {
+  .topic-content[data-pos="1"] .card-desc {
     -webkit-line-clamp: 8;
   }
 
-  .card-face[data-pos="2"] {
+  .topic-content[data-pos="2"] {
     /* S — small square: minimal */
     padding: 0.8rem 1rem;
     justify-content: center;
   }
-  .card-face[data-pos="2"] .card-desc {
+  .topic-content[data-pos="2"] .card-desc {
     -webkit-line-clamp: 2;
     font-size: 0.72rem;
   }
-  .card-face[data-pos="2"] .card-title {
+  .topic-content[data-pos="2"] .card-title {
     font-size: 0.95rem;
   }
-  .card-face[data-pos="2"] .card-label {
+  .topic-content[data-pos="2"] .card-label {
     font-size: 0.5rem;
   }
 
-  .card-face[data-pos="3"] {
+  .topic-content[data-pos="3"] {
     /* W — tall 2-row */
     padding: 1.1rem 1.3rem;
   }
-  .card-face[data-pos="3"] .card-desc {
+  .topic-content[data-pos="3"] .card-desc {
     -webkit-line-clamp: 6;
   }
 

@@ -37,10 +37,10 @@
 
 #### Phase 3: CSS Visibility & State Management
 
-* [ ] **Step 3.1:** In the `<style>` block, add rules to hide `.topic-content` by default. Example: `.topic-content { display: none; opacity: 0; }`.
-* [ ] **Step 3.2:** Add an active state class: `.topic-content.is-active { display: flex; opacity: 1; height: 100%; }`. (Ensure `flex-direction: column` and `gap` properties are retained from the old `.card-face` logic).
-* [ ] **Step 3.3:** Ensure the `.card-face` logic accommodates this new wrapper without breaking the background gradients, paddings, and positional overrides (e.g., `.card-face[data-pos="0"]`). You may need to map the `data-pos` attribute to the visible `.topic-content` wrapper rather than `.card-face`.
-* [ ] **Verification:** Run `npm run dev`. On initial load, only the contents for `data-step="0"` should be visible on the screen. The layout should look visually identical to the original JS-rendered version.
+* [x] **Step 3.1:** In the `<style>` block, add rules to hide `.topic-content` by default. Example: `.topic-content { display: none; opacity: 0; }`.
+* [x] **Step 3.2:** Add an active state class: `.topic-content.is-active { display: flex; opacity: 1; height: 100%; }`. (Ensure `flex-direction: column` and `gap` properties are retained from the old `.card-face` logic).
+* [x] **Step 3.3:** Ensure the `.card-face` logic accommodates this new wrapper without breaking the background gradients, paddings, and positional overrides (e.g., `.card-face[data-pos="0"]`). You may need to map the `data-pos` attribute to the visible `.topic-content` wrapper rather than `.card-face`.
+* [x] **Verification:** Run `npm run dev`. On initial load, only the contents for `data-step="0"` should be visible on the screen. The layout should look visually identical to the original JS-rendered version.
 
 #### Phase 4: Client-Side Script Refactor & GSAP Adaptation
 
