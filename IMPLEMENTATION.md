@@ -45,11 +45,11 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
 
 #### Phase 3: Mobile Aspect Ratio & Min-Height Scaling Correction
 
-* [ ] **Step 3.1:** Locate the global scoped styling block inside `src/components/SlidingBento.astro` and find the mobile responsive rule block (`@media (max-width: 768px)`).
-* [ ] **Step 3.2:** Locate line 728 where `.bento-card` is restricted to `min-height: 160px;`. Delete this line or overwrite it.
-* [ ] **Step 3.3:** Apply a uniform vertical footprint constraint across the layout stack. Target the `.orbit-card` element selector within the screen query block and enforce an explicit minimum height bound: `min-height: 480px !important;`.
-* [ ] **Step 3.4:** Ensure that structural children inside `.topic-content` layout blocks properly handle space distribution across this expanded height. Set `.card-content` elements inside mobile selectors to use `justify-content: space-between` or apply systematic spacing parameters to maintain text, badges, and link alignments without collisions.
-* [ ] **Verification:** Open the site in Chrome DevTools using responsive phone profiles (e.g., Pixel 7 or iPhone SE). Cycle across all topics ("Über Mich", "Die Geschichte", "Leistungen", "Projekte"). Verify that long descriptive descriptions, multi-step vertical timelines, and project grid listings now sit inside the cards with generous structural padding and zero line cut-offs or overflow bugs.
+* [x] **Step 3.1:** Locate the global scoped styling block inside `src/components/SlidingBento.astro` and find the mobile responsive rule block (`@media (max-width: 768px)`).
+* [x] **Step 3.2:** Locate line 728 where `.bento-card` is restricted to `min-height: 160px;`. Delete this line or overwrite it.
+* [x] **Step 3.3:** Apply a uniform vertical footprint constraint across the layout stack. Target the `.orbit-card` element selector within the screen query block and enforce an explicit minimum height bound: `min-height: 480px !important;`.
+* [x] **Step 3.4:** Ensure that structural children inside `.topic-content` layout blocks properly handle space distribution across this expanded height. Set `.card-content` elements inside mobile selectors to use `justify-content: space-between` or apply systematic spacing parameters to maintain text, badges, and link alignments without collisions.
+* [x] **Verification:** Open the site in Chrome DevTools using responsive phone profiles (e.g., Pixel 7 or iPhone SE). Cycle across all topics ("Über Mich", "Die Geschichte", "Leistungen", "Projekte"). Verify that long descriptive descriptions, multi-step vertical timelines, and project grid listings now sit inside the cards with generous structural padding and zero line cut-offs or overflow bugs.
 
 ---
 

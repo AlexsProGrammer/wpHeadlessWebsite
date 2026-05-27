@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.7] - 2026-05-27
+
+### Added
+- **Dynamic Project Counter** (Phase 1): `SlidingBento` now accepts a `totalProjectCount` prop fed by the full `projects.length` from the WordPress API; a base-ten rounding formula (`Math.floor(n / 10) * 10`) converts the raw count into a rounded badge label (e.g. `30+`), replacing the previous hardcoded static placeholder
+- **Slider Idle Wiggle** (Phase 2): physics-driven horizontal micro-interaction on `#sb-center-btn`; `initiateSliderIdleCue()` builds a looping GSAP timeline (`delay: 2s`, `repeatDelay: 7s`) that nudges right then snaps back with an elastic ease; launch is gated behind an `IntersectionObserver` so the 2-second countdown only starts once the bento section enters the viewport
+- **Wiggle Teardown** (Phase 2): `killIdleWiggleCue()` permanently kills the timeline and disconnects the observer on first `pointerdown` contact with `#sb-toggle-track`, leaving zero residual animation state for the GSAP Draggable to contend with; also fires on any desktop→mobile breakpoint crossing via `handleViewportMutation`
+- **Mobile Card Height** (Phase 3): `.orbit-card` inside `@media (max-width: 768px)` now enforces `min-height: 480px !important;`; the previous `min-height: 160px` floor on `.bento-card` has been removed (`min-height: unset`); `.card-content` gains `justify-content: space-between` to distribute text, badges, and links evenly across the expanded height without collisions
+
 ## [0.0.6] - 2026-05-27
 
 ### Added

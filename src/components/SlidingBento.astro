@@ -3357,6 +3357,7 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
       transform: none !important;
       left: auto !important;
       top: auto !important;
+      min-height: 480px !important;
     }
 
     /* Step 1.4 — hide the center toggle track on mobile */
@@ -3366,7 +3367,10 @@ const projectCountLabel = totalCount > 0 ? `${baseTens}+` : '0+';
     }
 
     .bento-card {
-      min-height: 160px;
+      min-height: unset;
+    }
+    .card-content {
+      justify-content: space-between;
     }
     .card-barchart {
       height: 36px;
