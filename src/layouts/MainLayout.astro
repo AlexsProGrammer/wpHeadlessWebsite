@@ -44,6 +44,12 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
 </html>
 
 <style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
   :root {
     --bg-dark: #0c0a1a;
     --text-main: #ffffff;
@@ -71,8 +77,9 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
   }
 
   html {
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
+    max-width: 100%;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
     overscroll-behavior: none;
@@ -103,6 +110,7 @@ const resolvedDecorTheme: 'default' | 'legal' | 'minimal' =
     color: var(--text-main);
     margin: 0;
     padding: 0;
+    max-width: 100%;
     min-height: 100vh;
     min-height: 100svh;
     min-height: 100dvh;
