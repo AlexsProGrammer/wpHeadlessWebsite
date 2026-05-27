@@ -1,9 +1,67 @@
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 128 128">
-    <path d="M50.4 78.5a75.1 75.1 0 0 0-28.5 6.9l24.2-65.7c.7-2 1.9-3.2 3.4-3.2h29c1.5 0 2.7 1.2 3.4 3.2l24.2 65.7s-11.6-7-28.5-7L67 45.5c-.4-1.7-1.6-2.8-2.9-2.8-1.3 0-2.5 1.1-2.9 2.7L50.4 78.5Zm-1.1 28.2Zm-4.2-20.2c-2 6.6-.6 15.8 4.2 20.2a17.5 17.5 0 0 1 .2-.7 5.5 5.5 0 0 1 5.7-4.5c2.8.1 4.3 1.5 4.7 4.7.2 1.1.2 2.3.2 3.5v.4c0 2.7.7 5.2 2.2 7.4a13 13 0 0 0 5.7 4.9v-.3l-.2-.3c-1.8-5.6-.5-9.5 4.4-12.8l1.5-1a73 73 0 0 0 3.2-2.2 16 16 0 0 0 6.8-11.4c.3-2 .1-4-.6-6l-.8.6-1.6 1a37 37 0 0 1-22.4 2.7c-5-.7-9.7-2-13.2-6.2Z" />
-    <style>
-        path { fill: #000; }
-        @media (prefers-color-scheme: dark) {
-            path { fill: #FFF; }
-        }
-    </style>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%" fill="none">
+  <defs>
+    <linearGradient id="jupiterAtmosphere" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#8c684a" />
+      <stop offset="12%" stop-color="#dcbfa0" />
+      <stop offset="25%" stop-color="#a47851" />
+      <stop offset="35%" stop-color="#ebd8c2" />
+      <stop offset="48%" stop-color="#7c4723" />
+      <stop offset="62%" stop-color="#c9986b" />
+      <stop offset="75%" stop-color="#f5e6d3" />
+      <stop offset="85%" stop-color="#b0754c" />
+      <stop offset="100%" stop-color="#402010" />
+    </linearGradient>
+
+    <radialGradient id="sphereShading" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.15" />
+      <stop offset="45%" stop-color="#000000" stop-opacity="0" />
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.75" />
+    </radialGradient>
+
+    <radialGradient id="redSpot" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#cc3a18" />
+      <stop offset="75%" stop-color="#8c200b" />
+      <stop offset="100%" stop-color="#541004" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="codeSignatureFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#000000" flood-opacity="0.95"/>
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feComponentTransfer in="blur" result="brightGlow">
+        <feFuncA type="linear" slope="2.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="brightGlow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <clipPath id="planetClip">
+      <circle cx="256" cy="256" r="240" />
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#planetClip)">
+    <circle cx="256" cy="256" r="240" fill="url(#jupiterAtmosphere)" />
+
+    <path d="M 10 190 Q 130 170 256 195 T 502 190 L 502 225 Q 370 235 256 215 T 10 225 Z" fill="#613316" opacity="0.45" />
+    <path d="M 10 305 Q 160 325 256 305 T 502 305 L 502 330 Q 340 315 256 335 T 10 330 Z" fill="#f0dfcc" opacity="0.35" />
+    <path d="M 10 110 Q 120 130 256 110 T 502 110 L 502 125 Q 350 115 256 130 T 10 125 Z" fill="#52321c" opacity="0.3" />
+
+    <g transform="rotate(-4 350 365)">
+      <ellipse cx="350" cy="365" rx="46" ry="28" fill="url(#redSpot)" />
+      <ellipse cx="350" cy="365" rx="22" ry="12" fill="#ff6230" opacity="0.65" />
+    </g>
+
+    <circle cx="256" cy="256" r="240" fill="url(#sphereShading)" />
+  </g>
+
+  <g filter="url(#codeSignatureFilter)">
+    <path d="M 175 192 L 105 256 L 175 320" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <path d="M 275 168 L 235 344" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+    
+    <path d="M 337 192 L 407 256 L 337 320" stroke="#ffffff" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" />
+  </g>
 </svg>
+
